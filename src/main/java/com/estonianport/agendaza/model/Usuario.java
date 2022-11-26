@@ -22,9 +22,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Usuario implements UserDetails{
+public class Usuario {
 
-	private static final long serialVersionUID = -3874297176481741405L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,11 +60,5 @@ public class Usuario implements UserDetails{
 	@JoinColumn(name = "rol_id")
 	private Rol rol;
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority(rol.getNombre()));
-		return authorities;
-	}
 
 }

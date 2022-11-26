@@ -2,8 +2,6 @@ package com.estonianport.agendaza.controller;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,12 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.estonianport.agendaza.commons.data.GeneralPath;
-import com.estonianport.agendaza.commons.security.SecurityConfig;
 import com.estonianport.agendaza.model.Rol;
 import com.estonianport.agendaza.model.Salon;
 import com.estonianport.agendaza.model.Usuario;
 import com.estonianport.agendaza.service.RolService;
 import com.estonianport.agendaza.service.UsuarioService;
+
+import jakarta.servlet.http.HttpSession;
+
 
 @Controller
 public class UsuarioController {
@@ -55,7 +55,6 @@ public class UsuarioController {
 
 	@PostMapping("/saveUsuario")
 	public String save(Usuario usuario, Model model) {
-		usuario.setPassword(SecurityConfig.passwordEncoder().encode(usuario.getPassword()));
 		usuarioService.save(usuario);
 		return GeneralPath.REDIRECT + GeneralPath.ABM_USUARIO;
 	}
