@@ -1,0 +1,87 @@
+package com.estonianport.agendaza.model;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class Evento {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column
+	private String nombre;
+
+	@ManyToOne
+	@JoinColumn(name = "salon_id")
+	private Salon salon;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sub_tipo_evento_id")
+	private SubTipoEvento subTipoEvento;
+
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+			name = "evento_extra_sub_tipo_evento",
+			joinColumns = @JoinColumn(name = "evento_id"),
+			inverseJoinColumns = @JoinColumn(name = "extra_sub_tipo_evento_id"))
+	private Set<ExtraSubTipoEvento> listaExtraSubTipoEvento;
+
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL)
+    private Set<EventoExtraVariableSubTipoEvento> listaEventoExtraVariable;
+    
+	@Column
+	private LocalDateTime startd;
+
+	@Column
+	private LocalDateTime endd;
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "capacidad_id")
+	private Capacidad capacidad;
+	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "catering_id")
+	private Catering catering;
+
+	@Column
+	private int presupuesto;
+
+	@ManyToOne
+	@JoinColumn(name = "usuario_id")
+	private Usuario usuario;
+
+	@ManyToOne
+	@JoinColumn(name = "cliente_id")
+	private Cliente cliente;
+
+	@Column
+	private String codigo;
+	
+	@Column
+	private int extraOtro;
+	
+	@Column
+	private int descuento;
+
+
+}

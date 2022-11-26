@@ -1,0 +1,24 @@
+package com.estonianport.agendaza.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.estonianport.agendaza.commons.genericService.GenericService;
+import com.estonianport.agendaza.model.Evento;
+import com.estonianport.agendaza.model.Salon;
+
+public interface EventoService extends GenericService<Evento, Long>{
+
+	List<Evento> getEventosBySalon(Salon salon);
+
+	Evento getEventoByCodigo(String codigo);
+	
+	List<Evento> findAllByStartdBetweenAndSalon(LocalDateTime start_date,LocalDateTime end_date, Salon salon);
+
+	Boolean existsByCodigo(String codigo);
+	
+	Long count();
+
+	boolean existByFechaAndSalon(LocalDateTime fecha, Salon salon);
+
+}
