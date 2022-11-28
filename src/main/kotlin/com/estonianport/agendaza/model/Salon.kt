@@ -13,14 +13,14 @@ data class Salon(
     val id: Long? = null,
 
     @Column
-    private val nombre: String,
+    val nombre: String,
 
     @Column
-    private val calle: String,
+    val calle: String,
 
     @Column
-    private val numero: Int,
+    val numero: Int,
 
     @Column
-    private val municipio: String){
+    val municipio: String){
 }

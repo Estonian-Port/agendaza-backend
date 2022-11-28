@@ -11,10 +11,10 @@ data class Capacidad(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column(name = "capacidad_adultos")
-    private val capacidadAdultos : Int,
+    val capacidadAdultos : Int,
 
     @Column(name = "capacidad_ninos")
-    private val capacidadNinos : Int){}
+    val capacidadNinos : Int){}

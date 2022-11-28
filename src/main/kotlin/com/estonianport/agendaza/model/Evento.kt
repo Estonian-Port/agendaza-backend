@@ -19,17 +19,17 @@ data class Evento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
     @Column
-    private val nombre: String,
+    val nombre: String,
 
     @ManyToOne
     @JoinColumn(name = "salon_id")
-    private val salon: Salon,
+    val salon: Salon,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")
-    private val tipoEvento: TipoEvento,
+    val tipoEvento: TipoEvento,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -37,45 +37,45 @@ data class Evento(
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "extra_tipo_evento_id"))
     )
-    private val listaExtraTipoEvento: Set<ExtraTipoEvento>,
+    val listaExtraTipoEvento: Set<ExtraTipoEvento>,
 
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
-    private val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento>,
+    val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento>,
 
     @Column
-    private val startd: LocalDateTime,
+    val startd: LocalDateTime,
 
     @Column
-    private val endd: LocalDateTime,
+    val endd: LocalDateTime,
 
     @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @JoinColumn(name = "capacidad_id")
-    private val capacidad: Capacidad,
+    val capacidad: Capacidad,
 
     @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @JoinColumn(name = "catering_id")
-    private val catering: Catering,
+    val catering: Catering,
 
     @Column
-    private val presupuesto: Int,
+    val presupuesto: Int,
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private val usuario: Usuario,
+    val usuario: Usuario,
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
-    private val cliente: Cliente,
+    val cliente: Cliente,
 
     @Column
-    private val codigo: String,
+    val codigo: String,
 
     @Column
-    private val estado: Estado,
+    val estado: Estado,
 
     @Column
-    private val extraOtro: Int,
+    val extraOtro: Int,
 
     @Column
-    private val descuento : Int){
+    val descuento : Int){
 }

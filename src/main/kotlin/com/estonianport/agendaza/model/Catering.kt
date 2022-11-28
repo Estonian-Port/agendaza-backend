@@ -17,13 +17,13 @@ data class Catering(
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val presupuesto : Int,
+    val presupuesto : Int,
 
     @Column(name = "catering_otro")
-    private val canteringOtro : Int,
+    val canteringOtro : Int,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -31,7 +31,7 @@ data class Catering(
         joinColumns = arrayOf(JoinColumn(name = "catering_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_catering_id"))
     )
-    private val listaTipoCatering: Set<TipoCatering>,
+    val listaTipoCatering: Set<TipoCatering>,
 
     @OneToMany(mappedBy = "catering", cascade = arrayOf(CascadeType.ALL))
-    private val listaCateringExtraVariableCatering: Set<CateringExtraVariableCatering>){}
+    val listaCateringExtraVariableCatering: Set<CateringExtraVariableCatering>){}

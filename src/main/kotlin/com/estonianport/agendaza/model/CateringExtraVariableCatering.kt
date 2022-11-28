@@ -13,15 +13,15 @@ import jakarta.persistence.ManyToOne
 data class CateringExtraVariableCatering(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "catering_id")
-    private val catering: Catering,
+    val catering: Catering,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_variable_catering_id")
-    private val extraVariableCatering: ExtraVariableCatering,
+    val extraVariableCatering: ExtraVariableCatering,
 
     @Column
-    private val cantidad : Int) {}
+    val cantidad : Int) {}

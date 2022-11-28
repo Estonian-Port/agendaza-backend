@@ -18,50 +18,50 @@ data class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val nombre: String,
+    val nombre: String,
 
     @JoinColumn(name = "duracion")
-    private val duracion : Duracion,
+    val duracion : Duracion,
 
     @ManyToOne
     @JoinColumn(name = "capacidad_id")
-    private val capacidad: Capacidad,
+    val capacidad: Capacidad,
 
     @Column
-    private val cantidadDuracion: LocalTime,
+    val cantidadDuracion: LocalTime,
 
     @Column(name = "cant_personal")
-    private val cantPersonal : Int,
+    val cantPersonal : Int,
 
     @Column(name = "valor_fin_semana")
-    private val valorFinSemana : Int,
+    val valorFinSemana : Int,
 
     @Column(name = "horario_final_automatico")
-    private val horarioFinalAutomatico : Boolean,
+    val horarioFinalAutomatico : Boolean,
 
     @JsonBackReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "subTipoEvento")
-    private val listaPrecioConFecha: List<PrecioConFechaTipoEvento>,
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
+    val listaPrecioConFecha: List<PrecioConFechaTipoEvento>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaServicio: Set<Servicio>,
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaServicio: Set<Servicio>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaExtraTipoEvento: Set<ExtraTipoEvento>,
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaExtraTipoEvento: Set<ExtraTipoEvento>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaExtraVariableTipoEvento: Set<ExtraVariableTipoEvento>,
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaExtraVariableTipoEvento: Set<ExtraVariableTipoEvento>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaExtraVariableCatering: Set<ExtraVariableCatering>,
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaExtraVariableCatering: Set<ExtraVariableCatering>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaTipoCatering: Set<TipoCatering>){}
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaTipoCatering: Set<TipoCatering>){}

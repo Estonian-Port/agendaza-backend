@@ -17,16 +17,16 @@ data class Servicio(
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val nombre: String,
+    val nombre: String,
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = arrayOf(CascadeType.ALL))
     @JoinTable(
-        name = "sub_tipo_evento_servicio",
+        name = "tipo_evento_servicio",
         joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "sub_tipo_evento_id"))
+        inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    private val listaTipoEvento: Set<TipoEvento>){}
+    val listaTipoEvento: Set<TipoEvento>){}

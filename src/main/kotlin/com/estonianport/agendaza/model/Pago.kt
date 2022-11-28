@@ -14,22 +14,22 @@ data class Pago (
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val monto : Int,
+    val monto : Int,
 
     @ManyToOne
     @JoinColumn(name = "medio_de_pago_id")
-    private val medioDePago: MedioDePago,
+    val medioDePago: MedioDePago,
 
     @Column
-    private val fecha: LocalDateTime,
+    val fecha: LocalDateTime,
 
     @ManyToOne
     @JoinColumn(name = "evento_id")
-    private val evento: Evento,
+    val evento: Evento,
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private val usuario: Usuario){}
+    val usuario: Usuario){}

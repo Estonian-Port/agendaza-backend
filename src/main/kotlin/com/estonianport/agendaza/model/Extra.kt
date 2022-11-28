@@ -19,10 +19,10 @@ import jakarta.persistence.OneToMany
 abstract class Extra(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val nombre: String){}
+    val nombre: String){}
 
 @Entity
 data class ExtraTipoEvento(
@@ -34,11 +34,11 @@ data class ExtraTipoEvento(
         joinColumns = arrayOf(JoinColumn(name = "extra_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "sub_tipo_evento_id"))
     )
-    private val listaTipoEvento: Set<TipoEvento>,
+    val listaTipoEvento: Set<TipoEvento>,
 
     @JsonBackReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extraSubTipoEvento")
-    private val listaPrecioConFecha: List<PrecioConFechaExtraSubTipoEvento>): Extra(0, "") {}
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extraTipoEvento")
+    val listaPrecioConFecha: List<PrecioConFechaExtraTipoEvento>): Extra(0, "") {}
 
 @Entity
 data class ExtraVariableTipoEvento(
@@ -49,11 +49,11 @@ data class ExtraVariableTipoEvento(
         joinColumns = arrayOf(JoinColumn(name = "extra_variable_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    private val listaTipoEvento: Set<TipoEvento>,
+    val listaTipoEvento: Set<TipoEvento>,
 
     @JsonBackReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extraVariableSubTipoEvento")
-    private val listaPrecioConFecha: List<PrecioConFechaExtraVariableTipoEvento>) : Extra(0, "") {}
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extraVariableTipoEvento")
+    val listaPrecioConFecha: List<PrecioConFechaExtraVariableTipoEvento>) : Extra(0, "") {}
 
 
 
@@ -67,11 +67,11 @@ data class TipoCatering(
         joinColumns = arrayOf(JoinColumn(name = "tipo_catering_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    private val listaTipoEvento: Set<TipoEvento>,
+    val listaTipoEvento: Set<TipoEvento>,
 
     @JsonBackReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoCatering")
-    private val listaPrecioConFecha: List<PrecioConFechaTipoCatering>) :  Extra(0, "") {}
+    val listaPrecioConFecha: List<PrecioConFechaTipoCatering>) :  Extra(0, "") {}
 
 @Entity
 data class ExtraVariableCatering(
@@ -82,9 +82,9 @@ data class ExtraVariableCatering(
         joinColumns = arrayOf(JoinColumn(name = "extra_variable_catering_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    private val listaTipoEvento: Set<TipoEvento>,
+    val listaTipoEvento: Set<TipoEvento>,
 
     @JsonBackReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "extraVariableCatering")
-    private val listaPrecioConFecha: List<PrecioConFechaExtraVariableCatering>) : Extra(0, "") {
+    val listaPrecioConFecha: List<PrecioConFechaExtraVariableCatering>) : Extra(0, "") {
 }

@@ -11,7 +11,7 @@ data class MedioDePago(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val nombre: String){}
+    val nombre: String){}

@@ -14,15 +14,15 @@ data class EventoExtraVariableTipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evento_id")
-    private val evento: Evento,
+    val evento: Evento,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_variable_sub_tipo_evento_id")
-    private val extraVariableTipoEvento: ExtraVariableTipoEvento,
+    val extraVariableTipoEvento: ExtraVariableTipoEvento,
 
     @Column
-    private val cantidad : Int){}
+    val cantidad : Int){}

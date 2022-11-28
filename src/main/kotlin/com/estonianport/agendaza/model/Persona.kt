@@ -9,73 +9,66 @@ import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.OneToMany
 import java.sql.Date
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@MappedSuperclass
 abstract class Persona(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    val id: Long,
 
     @Column
-    private val nombre: String,
+    val nombre: String,
 
     @Column
-    private val apellido: String,
+    val apellido: String,
 
     @Column
-    private val cuil: Long,
+    val cuil: Long,
 
     @Column
-    private val celular: Long,
+    val celular: Long,
 
     @Column
-    private val mail: String){}
+    val mail: String){}
 
 @Entity
 data class Usuario(
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
+    @Column
+    val username: String,
 
     @Column
-    private val username: String,
+    val password: String) : Persona(0,"", "", 0, 0,""){
 
-    @Column
-    private val password: String) : Persona(0,"", "", 0, 0,""){
-
-    @Column
-    lateinit var tipoUsuario : TipoUsuario
+    /*@Column
+    lateinit var tipoUsuario : TipoUsuario*/
 }
 
 @Entity
 data class Cliente(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long,
 
     @JoinColumn(name = "sexo")
-    private val sexo: Sexo,
+    val sexo: Sexo,
 
     @Column(name = "fecha_nacimiento")
-    private val fechaNacimiento: Date,
+    val fechaNacimiento: Date,
 
     @Column
-    private val empresa: String,
+    val empresa: String,
 
     @Column
-    private val ciudad: String,
+    val ciudad: String,
 
     @Column
-    private val provincia: String,
+    val provincia: String,
 
     @Column
-    private val codigoPostal : Int,
+    val codigoPostal : Int,
 
     @JsonBackReference
     @OneToMany(mappedBy = "cliente")
-    private val evento: Set<Evento>) : Persona(0,"", "", 0, 0,""){}
+    val evento: Set<Evento>) : Persona(0,"", "", 0, 0,""){}

@@ -8,41 +8,44 @@ import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.MappedSuperclass
-
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+/*
+@MappedSuperclass
 abstract class TipoUsuario(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long){}
+    val id: Long,
+
+    @Column
+    val nombre2: String){}
+
 
 @Entity
 data class Owner(
 
     @Column
-    private val nombre: String) : TipoUsuario(0){}
+    val nombre: String) : TipoUsuario(0, ""){}
 
 @Entity
 data class Encargado(
 
     @Column
-    private val nombre: String) : TipoUsuario(0){}
+    val nombre: String) : TipoUsuario(0, ""){}
 
 @Entity
 data class Empleado(
 
     @Column
-    private val nombre: String) : TipoUsuario(0){}
+    val nombre: String) : TipoUsuario(0, ""){}
 
 
 @Entity
 data class Caterings(
 
     @Column
-    private val nombre: String) : TipoUsuario(0)
+    val nombre: String) : TipoUsuario(0, "")
 
 @Entity
 data class Clientes(
 
     @Column
-    private val nombre: String) : TipoUsuario(0)
+    val nombre: String) : TipoUsuario(0, "")*/
