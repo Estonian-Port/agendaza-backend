@@ -29,4 +29,4 @@ data class Servicio(
         joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "sub_tipo_evento_id"))
     )
-    private val listaSubTipoEvento: Set<SubTipoEvento>){}
+    private val listaTipoEvento: Set<TipoEvento>){}

@@ -1,3 +1,3 @@
 package com.estonianport.agendaza.model
 
-enum class TipoEvento { CORTO, MEDIO, LARGO }
+enum class Duracion { CORTO, MEDIO, LARGO }

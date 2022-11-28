@@ -19,7 +19,7 @@ data class Salon(
     private val calle: String,
 
     @Column
-    private val numero: String,
+    private val numero: Int,
 
     @Column
     private val municipio: String){

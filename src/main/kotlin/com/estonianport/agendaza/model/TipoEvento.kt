@@ -14,7 +14,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 
 @Entity
-data class SubTipoEvento(
+data class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,15 +23,15 @@ data class SubTipoEvento(
     @Column
     private val nombre: String,
 
-    @JoinColumn(name = "tipo_evento")
-    private val tipoEvento: TipoEvento,
+    @JoinColumn(name = "duracion")
+    private val duracion : Duracion,
 
     @ManyToOne
     @JoinColumn(name = "capacidad_id")
     private val capacidad: Capacidad,
 
     @Column
-    private val duracion: LocalTime,
+    private val cantidadDuracion: LocalTime,
 
     @Column(name = "cant_personal")
     private val cantPersonal : Int,
@@ -44,7 +44,7 @@ data class SubTipoEvento(
 
     @JsonBackReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "subTipoEvento")
-    private val listaPrecioConFecha: List<PrecioConFechaSubTipoEvento>,
+    private val listaPrecioConFecha: List<PrecioConFechaTipoEvento>,
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
@@ -52,11 +52,11 @@ data class SubTipoEvento(
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaExtraSubTipoEvento: Set<ExtraSubTipoEvento>,
+    private val listaExtraTipoEvento: Set<ExtraTipoEvento>,
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")
-    private val listaExtraVariableSubTipoEvento: Set<ExtraVariableSubTipoEvento>,
+    private val listaExtraVariableTipoEvento: Set<ExtraVariableTipoEvento>,
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaSubTipoEvento")

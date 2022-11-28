@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
 @Entity
-data class EventoExtraVariableSubTipoEvento(
+data class EventoExtraVariableTipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ data class EventoExtraVariableSubTipoEvento(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_variable_sub_tipo_evento_id")
-    private val extraVariableSubTipoEvento: ExtraVariableSubTipoEvento,
+    private val extraVariableTipoEvento: ExtraVariableTipoEvento,
 
     @Column
     private val cantidad : Int){}

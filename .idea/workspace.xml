@@ -5,17 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c32766-27dc-4709-9769-96a0bddd3438" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/AgendazaApplication.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/ServletInitializer.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/com/estonianport/agendaza/AgendazaApplicationTests.kt" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Duracion.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Cliente.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Evento.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Evento.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/EventoExtraVariableSubTipoEvento.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/EventoExtraVariableTipoEvento.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Extra.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Extra.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Salon.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Salon.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Servicio.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Servicio.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/SubTipoEvento.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoEvento.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoEvento.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Usuario.kt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +26,18 @@
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
     </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand />
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -57,7 +69,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/Users/Sebastian/Documents/git/agendaza-backend/src/main/kotlin/com/estonianport/agendaza/model",
+    "last_opened_file_path": "C:/Users/Sebastian/Documents/git/agendaza-backend",
     "settings.editor.selected.configurable": "preferences.sourceCode.Kotlin",
     "spring.configuration.checksum": "96fed8027344feba675b2cd1a1a6c5d4"
   }
@@ -76,6 +88,9 @@
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
       <recent name="com.estonianport.agendaza.service" />
       <recent name="com.estonianport.agendaza.service.impl" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="com.estonianport.agendaza.model" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -124,7 +139,9 @@
       <workItem from="1669506463136" duration="1199000" />
       <workItem from="1669507911310" duration="108000" />
       <workItem from="1669650733371" duration="2546000" />
-      <workItem from="1669653704043" duration="2559000" />
+      <workItem from="1669653704043" duration="5746000" />
+      <workItem from="1669663704716" duration="38000" />
+      <workItem from="1669663753608" duration="14000" />
     </task>
     <servers />
   </component>

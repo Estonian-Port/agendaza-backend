@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 
 @Entity
 data class Evento(
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long,
@@ -27,19 +28,19 @@ data class Evento(
     private val salon: Salon,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_tipo_evento_id")
-    private val subTipoEvento: SubTipoEvento,
+    @JoinColumn(name = "tipo_evento_id")
+    private val tipoEvento: TipoEvento,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "evento_extra_sub_tipo_evento",
+        name = "evento_extra_tipo_evento",
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_sub_tipo_evento_id"))
+        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_tipo_evento_id"))
     )
-    private val listaExtraSubTipoEvento: Set<ExtraSubTipoEvento>,
+    private val listaExtraTipoEvento: Set<ExtraTipoEvento>,
 
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
-    private val listaEventoExtraVariable: Set<EventoExtraVariableSubTipoEvento>,
+    private val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento>,
 
     @Column
     private val startd: LocalDateTime,
@@ -68,6 +69,9 @@ data class Evento(
 
     @Column
     private val codigo: String,
+
+    @Column
+    private val estado: Estado,
 
     @Column
     private val extraOtro: Int,
