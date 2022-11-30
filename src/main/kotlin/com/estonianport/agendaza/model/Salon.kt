@@ -23,4 +23,5 @@ data class Salon(
 
     @Column
     val municipio: String){
+
 }

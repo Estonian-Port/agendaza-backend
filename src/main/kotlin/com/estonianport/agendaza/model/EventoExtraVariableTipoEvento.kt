@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 data class EventoExtraVariableTipoEvento(
@@ -17,11 +18,11 @@ data class EventoExtraVariableTipoEvento(
     val id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evento_id")
-    val evento: Evento,
+    @PrimaryKeyJoinColumn
+    val agregados: Agregados,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_variable_sub_tipo_evento_id")
+    @PrimaryKeyJoinColumn
     val extraVariableTipoEvento: ExtraVariableTipoEvento,
 
     @Column

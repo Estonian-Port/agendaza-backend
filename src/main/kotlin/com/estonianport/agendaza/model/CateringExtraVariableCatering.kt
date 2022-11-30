@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne
 
 @Entity
 data class CateringExtraVariableCatering(
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
