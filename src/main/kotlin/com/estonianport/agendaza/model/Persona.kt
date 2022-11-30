@@ -47,10 +47,11 @@ data class Usuario(
     val username: String,
 
     @Column
-    val password: String) : Persona(0,"", "", 0, 0,""){
+    val password: String,
 
-    @OneToOne
-    lateinit var tipoUsuario : TipoUsuario
+    @Column
+    val tipoUsuario : TipoUsuario) : Persona(0,"", "", 0, 0,""){
+
 }
 
 @Entity

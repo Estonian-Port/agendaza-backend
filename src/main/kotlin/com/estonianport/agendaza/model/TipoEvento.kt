@@ -51,17 +51,5 @@ data class TipoEvento(
     val listaServicio: Set<Servicio>,
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "extra_id")
-    val listaExtraTipoEvento: Set<Extra>,
-
-    @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "extra_id")
-    val listaExtraVariableTipoEvento: Set<Extra>,
-
-    @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "extra_id")
-    val listaExtraVariableCatering: Set<Extra>,
-
-    @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "extra_id")
-    val listaTipoCatering: Set<Extra>){}
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    val listaExtra: MutableList<Extra>){}

@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 
 @MappedSuperclass
 abstract class PrecioConFecha (
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
@@ -31,19 +32,12 @@ abstract class PrecioConFecha (
     @JoinColumn(name = "salon_id")
     val salon: Salon){}
 
-@Entity(name = "precio_con_fecha_extra_tipo_evento")
-data class PrecioConFechaExtraTipoEvento(
+@Entity(name = "precio_con_fecha_extra")
+data class PrecioConFechaExtra(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_tipo_evento_id")
-    val extraTipoEvento: Extra? = null) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
-
-@Entity(name = "precio_con_fecha_extra_variable_catering")
-data class PrecioConFechaExtraVariableCatering(
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_variable_catering_id")
-    val extraVariableCatering: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    @JoinColumn(name = "extra_id")
+    val extra: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 
 @Entity(name = "precio_con_fecha_tipo_evento")
 data class PrecioConFechaTipoEvento(
@@ -51,19 +45,4 @@ data class PrecioConFechaTipoEvento(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")
     val tipoEvento: TipoEvento) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
-
-
-@Entity(name = "precio_con_fecha_tipo_catering")
-data class PrecioConFechaTipoCatering(
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_catering_id")
-    val tipoCatering: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
-
-@Entity(name = "precio_con_fecha_extra_variable_tipo_evento")
-data class PrecioConFechaExtraVariableTipoEvento(
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_variable_tipo_evento_id")
-    val extraVariableTipoEvento: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 
