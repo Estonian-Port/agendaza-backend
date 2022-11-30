@@ -23,9 +23,9 @@ data class Agregados(
     @JoinTable(
         name = "agregados_extra_tipo_evento",
         joinColumns = arrayOf(JoinColumn(name = "agregados_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_tipo_evento_id"))
+        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
     )
-    val listaExtraTipoEvento: Set<ExtraTipoEvento>,
+    val listaExtra: Set<Extra>,
 
     @OneToMany(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))
     val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento>,

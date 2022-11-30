@@ -22,6 +22,9 @@ data class Salon(
     val numero: Int,
 
     @Column
-    val municipio: String){
+    val municipio: String
+
+
+    ){
 
 }

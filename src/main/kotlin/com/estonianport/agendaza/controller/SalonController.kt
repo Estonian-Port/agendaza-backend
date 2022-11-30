@@ -28,7 +28,7 @@ class SalonController {
 
     @GetMapping("/saveSalon/{id}")
     fun showSave(@PathVariable("id") id: Long): ResponseEntity<Salon>? {
-        if (id != null && id != 0L) {
+        if (id != 0L) {
             return ResponseEntity<Salon>(salonService.get(id), HttpStatus.OK)
         }
 

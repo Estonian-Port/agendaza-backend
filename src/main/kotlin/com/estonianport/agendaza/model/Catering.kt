@@ -31,7 +31,7 @@ data class Catering(
         joinColumns = arrayOf(JoinColumn(name = "catering_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_catering_id"))
     )
-    val listaTipoCatering: Set<TipoCatering>,
+    val listaTipoCatering: Set<Extra>,
 
     @OneToMany(mappedBy = "catering", cascade = arrayOf(CascadeType.ALL))
     val listaCateringExtraVariableCatering: Set<CateringExtraVariableCatering>){}

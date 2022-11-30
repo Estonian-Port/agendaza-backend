@@ -23,7 +23,7 @@ data class EventoExtraVariableTipoEvento(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    val extraVariableTipoEvento: ExtraVariableTipoEvento,
+    val extra: Extra,
 
     @Column
     val cantidad : Int){}

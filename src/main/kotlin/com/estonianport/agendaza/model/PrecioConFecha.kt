@@ -36,14 +36,14 @@ data class PrecioConFechaExtraTipoEvento(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_tipo_evento_id")
-    val extraTipoEvento: ExtraTipoEvento? = null) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val extraTipoEvento: Extra? = null) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 
 @Entity(name = "precio_con_fecha_extra_variable_catering")
 data class PrecioConFechaExtraVariableCatering(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_variable_catering_id")
-    val extraVariableCatering: ExtraVariableCatering) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val extraVariableCatering: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 
 @Entity(name = "precio_con_fecha_tipo_evento")
 data class PrecioConFechaTipoEvento(
@@ -58,12 +58,12 @@ data class PrecioConFechaTipoCatering(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_catering_id")
-    val tipoCatering: TipoCatering) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val tipoCatering: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 
 @Entity(name = "precio_con_fecha_extra_variable_tipo_evento")
 data class PrecioConFechaExtraVariableTipoEvento(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_variable_tipo_evento_id")
-    val extraVariableTipoEvento: ExtraVariableTipoEvento) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val extraVariableTipoEvento: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
 

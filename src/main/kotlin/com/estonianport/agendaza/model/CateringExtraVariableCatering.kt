@@ -21,8 +21,8 @@ data class CateringExtraVariableCatering(
     val catering: Catering,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_variable_catering_id")
-    val extraVariableCatering: ExtraVariableCatering,
+    @JoinColumn(name = "extra_id")
+    val extra: Extra,
 
     @Column
     val cantidad : Int) {}
