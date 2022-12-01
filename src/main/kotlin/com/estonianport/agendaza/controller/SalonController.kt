@@ -20,18 +20,16 @@ class SalonController {
     @Autowired
     lateinit var salonService: SalonService
 
-
     @GetMapping("/getAllSalon")
-    fun abm(): MutableList<Salon>? {
+    fun getAll(): MutableList<Salon>? {
         return salonService.getAll()
     }
 
-    @GetMapping("/saveSalon/{id}")
-    fun showSave(@PathVariable("id") id: Long): ResponseEntity<Salon>? {
+    @GetMapping("/getSalon/{id}")
+    fun get(@PathVariable("id") id: Long): ResponseEntity<Salon>? {
         if (id != 0L) {
             return ResponseEntity<Salon>(salonService.get(id), HttpStatus.OK)
         }
-
         return ResponseEntity<Salon>(HttpStatus.NO_CONTENT)
     }
 

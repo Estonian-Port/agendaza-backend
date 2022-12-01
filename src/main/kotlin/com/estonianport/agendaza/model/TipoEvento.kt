@@ -28,7 +28,7 @@ data class TipoEvento(
 
     @ManyToOne
     @JoinColumn(name = "capacidad_id")
-    val capacidad: Capacidad,
+    var capacidad: Capacidad,
 
     @Column
     val cantidadDuracion: LocalTime,
@@ -37,19 +37,17 @@ data class TipoEvento(
     val cantPersonal : Int,
 
     @Column(name = "valor_fin_semana")
-    val valorFinSemana : Int,
-
-    @Column(name = "horario_final_automatico")
-    val horarioFinalAutomatico : Boolean,
+    val valorFinSemana : Int){
 
     @JsonBackReference
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
-    val listaPrecioConFecha: List<PrecioConFechaTipoEvento>,
+    val listaPrecioConFecha: List<PrecioConFechaTipoEvento> = mutableListOf()
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
-    val listaServicio: Set<Servicio>,
+    val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
-    val listaExtra: MutableList<Extra>){}
+    val listaExtra: MutableSet<Extra> = mutableSetOf()
+}

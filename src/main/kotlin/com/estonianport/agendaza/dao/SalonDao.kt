@@ -1,4 +1,4 @@
-package com.estonianport.agendaza.repository
+package com.estonianport.agendaza.dao
 
 import com.estonianport.agendaza.model.Salon
 import org.springframework.data.repository.CrudRepository

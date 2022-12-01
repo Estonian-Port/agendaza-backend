@@ -2,7 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.model.Salon
-import com.estonianport.agendaza.repository.SalonDao
+import com.estonianport.agendaza.dao.SalonDao
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service

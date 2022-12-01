@@ -6,11 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="c1c32766-27dc-4709-9769-96a0bddd3438" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Extra.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Extra.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Persona.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/Persona.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/PrecioConFecha.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/PrecioConFecha.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/controller/SalonController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/controller/SalonController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/dao/SalonDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/dao/SalonDao.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoEvento.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoEvento.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoUsuario.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/model/TipoUsuario.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/service/SalonService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/com/estonianport/agendaza/service/SalonService.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,13 +77,17 @@
       <recent name="C:\Users\Sebastian\Documents\git\agendaza-backend\src\main\kotlin\com\estonianport\agendaza\controller" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Sebastian\Documents\git\agendaza-backend\src\main\kotlin\com\estonianport\agendaza\service" />
+      <recent name="C:\Users\Sebastian\Documents\git\agendaza-backend\src\main\kotlin\com\estonianport\agendaza\controller" />
       <recent name="C:\Users\Sebastian\Documents\git\agendaza-backend\src\main\kotlin\com\estonianport\agendaza\model" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="com.estonianport.agendaza.dao" />
       <recent name="com.estonianport.agendaza.service" />
       <recent name="com.estonianport.agendaza.service.impl" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="com.estonianport.agendaza.dao" />
       <recent name="com.estonianport.agendaza.model" />
     </key>
   </component>
@@ -138,7 +141,7 @@
       <workItem from="1669663704716" duration="38000" />
       <workItem from="1669663753608" duration="4993000" />
       <workItem from="1669762847316" duration="2799000" />
-      <workItem from="1669818167067" duration="7097000" />
+      <workItem from="1669818167067" duration="10272000" />
     </task>
     <servers />
   </component>
