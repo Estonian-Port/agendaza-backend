@@ -41,6 +41,7 @@ data class PrecioConFechaExtra(
 
 @Entity(name = "precio_con_fecha_tipo_evento")
 data class PrecioConFechaTipoEvento(
+
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")

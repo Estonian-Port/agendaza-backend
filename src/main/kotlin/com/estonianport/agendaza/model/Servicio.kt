@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonManagedReference
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -22,11 +23,11 @@ data class Servicio(
     @Column
     val nombre: String,
 
-    @JsonManagedReference
-    @ManyToMany(fetch = FetchType.LAZY, cascade = arrayOf(CascadeType.ALL))
+    @JsonBackReference
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "tipo_evento_servicio",
         joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    val listaTipoEvento: Set<TipoEvento>){}
+    val listaTipoEvento: MutableSet<TipoEvento>){}

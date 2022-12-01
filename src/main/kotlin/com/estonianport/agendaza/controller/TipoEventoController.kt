@@ -46,7 +46,7 @@ class TipoEventoController {
         val listaCapacidad: MutableList<Capacidad>? = capacidadService.getAll()
 
         // Reutilizar capacidades ya guardadas
-        if (listaCapacidad != null) {
+        if (listaCapacidad != null && listaCapacidad.size != 0) {
             for (capacidad in listaCapacidad) {
                 if (capacidad.capacidadAdultos == tipoEvento.capacidad.capacidadAdultos
                     && capacidad.capacidadNinos == tipoEvento.capacidad.capacidadNinos) {
