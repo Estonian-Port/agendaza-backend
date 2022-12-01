@@ -23,7 +23,7 @@ data class Extra(
     val nombre: String,
 
     @Column
-    val tipoExtra : TipoExtra,
+    val tipoExtra : TipoExtra){
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY)
@@ -32,5 +32,6 @@ data class Extra(
         joinColumns = arrayOf(JoinColumn(name = "extra_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    val listaTipoEvento: MutableSet<TipoEvento>){
+    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+
 }

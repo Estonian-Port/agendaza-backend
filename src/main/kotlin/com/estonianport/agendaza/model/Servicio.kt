@@ -21,7 +21,7 @@ data class Servicio(
     val id: Long,
 
     @Column
-    val nombre: String,
+    val nombre: String){
 
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY)
@@ -30,4 +30,6 @@ data class Servicio(
         joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    val listaTipoEvento: MutableSet<TipoEvento>){}
+    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+
+}

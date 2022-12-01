@@ -35,13 +35,13 @@ class SalonController {
 
     @PostMapping("/saveSalon")
     fun save(@RequestBody salon: Salon): ResponseEntity<Salon> {
-        return  ResponseEntity<Salon>(salonService.save(salon), HttpStatus.OK)
+        return ResponseEntity<Salon>(salonService.save(salon), HttpStatus.OK)
     }
 
     @DeleteMapping("/deleteSalon/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Salon> {
 
-        //Elimina todos los eventos del salon 
+        // TODO Elimina todos los eventos del salon
         //val listaEventos: List<Evento> = eventoService.getEventosBySalon(salonService.get(id))
         //for (evento in listaEventos) {
           //  eventoService.delete(evento.getId())
