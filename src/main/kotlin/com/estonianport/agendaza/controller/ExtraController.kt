@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -31,7 +32,7 @@ class ExtraController {
     }
 
     @PostMapping("/saveExtra")
-    fun save(extra: Extra): ResponseEntity<Extra> {
+    fun save(@RequestBody extra: Extra): ResponseEntity<Extra> {
         return ResponseEntity<Extra>(extraService.save(extra), HttpStatus.OK)
     }
 

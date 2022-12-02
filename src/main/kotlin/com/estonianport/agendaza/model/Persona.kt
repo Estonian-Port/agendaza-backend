@@ -1,17 +1,32 @@
 package com.estonianport.agendaza.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorColumn
+import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Inheritance
+import jakarta.persistence.InheritanceType
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.sql.Date
 
-@MappedSuperclass
+@JsonTypeInfo(
+    use= JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "tipo")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Usuario::class, name = "USUARIO"),
+    JsonSubTypes.Type(value = Cliente::class, name ="CLIENTE"))
+@Entity
+@DiscriminatorColumn(name="tipo")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Persona(
 
     @Id
@@ -34,6 +49,7 @@ abstract class Persona(
     val mail: String){}
 
 @Entity
+@DiscriminatorValue(value="USUARIO")
 class Usuario(
     id: Long,
     nombre: String,
@@ -52,6 +68,7 @@ class Usuario(
     val tipoUsuario : TipoUsuario) : Persona(id,nombre, apellido, cuil, celular, mail){}
 
 @Entity
+@DiscriminatorValue(value="CLIENTE")
 class Cliente(
     id: Long,
     nombre: String,
