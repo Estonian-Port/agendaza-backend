@@ -15,8 +15,5 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
 
     override val dao: CrudRepository<TipoEvento, Long>
         get() = tipoEventoDao
-
-    fun count(): Long? {
-        return tipoEventoDao.count()
-    }
+    
 }

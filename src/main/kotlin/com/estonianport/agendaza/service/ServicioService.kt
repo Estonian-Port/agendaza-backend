@@ -16,7 +16,4 @@ class ServicioService : GenericServiceImpl<Servicio, Long>(){
     override val dao: CrudRepository<Servicio, Long>
         get() = servicioDao
 
-    fun count(): Long {
-        return servicioDao.count()
-    }
 }

@@ -17,33 +17,47 @@ abstract class PrecioConFecha (
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @Column
-    val precio : Int,
+    open var precio : Int,
 
     @Column
-    val desde: LocalDateTime,
+    open var desde: LocalDateTime,
 
     @Column
-    val hasta: LocalDateTime,
+    open var hasta: LocalDateTime,
 
     @ManyToOne
     @JoinColumn(name = "salon_id")
-    val salon: Salon){}
+    open var salon: Salon){
+}
 
 @Entity(name = "precio_con_fecha_extra")
-data class PrecioConFechaExtra(
+class PrecioConFechaExtra(
+    id: Long,
+    precio: Int,
+    desde: LocalDateTime,
+    hasta: LocalDateTime,
+    salon: Salon,
+
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_id")
-    val extra: Extra) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val extra: Extra
+
+    ) : PrecioConFecha(id, precio, desde, hasta, salon) {}
 
 @Entity(name = "precio_con_fecha_tipo_evento")
-data class PrecioConFechaTipoEvento(
+class PrecioConFechaTipoEvento(
+    id: Long,
+    precio: Int,
+    desde: LocalDateTime,
+    hasta: LocalDateTime,
+    salon: Salon,
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")
-    val tipoEvento: TipoEvento) : PrecioConFecha(0, 0, LocalDateTime.now(), LocalDateTime.now(), Salon(0,"","",0,"")) {}
+    val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, salon) {}
 

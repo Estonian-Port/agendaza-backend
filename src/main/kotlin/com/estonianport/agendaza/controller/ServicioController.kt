@@ -2,11 +2,9 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.service.ServicioService
-import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,9 +19,6 @@ class ServicioController {
 
     @Autowired
     lateinit var servicioService: ServicioService
-
-    @Autowired
-    lateinit var tipoEventoService: TipoEventoService
 
     @GetMapping("/getAllServicio")
     fun getAll(): MutableList<Servicio>? {
@@ -45,11 +40,6 @@ class ServicioController {
 
     @DeleteMapping("/deleteServicio/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Servicio> {
-
-        // TODO Elimina los subTipoEvento Vinculados
-        // servicio.setListaSubTipoEvento(null);
-        // servicioService.save(servicio);
-
         servicioService.delete(id)
         return ResponseEntity<Servicio>(HttpStatus.OK)
     }

@@ -29,7 +29,7 @@ data class TipoEvento(
     @JoinColumn(name = "duracion")
     val duracion : Duracion,
 
-    @ManyToOne(cascade = arrayOf(CascadeType.ALL))
+    @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "capacidad_id")
     var capacidad: Capacidad,
 
@@ -43,7 +43,7 @@ data class TipoEvento(
     val valorFinSemana : Int){
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
-    val listaPrecioConFecha: List<PrecioConFechaTipoEvento> = mutableListOf()
+    val listaPrecioConFecha: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
     val listaServicio: MutableSet<Servicio> = mutableSetOf()

@@ -26,5 +26,9 @@ abstract class GenericServiceImpl<T, ID : Serializable?> : GenericService<T, ID>
         return returnList
     }
 
+    fun count(): Long {
+        return dao.count()
+    }
+
     abstract val dao : CrudRepository<T, ID>
 }

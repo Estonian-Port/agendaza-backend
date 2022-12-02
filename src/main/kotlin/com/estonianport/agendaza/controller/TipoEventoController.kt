@@ -2,8 +2,10 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Salon
+import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.CapacidadService
+import com.estonianport.agendaza.service.ServicioService
 import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -27,6 +29,9 @@ class TipoEventoController {
 
     @Autowired
     lateinit var  capacidadService: CapacidadService
+
+    @Autowired
+    lateinit var  servicioService: ServicioService
 
     @GetMapping("/getAllTipoEvento")
     fun getAll(): MutableList<TipoEvento>? {
@@ -60,7 +65,31 @@ class TipoEventoController {
 
     @DeleteMapping("/deleteTipoEvento/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<TipoEvento> {
-        this.tipoEventoService.delete(id)
+
+        var tipoEventoEliminar : TipoEvento? =  tipoEventoService.get(id)
+
+        if (tipoEventoEliminar != null) {
+            var listaServicios = tipoEventoEliminar.listaServicio
+
+            // Elimina en los servicio el tipoEventoEliminar
+            listaServicios.forEach { servicio ->
+                if(servicio.listaTipoEvento.contains(tipoEventoEliminar)){
+                    servicio.listaTipoEvento.remove(tipoEventoEliminar)
+                    servicioService.save(servicio)
+                }
+            }
+
+            // Eliminar en tipoEventoEliminar los servicios
+            tipoEventoEliminar.listaServicio.clear()
+            tipoEventoEliminar.listaExtra.clear()
+            tipoEventoEliminar.listaPrecioConFecha.clear()
+
+            // Setea una capacidad sin guardar en la DB a tipoEventoEliminar
+            tipoEventoEliminar.capacidad = Capacidad(0,0,0)
+
+            // Eliminar tipoEventoEliminar
+            tipoEventoService.delete(id)
+        }
         return ResponseEntity<TipoEvento>(HttpStatus.OK)
     }
 }

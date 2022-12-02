@@ -16,7 +16,4 @@ class SalonService : GenericServiceImpl<Salon, Long>() {
     override val dao: CrudRepository<Salon, Long>
         get() = salonDao
 
-    fun count(): Long? {
-        return salonDao.count()
-    }
 }
