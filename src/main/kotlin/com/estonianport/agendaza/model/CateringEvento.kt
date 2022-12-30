@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 
 @Entity
-data class Catering(
+data class CateringEvento(
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +27,11 @@ data class Catering(
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "catering_tipo_catering",
-        joinColumns = arrayOf(JoinColumn(name = "catering_id")),
+        name = "catering_evento__tipo_catering",
+        joinColumns = arrayOf(JoinColumn(name = "catering_evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_catering_id"))
     )
     val listaTipoCatering: Set<Extra>,
 
-    @OneToMany(mappedBy = "catering", cascade = arrayOf(CascadeType.ALL))
-    val listaCateringExtraVariableCatering: Set<CateringExtraVariableCatering>){}
+    @OneToMany(mappedBy = "cateringEvento", cascade = arrayOf(CascadeType.ALL))
+    val listaCateringExtraVariableCatering: Set<CateringEventoExtraVariableCatering>){}

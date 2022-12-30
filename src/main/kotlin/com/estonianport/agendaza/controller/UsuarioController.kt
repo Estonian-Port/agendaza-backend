@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.model.Persona
-import com.estonianport.agendaza.service.PersonaService
+import com.estonianport.agendaza.model.Usuario
+import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -14,31 +14,31 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin("*")
-class PersonaController {
+class UsuarioController {
     @Autowired
-    lateinit var PersonaService: PersonaService
+    lateinit var UsuarioService: UsuarioService
 
-    @GetMapping("/getAllPersona")
-    fun abm(): MutableList<Persona>? {
-        return PersonaService.getAll()
+    @GetMapping("/getAllUsuario")
+    fun abm(): MutableList<Usuario>? {
+        return UsuarioService.getAll()
     }
 
-    @GetMapping("/getPersona/{id}")
-    fun showSave(@PathVariable("id") id: Long): ResponseEntity<Persona>? {
+    @GetMapping("/getUsuario/{id}")
+    fun showSave(@PathVariable("id") id: Long): ResponseEntity<Usuario>? {
         if (id != 0L) {
-            ResponseEntity<Persona>(PersonaService.get(id), HttpStatus.OK)
+            ResponseEntity<Usuario>(UsuarioService.get(id), HttpStatus.OK)
         }
-        return ResponseEntity<Persona>(HttpStatus.NO_CONTENT)
+        return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
     }
 
-    @PostMapping("/savePersona")
-    fun save(@RequestBody persona: Persona): ResponseEntity<Persona> {
-        return ResponseEntity<Persona>(PersonaService.save(persona), HttpStatus.OK)
+    @PostMapping("/saveUsuario")
+    fun save(@RequestBody Usuario: Usuario): ResponseEntity<Usuario> {
+        return ResponseEntity<Usuario>(UsuarioService.save(Usuario), HttpStatus.OK)
     }
 
-    @GetMapping("/deletePersona/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Persona> {
-        PersonaService.delete(id)
-        return ResponseEntity<Persona>(HttpStatus.OK)
+    @GetMapping("/deleteUsuario/{id}")
+    fun delete(@PathVariable("id") id: Long): ResponseEntity<Usuario> {
+        UsuarioService.delete(id)
+        return ResponseEntity<Usuario>(HttpStatus.OK)
     }
 }

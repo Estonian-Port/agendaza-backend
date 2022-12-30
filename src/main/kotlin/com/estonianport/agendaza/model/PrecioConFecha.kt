@@ -29,8 +29,8 @@ abstract class PrecioConFecha (
     open var hasta: LocalDateTime,
 
     @ManyToOne
-    @JoinColumn(name = "salon_id")
-    open var salon: Salon){
+    @JoinColumn(name = "empresa_id")
+    open var empresa: Empresa){
 }
 
 @Entity(name = "precio_con_fecha_extra")
@@ -39,14 +39,14 @@ class PrecioConFechaExtra(
     precio: Int,
     desde: LocalDateTime,
     hasta: LocalDateTime,
-    salon: Salon,
+    empresa: Empresa,
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_id")
     val extra: Extra
 
-    ) : PrecioConFecha(id, precio, desde, hasta, salon) {}
+    ) : PrecioConFecha(id, precio, desde, hasta, empresa) {}
 
 @Entity(name = "precio_con_fecha_tipo_evento")
 class PrecioConFechaTipoEvento(
@@ -54,10 +54,10 @@ class PrecioConFechaTipoEvento(
     precio: Int,
     desde: LocalDateTime,
     hasta: LocalDateTime,
-    salon: Salon,
+    empresa: Empresa,
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")
-    val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, salon) {}
+    val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {}
 

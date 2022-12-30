@@ -1,5 +1,9 @@
 package com.estonianport.agendaza.model
 
+import jakarta.persistence.Embeddable
+import jakarta.persistence.Embedded
+
+@Embeddable
 abstract class TipoUsuario() {
 
     abstract fun obtenerAgenda() : Any
@@ -45,7 +49,7 @@ class Empleado : TipoUsuario() {
     }
 }
 
-class ClienteUsuario : TipoUsuario() {
+class Cliente : TipoUsuario() {
 
     override fun obtenerAgenda(): Int {
         return 1
@@ -55,17 +59,5 @@ class ClienteUsuario : TipoUsuario() {
     override fun obtenerOpcionesPanelDeAdminitracion(): Any {
         TODO("No tiene panel de control?")
     }
-}
-
-class Prestador(
-    tipoPrestador : TipoPrestador) : TipoUsuario() {
-    override fun obtenerAgenda(): Any {
-        TODO("Eventos creados por el y asignados por salon")
-    }
-
-    override fun obtenerOpcionesPanelDeAdminitracion(): Any {
-        TODO("Opciones para prestadores de servicios")
-    }
-
 
 }

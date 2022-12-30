@@ -11,7 +11,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDateTime
@@ -46,18 +45,34 @@ data class Evento(
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
-    val catering: Catering,
+    val catering: CateringEvento,
 
     @Column
     val presupuesto: Int,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val usuario: Usuario,
+    val encargado: Usuario,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val cliente: Cliente,
+    val cliente: Usuario,
+
+    @ManyToMany
+    @JoinTable(
+        name = "empresa_evento",
+        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
+    )
+    val listaEmpresa: MutableSet<Empresa>,
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "evento_empleado",
+        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "usuario_id"))
+    )
+    val listaEmpleado: MutableSet<Usuario>,
 
     @Column
     val codigo: String,
@@ -65,7 +80,5 @@ data class Evento(
     @Column
     val estado: Estado,
 
-    @ManyToOne
-    @PrimaryKeyJoinColumn
-    val salon: Salon){
+    ){
 }

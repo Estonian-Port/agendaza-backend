@@ -31,5 +31,5 @@ data class Pago (
     val evento: Evento,
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    val usuario: Usuario){}
+    @JoinColumn(name = "encargado_id")
+    val encargado: Usuario){}
