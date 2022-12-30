@@ -28,7 +28,7 @@ data class Agregados(
     val listaExtra: Set<Extra>,
 
     @OneToMany(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))
-    val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento>,
+    val listaEventoExtraVariable: MutableSet<EventoExtraVariableTipoEvento>,
 
     @Column
     val extraOtro: Int,

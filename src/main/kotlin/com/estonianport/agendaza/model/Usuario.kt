@@ -1,17 +1,16 @@
 package com.estonianport.agendaza.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
-import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
-import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.sql.Date
@@ -39,6 +38,7 @@ data class Usuario(
     val mail: String,
 
     @PrimaryKeyJoinColumn
+    @Enumerated(EnumType.STRING)
     val sexo: Sexo,
 
     @Column
@@ -48,18 +48,13 @@ data class Usuario(
     val password: String,
 
     @Column(name = "fecha_nacimiento")
-    val fechaNacimiento: Date,
+    val fechaNacimiento: Date) {
 
-    @Embedded
-    val tipoUsuario : TipoUsuario) {
+    @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))
+    val listaEventosContratados : MutableSet<Evento> = mutableSetOf()
 
-    @ManyToMany
-    @JoinTable(
-        name = "empresa_empleado",
-        joinColumns = arrayOf(JoinColumn(name = "usuario_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
-    )
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+    @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
+    val listaCargo: MutableSet<Cargo> = mutableSetOf()
 
 }
 

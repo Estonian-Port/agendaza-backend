@@ -34,4 +34,4 @@ data class CateringEvento(
     val listaTipoCatering: Set<Extra>,
 
     @OneToMany(mappedBy = "cateringEvento", cascade = arrayOf(CascadeType.ALL))
-    val listaCateringExtraVariableCatering: Set<CateringEventoExtraVariableCatering>){}
+    val listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){}
