@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -10,7 +11,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.MapsId
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 
 @Entity
 data class CateringEvento(
@@ -31,7 +34,12 @@ data class CateringEvento(
         joinColumns = arrayOf(JoinColumn(name = "catering_evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_catering_id"))
     )
-    val listaTipoCatering: Set<Extra>,
+    val listaTipoCatering: MutableSet<Extra>,
 
     @OneToMany(mappedBy = "cateringEvento", cascade = arrayOf(CascadeType.ALL))
-    val listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){}
+    val listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "catering", cascade = arrayOf(CascadeType.ALL))
+    lateinit var evento : Evento
+}

@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 
 @Service
-open class CapacidadService : GenericServiceImpl<Capacidad, Long>() {
+class CapacidadService : GenericServiceImpl<Capacidad, Long>() {
 
     @Autowired
     lateinit var capacidadDao: CapacidadDao

@@ -3,6 +3,8 @@ package com.estonianport.agendaza.model
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -40,11 +42,11 @@ data class Evento(
     val capacidad: Capacidad,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "agregados_id")
     val agregados: Agregados,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "catering_evento_id")
     val catering: CateringEvento,
 
     @Column
@@ -58,13 +60,22 @@ data class Evento(
     @PrimaryKeyJoinColumn
     val cliente: Usuario,
 
+    @Column
+    val codigo: String,
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    val estado: Estado,
+
+    ){
+
     @ManyToMany
     @JoinTable(
         name = "empresa_evento",
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
     )
-    val listaEmpresa: MutableSet<Empresa>,
+    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -72,13 +83,5 @@ data class Evento(
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "usuario_id"))
     )
-    val listaEmpleado: MutableSet<Usuario>,
-
-    @Column
-    val codigo: String,
-
-    @Column
-    val estado: Estado,
-
-    ){
+    val listaEmpleado: MutableSet<Usuario> = mutableSetOf()
 }

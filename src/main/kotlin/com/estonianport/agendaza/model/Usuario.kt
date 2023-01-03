@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -50,9 +51,11 @@ data class Usuario(
     @Column(name = "fecha_nacimiento")
     val fechaNacimiento: Date) {
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))
     val listaEventosContratados : MutableSet<Evento> = mutableSetOf()
 
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
     val listaCargo: MutableSet<Cargo> = mutableSetOf()
 

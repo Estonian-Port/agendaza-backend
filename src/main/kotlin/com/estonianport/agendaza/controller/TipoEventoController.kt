@@ -1,8 +1,6 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Capacidad
-import com.estonianport.agendaza.model.Salon
-import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.ServicioService
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 

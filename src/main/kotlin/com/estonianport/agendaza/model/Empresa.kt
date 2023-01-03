@@ -1,6 +1,9 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.errors.BusinessException
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -15,6 +18,14 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import java.lang.Error
 
+@JsonTypeInfo(
+    use= JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "tipo")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Salon::class, name = "SALON"),
+    JsonSubTypes.Type(value = Catering::class, name ="CATERING"),
+    JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 open abstract class Empresa(
@@ -25,9 +36,11 @@ open abstract class Empresa(
     @Column
     open val nombre: String){
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "listaEmpresa")
     open val listaEvento : MutableSet<Evento> = mutableSetOf()
 
+    @JsonIgnore
     @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
