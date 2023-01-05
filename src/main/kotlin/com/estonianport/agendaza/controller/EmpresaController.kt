@@ -1,6 +1,8 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -18,24 +20,40 @@ import org.springframework.web.bind.annotation.RestController
 class EmpresaController {
 
     @Autowired
-    lateinit var EmpresaService: EmpresaService
+    lateinit var empresaService: EmpresaService
 
     @GetMapping("/getAllEmpresa")
     fun getAll(): MutableList<Empresa>? {
-        return EmpresaService.getAll()
+        return empresaService.getAll()
     }
 
     @GetMapping("/getEmpresa/{id}")
     fun get(@PathVariable("id") id: Long): ResponseEntity<Empresa>? {
         if (id != 0L) {
-            return ResponseEntity<Empresa>(EmpresaService.get(id), HttpStatus.OK)
+            return ResponseEntity<Empresa>(empresaService.get(id), HttpStatus.OK)
         }
         return ResponseEntity<Empresa>(HttpStatus.NO_CONTENT)
     }
 
+    @GetMapping("/getEmpresaListaExtra/{id}")
+    fun getListaExtra(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<Extra>>(empresaService.get(id)?.listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getEmpresaListaTipoEvento/{id}")
+    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<TipoEvento>>(empresaService.get(id)?.listaTipoEvento, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    }
+
     @PostMapping("/saveEmpresa")
-    fun save(@RequestBody Empresa: Empresa): ResponseEntity<Empresa> {
-        return ResponseEntity<Empresa>(EmpresaService.save(Empresa), HttpStatus.OK)
+    fun save(@RequestBody empresa: Empresa): ResponseEntity<Empresa> {
+        return ResponseEntity<Empresa>(empresaService.save(empresa), HttpStatus.OK)
     }
 
     @DeleteMapping("/deleteEmpresa/{id}")
@@ -48,7 +66,7 @@ class EmpresaController {
         //}
 
         //Elmina el Empresa
-        EmpresaService.delete(id)
+        empresaService.delete(id)
         return ResponseEntity<Empresa>(HttpStatus.OK)
     }
 }

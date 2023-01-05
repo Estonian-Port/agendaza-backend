@@ -3,6 +3,7 @@ package com.estonianport.agendaza.model
 import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import java.time.LocalTime
 import jakarta.persistence.Column
@@ -45,12 +46,15 @@ data class TipoEvento(
     @Column(name = "valor_fin_semana")
     val valorFinSemana : Int){
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
     val listaPrecioConFecha: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
     val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
     val listaExtra: MutableSet<Extra> = mutableSetOf()
 }

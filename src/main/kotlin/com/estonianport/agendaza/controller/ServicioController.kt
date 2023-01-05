@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Servicio
+import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.ServicioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -28,9 +29,17 @@ class ServicioController {
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ResponseEntity<Servicio>? {
         if (id != 0L) {
-            ResponseEntity<Servicio>(servicioService.get(id), HttpStatus.OK)
+            return ResponseEntity<Servicio>(servicioService.get(id), HttpStatus.OK)
         }
         return ResponseEntity<Servicio>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getServicioListaTipoEvento/{id}")
+    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<TipoEvento>>(servicioService.get(id)?.listaTipoEvento, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
     }
 
     @PostMapping("/saveServicio")

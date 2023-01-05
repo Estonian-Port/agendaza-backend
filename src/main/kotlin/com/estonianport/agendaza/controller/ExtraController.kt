@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.ExtraService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -29,6 +30,14 @@ class ExtraController {
             ResponseEntity<Extra>(extraService.get(id), HttpStatus.OK)
         }
         return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getExtraListaTipoEvento/{id}")
+    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<TipoEvento>>(extraService.get(id)?.listaTipoEvento, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
     }
 
     @PostMapping("/saveExtra")
