@@ -27,6 +27,6 @@ data class Cargo(
     @PrimaryKeyJoinColumn
     val empresa: Empresa,
 
-    @Column
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @PrimaryKeyJoinColumn
     val tipoCargo : TipoCargo){}

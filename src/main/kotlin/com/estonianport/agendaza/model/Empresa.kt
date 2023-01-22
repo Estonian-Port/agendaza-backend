@@ -32,7 +32,7 @@ import java.lang.Error
     JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-open abstract class Empresa(
+abstract class Empresa(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     open val id: Long,
