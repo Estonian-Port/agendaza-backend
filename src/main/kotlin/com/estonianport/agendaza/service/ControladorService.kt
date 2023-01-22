@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.service
 
+import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.PanelAdministracion
@@ -65,6 +66,23 @@ class AgendaAdminitrador : AgendaTipoCargo{
         return mutableSetOf() // TODO
     }
 
+
+}
+
+@Service
+class AgendaService {
+    fun getListaAgendasByUsuario(usuario : Usuario): MutableSet<AgendaDto> {
+        var listaAgendaDto : MutableSet<AgendaDto> = mutableSetOf()
+
+        usuario.listaCargo.forEach {
+            var agendaDto = AgendaDto(it.id, it.empresa.nombre, it.tipoCargo.toString())
+
+            listaAgendaDto.add(agendaDto)
+        }
+
+        return listaAgendaDto
+
+    }
 
 }
 
