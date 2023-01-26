@@ -2,7 +2,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import java.io.Serializable
 
-
 @Service
 abstract class GenericServiceImpl<T, ID : Serializable?> : GenericService<T, ID> {
     override fun save(entity: T): T {

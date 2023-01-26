@@ -1,5 +1,4 @@
 package com.estonianport.agendaza.common
-
 object GeneralPath {
     const val EVENTO = "evento"
     const val USUARIO = "usuario"

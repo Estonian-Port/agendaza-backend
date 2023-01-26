@@ -1,4 +1,3 @@
-
 import java.io.Serializable
 
 interface GenericService<T, ID : Serializable?> {

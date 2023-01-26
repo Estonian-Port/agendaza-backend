@@ -11,7 +11,7 @@ class AgendaService {
         var listaAgendaDto : MutableSet<AgendaDto> = mutableSetOf()
 
         usuario.listaCargo.forEach {
-            var agendaDto = AgendaDto(it.id, it.empresa.nombre, it.tipoCargo.toString())
+            var agendaDto = AgendaDto(it.id, it.empresa.nombre, it.tipoCargo.tipoCargoNombre.toString())
 
             listaAgendaDto.add(agendaDto)
         }
