@@ -16,15 +16,15 @@ class TokenUtils {
         val ACCESS_TOKEN_SECRET : String = Keys.secretKeyFor(SignatureAlgorithm.HS256).toString();
         val ACCESS_TOKEN_VALIDITY_SECONDS : Long = 259000
 
-        fun createToken(username : String, email : String): String {
+        fun createToken(nombre : String, username : String): String {
             var expirationTime : Long = ACCESS_TOKEN_VALIDITY_SECONDS * 1000
             var expirationDate : Date = Date(System.currentTimeMillis() + expirationTime)
 
             val extra: MutableMap<String, Any> = HashMap()
-            extra["nombre"] = username
+            extra["nombre"] = nombre
 
             return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .setExpiration(expirationDate)
                 .addClaims(extra)
                 .signWith(Keys.hmacShaKeyFor((ACCESS_TOKEN_SECRET.toByteArray())))
