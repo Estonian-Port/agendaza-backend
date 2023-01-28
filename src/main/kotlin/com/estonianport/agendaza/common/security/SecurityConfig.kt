@@ -32,9 +32,7 @@ class SecurityConfig {
         val jwtAuthenticationFilter = JWTAuthenticationFilter()
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
-/*
-        println("pass " + BCryptPasswordEncoder().encode("admin"))
-*/
+
         return http
             .csrf()
             .disable()
@@ -50,17 +48,6 @@ class SecurityConfig {
             .build()
 
     }
-
-/*    @Bean
-    fun userDetailService() : UserDetailsService {
-        val manager = InMemoryUserDetailsManager()
-        manager.createUser(
-            User.withUsername("admin")
-            .password(passwordEncoder().encode("admin"))
-            .roles()
-            .build())
-        return manager
-    }*/
 
     @Bean
     fun passwordEncoder() : PasswordEncoder {
