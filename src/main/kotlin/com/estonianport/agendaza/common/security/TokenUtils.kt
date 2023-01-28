@@ -40,9 +40,9 @@ class TokenUtils {
                     .parseClaimsJws(token)
                     .body
 
-                var email : String = claims.subject
+                var username : String = claims.subject
 
-                return UsernamePasswordAuthenticationToken(email, null, Collections.emptyList())
+                return UsernamePasswordAuthenticationToken(username, null, Collections.emptyList())
             }catch (e : JwtException){
                 return null
             }

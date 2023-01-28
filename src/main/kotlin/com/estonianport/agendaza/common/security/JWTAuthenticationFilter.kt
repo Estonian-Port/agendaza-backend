@@ -22,7 +22,7 @@ class JWTAuthenticationFilter : UsernamePasswordAuthenticationFilter() {
         } catch (e: IOException) {
         }
         val usernamePAT = UsernamePasswordAuthenticationToken(
-            authCredentials.mail,
+            authCredentials.username,
             authCredentials.password,
             emptyList()
         )

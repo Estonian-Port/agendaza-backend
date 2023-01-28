@@ -14,9 +14,9 @@ class UserDetailServiceImpl : UserDetailsService {
     @Autowired
     lateinit var usuarioDao : UsuarioDao
 
-    override fun loadUserByUsername(email: String): UserDetails{
+    override fun loadUserByUsername(username: String): UserDetails{
 
-        val usuario : Usuario = usuarioDao.findOneByMail(email)
+        val usuario : Usuario = usuarioDao.findOneByUsername(username)
             ?: throw UsernameNotFoundException("No se encontró el usuario")
 
         return UserDetailImpl(usuario)

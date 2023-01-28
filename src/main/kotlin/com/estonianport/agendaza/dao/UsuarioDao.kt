@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository
 interface UsuarioDao : CrudRepository<Usuario, Long> {
     fun getByUsername(username: String): Usuario
 
-    fun findOneByMail(mail: String): Usuario?
+    fun findOneByUsername(username: String): Usuario?
 
 }

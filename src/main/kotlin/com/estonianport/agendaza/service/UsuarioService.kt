@@ -35,6 +35,4 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     }
 
     fun getByUsername(usuarioDto: UsuarioDto): Usuario = usuarioDao.getByUsername(usuarioDto.username)
-
-    fun findOneByMail(email : String) : Usuario? = usuarioDao.findOneByMail(email)
 }
