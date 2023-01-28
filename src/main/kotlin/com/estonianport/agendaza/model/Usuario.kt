@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.sql.Date
+import java.time.LocalDate
 
 @Entity
 data class Usuario(
@@ -49,7 +50,7 @@ data class Usuario(
     val password: String,
 
     @Column(name = "fecha_nacimiento")
-    val fechaNacimiento: Date) {
+    val fechaNacimiento: LocalDate) {
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))

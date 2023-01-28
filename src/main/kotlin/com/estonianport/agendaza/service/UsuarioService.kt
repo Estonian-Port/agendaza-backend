@@ -5,7 +5,6 @@ import com.estonianport.agendaza.dao.UsuarioDao
 import com.estonianport.agendaza.dto.UsuarioDto
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Usuario
-import org.jetbrains.annotations.NotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.data.repository.CrudRepository
@@ -37,4 +36,5 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
 
     fun getByUsername(usuarioDto: UsuarioDto): Usuario = usuarioDao.getByUsername(usuarioDto.username)
 
+    fun findOneByMail(email : String) : Usuario? = usuarioDao.findOneByMail(email)
 }
