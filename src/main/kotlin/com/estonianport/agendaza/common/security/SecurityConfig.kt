@@ -34,6 +34,8 @@ class SecurityConfig {
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
 
         return http
+            .cors()
+            .and()
             .csrf()
             .disable()
             .authorizeHttpRequests()

@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.common.security.AuthCredentials
 import com.estonianport.agendaza.dto.UsuarioDto
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.UsuarioService
@@ -44,8 +45,8 @@ class UsuarioController {
         return ResponseEntity<Usuario>(HttpStatus.OK)
     }
 
-    @PutMapping("/getUsuarioByUsernameAndContrasena")
-    fun getByNameAndContrasena(@RequestBody usuarioDto: UsuarioDto): Long {
-        return usuarioService.getUsuarioLogIn(usuarioDto)
+    @PutMapping("/getUsuarioIdByUsername")
+    fun getUsuarioIdByUsername(@RequestBody authCredentials: AuthCredentials): Long {
+        return usuarioService.getUsuarioIdByUsername(authCredentials)
     }
 }
