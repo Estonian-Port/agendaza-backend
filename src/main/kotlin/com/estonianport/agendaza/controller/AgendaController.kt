@@ -1,7 +1,9 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.AgendaDto
+import com.estonianport.agendaza.dto.AgendaEventoDto
 import com.estonianport.agendaza.service.AgendaService
+import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -21,6 +23,9 @@ class AgendaController {
     @Autowired
     lateinit var usuarioService : UsuarioService
 
+    @Autowired
+    lateinit var empresaService: EmpresaService
+
     @GetMapping("/getListaAgendaByUsuarioId/{id}")
     fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<AgendaDto>>? {
         if (id != 0L) {
@@ -30,5 +35,14 @@ class AgendaController {
             }
         }
         return ResponseEntity<MutableSet<AgendaDto>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllEventosByEmpresaId/{id}")
+    fun getAllEventosByEmpresaId(@PathVariable("id") id: Long):  ResponseEntity<MutableSet<AgendaEventoDto>>? {
+        val empresa = empresaService.get(id)
+        if(empresa != null){
+            return ResponseEntity<MutableSet<AgendaEventoDto>>(agendaService.getAllEventosByEmpresa(empresa), HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<AgendaEventoDto>>(HttpStatus.NO_CONTENT)
     }
 }
