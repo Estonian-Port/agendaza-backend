@@ -18,8 +18,8 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         get() = usuarioDao
 
 
-    fun getUsuarioIdByUsername(authCredentials: AuthCredentials): Long {
-        return usuarioDao.getByUsername(authCredentials.username).id
+    fun getUsuarioIdByUsername(username: String): Long {
+        return usuarioDao.getByUsername(username).id
     }
 
 }

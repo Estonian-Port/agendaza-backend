@@ -46,7 +46,7 @@ class UsuarioController {
     }
 
     @PutMapping("/getUsuarioIdByUsername")
-    fun getUsuarioIdByUsername(@RequestBody authCredentials: AuthCredentials): Long {
-        return usuarioService.getUsuarioIdByUsername(authCredentials)
+    fun getUsuarioIdByUsername(@RequestBody username: String): Long {
+        return usuarioService.getUsuarioIdByUsername(username)
     }
 }
