@@ -2,6 +2,7 @@ package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.dto.AgendaEventoDto
+import com.estonianport.agendaza.dto.ConfiguracionDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.stereotype.Service
@@ -32,5 +33,10 @@ class AgendaService {
         }
 
         return listaAgendaEventoDto
+    }
+
+    fun getAllCantidadesConfiguracionByEmpresa(empresa: Empresa): ConfiguracionDto {
+        return ConfiguracionDto(empresa.listaEmpleados.size, 0, empresa.listaTipoEvento.size,
+            empresa.listaExtra.size, 0, empresa.listaEvento.size, 0, 0, 0)
     }
 }
