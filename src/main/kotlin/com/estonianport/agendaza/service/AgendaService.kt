@@ -5,6 +5,7 @@ import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.dto.ConfiguracionDto
 import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.stereotype.Service
 
@@ -35,8 +36,16 @@ class AgendaService {
     }
 
     fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {
-        return ConfiguracionDto(empresa.listaEmpleados.size, usuario.listaCargo.size, empresa.listaTipoEvento.size,
-            empresa.listaExtra.size, 0, empresa.listaEvento.size, 0, 0, 0)
+        return ConfiguracionDto(
+            empresa.listaEmpleados.size,
+            usuario.listaCargo.size,
+            empresa.listaTipoEvento.size,
+            empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.size,
+            empresa.listaEvento.sumOf{ it.listaPago.size },
+            empresa.listaEvento.size,
+            0,
+            empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.size,
+            empresa.listaServicio.size)
     }
 
     fun getAllUsuariosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {

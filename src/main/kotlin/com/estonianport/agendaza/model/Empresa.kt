@@ -48,6 +48,10 @@ abstract class Empresa(
     @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "listaEmpresa", cascade = arrayOf(CascadeType.ALL))
+    open val listaServicio: MutableSet<Servicio> = mutableSetOf()
+
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

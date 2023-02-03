@@ -32,4 +32,12 @@ data class Servicio(
     )
     val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
+    @JsonBackReference
+    @ManyToMany
+    @JoinTable(
+        name = "empresa_servicio",
+        joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
+    )
+    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
 }

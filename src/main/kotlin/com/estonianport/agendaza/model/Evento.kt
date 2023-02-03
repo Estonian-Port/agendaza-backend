@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDateTime
@@ -84,4 +85,8 @@ data class Evento(
         inverseJoinColumns = arrayOf(JoinColumn(name = "usuario_id"))
     )
     val listaEmpleado: MutableSet<Usuario> = mutableSetOf()
+
+    @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
+    val listaPago: MutableSet<Pago> = mutableSetOf()
+
 }
