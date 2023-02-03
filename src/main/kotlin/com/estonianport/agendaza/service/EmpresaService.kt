@@ -3,6 +3,7 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.dao.EmpresaDao
+import com.estonianport.agendaza.dto.EventoDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -15,5 +16,16 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     override val dao: CrudRepository<Empresa, Long>
         get() = EmpresaDao
+
+    fun getAllEventoByEmpresaId(empresa : Empresa): MutableSet<EventoDto> {
+
+        val listaAgendaEventoDto : MutableSet<EventoDto> = mutableSetOf()
+
+        empresa.listaEvento.forEach {
+            listaAgendaEventoDto.add(EventoDto(it.id, it.nombre, it.codigo, it.inicio, it.fin))
+        }
+
+        return listaAgendaEventoDto
+    }
 
 }

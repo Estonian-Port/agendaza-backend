@@ -15,4 +15,5 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     override val dao: CrudRepository<Evento, Long>
         get() = eventoDao
+
 }

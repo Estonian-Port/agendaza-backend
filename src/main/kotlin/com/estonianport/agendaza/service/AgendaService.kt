@@ -23,7 +23,7 @@ class AgendaService {
         return listaAgendaDto
     }
 
-    fun getAllEventosByEmpresa(empresa : Empresa): MutableSet<AgendaEventoDto> {
+    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): MutableSet<AgendaEventoDto> {
 
         val listaAgendaEventoDto : MutableSet<AgendaEventoDto> = mutableSetOf()
 
@@ -39,7 +39,7 @@ class AgendaService {
             empresa.listaExtra.size, 0, empresa.listaEvento.size, 0, 0, 0)
     }
 
-    fun getAllEmpleadosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {
+    fun getAllUsuariosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {
         val listaUsuarioAbmDto : MutableSet<UsuarioAbmDto> = mutableSetOf()
 
          empresa.listaEmpleados.forEach {

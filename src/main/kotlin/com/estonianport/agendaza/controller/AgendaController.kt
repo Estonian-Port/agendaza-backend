@@ -37,11 +37,11 @@ class AgendaController {
         return ResponseEntity<MutableSet<AgendaDto>>(HttpStatus.NO_CONTENT)
     }
 
-    @GetMapping("/getAllEventosByEmpresaId/{id}")
-    fun getAllEventosByEmpresaId(@PathVariable("id") id: Long):  ResponseEntity<MutableSet<AgendaEventoDto>>? {
+    @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long):  ResponseEntity<MutableSet<AgendaEventoDto>>? {
         val empresa = empresaService.get(id)
         if(empresa != null){
-            return ResponseEntity<MutableSet<AgendaEventoDto>>(agendaService.getAllEventosByEmpresa(empresa), HttpStatus.OK)
+            return ResponseEntity<MutableSet<AgendaEventoDto>>(agendaService.getAllEventosForAgendaByEmpresaId(empresa), HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<AgendaEventoDto>>(HttpStatus.NO_CONTENT)
     }
