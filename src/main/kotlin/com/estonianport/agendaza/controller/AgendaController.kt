@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.AgendaDto
-import com.estonianport.agendaza.dto.AgendaEventoDto
+import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.service.AgendaService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
@@ -38,11 +38,11 @@ class AgendaController {
     }
 
     @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
-    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long):  ResponseEntity<MutableSet<AgendaEventoDto>>? {
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long):  ResponseEntity<MutableSet<EventoAgendaDto>>? {
         val empresa = empresaService.get(id)
         if(empresa != null){
-            return ResponseEntity<MutableSet<AgendaEventoDto>>(agendaService.getAllEventosForAgendaByEmpresaId(empresa), HttpStatus.OK)
+            return ResponseEntity<MutableSet<EventoAgendaDto>>(agendaService.getAllEventosForAgendaByEmpresaId(empresa), HttpStatus.OK)
         }
-        return ResponseEntity<MutableSet<AgendaEventoDto>>(HttpStatus.NO_CONTENT)
+        return ResponseEntity<MutableSet<EventoAgendaDto>>(HttpStatus.NO_CONTENT)
     }
 }

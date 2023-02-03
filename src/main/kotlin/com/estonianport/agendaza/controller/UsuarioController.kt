@@ -1,7 +1,9 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.security.AuthCredentials
+import com.estonianport.agendaza.dto.GenericItemDto
 import com.estonianport.agendaza.dto.UsuarioDto
+import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,5 +50,16 @@ class UsuarioController {
     @PutMapping("/getUsuarioIdByUsername")
     fun getUsuarioIdByUsername(@RequestBody username: String): Long {
         return usuarioService.getUsuarioIdByUsername(username)
+    }
+
+    @GetMapping("/getAllEmpresaByUsuarioId/{id}")
+    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<GenericItemDto>>? {
+        val usuario = usuarioService.get(id)
+
+        if(usuario != null){
+            return ResponseEntity<MutableSet<GenericItemDto>>(usuarioService.getAllEmpresaByUsuario(usuario), HttpStatus.OK)
+        }
+
+        return ResponseEntity<MutableSet<GenericItemDto>>(HttpStatus.NO_CONTENT)
     }
 }

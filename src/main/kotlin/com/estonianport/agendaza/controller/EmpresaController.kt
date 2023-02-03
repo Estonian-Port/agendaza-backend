@@ -35,22 +35,6 @@ class EmpresaController {
         return ResponseEntity<Empresa>(HttpStatus.NO_CONTENT)
     }
 
-    @GetMapping("/getEmpresaListaExtra/{id}")
-    fun getListaExtra(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
-        if (id != 0L) {
-            return ResponseEntity<MutableSet<Extra>>(empresaService.get(id)?.listaExtra, HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
-    }
-
-    @GetMapping("/getEmpresaListaTipoEvento/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
-        if (id != 0L) {
-            return ResponseEntity<MutableSet<TipoEvento>>(empresaService.get(id)?.listaTipoEvento, HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
-    }
-
     @PostMapping("/saveEmpresa")
     fun save(@RequestBody empresa: Empresa): ResponseEntity<Empresa> {
         return ResponseEntity<Empresa>(empresaService.save(empresa), HttpStatus.OK)
@@ -69,4 +53,21 @@ class EmpresaController {
         empresaService.delete(id)
         return ResponseEntity<Empresa>(HttpStatus.OK)
     }
+
+    @GetMapping("/getAllExtraByEmpresaId/{id}")
+    fun getListaExtra(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<Extra>>(empresaService.get(id)?.listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
+    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<TipoEvento>>(empresaService.get(id)?.listaTipoEvento, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    }
+
 }

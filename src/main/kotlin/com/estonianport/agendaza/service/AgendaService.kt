@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.dto.AgendaDto
-import com.estonianport.agendaza.dto.AgendaEventoDto
+import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.dto.ConfiguracionDto
 import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Empresa
@@ -23,19 +23,19 @@ class AgendaService {
         return listaAgendaDto
     }
 
-    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): MutableSet<AgendaEventoDto> {
+    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): MutableSet<EventoAgendaDto> {
 
-        val listaAgendaEventoDto : MutableSet<AgendaEventoDto> = mutableSetOf()
+        val listaAgendaEventoDto : MutableSet<EventoAgendaDto> = mutableSetOf()
 
         empresa.listaEvento.forEach {
-            listaAgendaEventoDto.add(AgendaEventoDto(it.id, it.nombre, it.inicio, it.fin))
+            listaAgendaEventoDto.add(EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin))
         }
 
         return listaAgendaEventoDto
     }
 
-    fun getAllCantidadesConfiguracionByEmpresa(empresa: Empresa): ConfiguracionDto {
-        return ConfiguracionDto(empresa.listaEmpleados.size, 0, empresa.listaTipoEvento.size,
+    fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {
+        return ConfiguracionDto(empresa.listaEmpleados.size, usuario.listaCargo.size, empresa.listaTipoEvento.size,
             empresa.listaExtra.size, 0, empresa.listaEvento.size, 0, 0, 0)
     }
 
