@@ -47,7 +47,7 @@ data class Usuario(
     val username: String,
 
     @Column
-    val password: String,
+    var password: String,
 
     @Column(name = "fecha_nacimiento")
     val fechaNacimiento: LocalDate) {
