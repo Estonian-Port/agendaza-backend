@@ -43,7 +43,7 @@ class AgendaService {
             empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.size,
             empresa.listaEvento.sumOf{ it.listaPago.size },
             empresa.listaEvento.size,
-            0,
+            empresa.listaEvento.map { it.cliente }.toSet().size,
             empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.size,
             empresa.listaServicio.size)
     }
