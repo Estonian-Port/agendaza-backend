@@ -32,7 +32,7 @@ class UserDetailImpl(var usuario : Usuario) : UserDetails{
     }
 
     override fun isEnabled(): Boolean {
-        return true
+        return usuario.habilitado
     }
 
     fun getNombre() : String{

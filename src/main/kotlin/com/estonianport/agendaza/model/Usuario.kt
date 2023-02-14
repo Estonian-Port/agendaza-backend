@@ -60,6 +60,8 @@ data class Usuario(
     @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
     val listaCargo: MutableSet<Cargo> = mutableSetOf()
 
+    @Column
+    var habilitado : Boolean = true
 }
 
 
