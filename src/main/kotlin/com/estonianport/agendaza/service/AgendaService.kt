@@ -16,7 +16,7 @@ class AgendaService {
         val listaAgendaDto : MutableSet<AgendaDto> = mutableSetOf()
 
         usuario.listaCargo.forEach {
-            val agendaDto = AgendaDto(it.empresa.id, it.empresa.nombre, it.tipoCargo.tipoCargoNombre.toString())
+            val agendaDto = AgendaDto(it.empresa.id, it.empresa.nombre, it.tipoCargo.toString())
 
             listaAgendaDto.add(agendaDto)
         }

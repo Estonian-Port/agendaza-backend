@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
 
-enum class TipoCargoNombre { OWNER, ENCARGADO, EMPLEADO }
+enum class TipoCargoNombre { ADMIN, ENCARGADO, EMPLEADO }
 
 @Entity
 data class TipoCargo(
@@ -23,7 +23,7 @@ data class TipoCargo(
     var tipoCargoNombre : TipoCargoNombre){
 
 
-    fun getTipoCargo(usuario : Usuario, empresa: Empresa): TipoCargo {
+    fun getTipoCargo(usuario : Usuario, empresa: Empresa): TipoCargoNombre {
         return empresa.getCargoOfUsuario(usuario)
     }
 
@@ -50,7 +50,7 @@ data class TipoCargo(
     }
 
     fun getAgendaTipoCargo(): TipoCargoClasificacion {
-        if(TipoCargoNombre.OWNER == tipoCargoNombre || TipoCargoNombre.ENCARGADO == tipoCargoNombre){
+        if(TipoCargoNombre.ADMIN == tipoCargoNombre || TipoCargoNombre.ENCARGADO == tipoCargoNombre){
             return Administrador()
         }else{
             return Empleado()

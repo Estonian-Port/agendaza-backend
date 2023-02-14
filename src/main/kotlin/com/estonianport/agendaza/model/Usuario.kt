@@ -37,7 +37,7 @@ data class Usuario(
     val celular: Long,
 
     @Column
-    val mail: String,
+    val email: String,
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)

@@ -60,7 +60,7 @@ abstract class Empresa(
     @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
-    fun getCargoOfUsuario(usuario: Usuario) : TipoCargo {
+    fun getCargoOfUsuario(usuario: Usuario) : TipoCargoNombre {
         return listaEmpleados.find { cargo -> cargo.usuario == usuario }
             ?.tipoCargo ?: throw BusinessException("El usuario no cuenta con un cargo en esta empresa")
     }

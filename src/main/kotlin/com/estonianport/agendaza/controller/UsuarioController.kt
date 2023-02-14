@@ -1,11 +1,13 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.common.security.AuthCredentials
-import com.estonianport.agendaza.common.security.SecurityConfig
 import com.estonianport.agendaza.dto.GenericItemDto
 import com.estonianport.agendaza.dto.UsuarioDto
-import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.Cargo
+import com.estonianport.agendaza.model.Sexo
+import com.estonianport.agendaza.model.TipoCargoNombre
 import com.estonianport.agendaza.model.Usuario
+import com.estonianport.agendaza.service.CargoService
+import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -26,6 +28,13 @@ class UsuarioController {
     @Autowired
     lateinit var usuarioService: UsuarioService
 
+    @Autowired
+    lateinit var empresaService: EmpresaService
+
+    @Autowired
+    lateinit var cargoService: CargoService
+
+
     @GetMapping("/getAllUsuario")
     fun abm(): MutableList<Usuario>? {
         return usuarioService.getAll()
@@ -40,9 +49,16 @@ class UsuarioController {
     }
 
     @PostMapping("/saveUsuario")
-    fun save(@RequestBody usuario: Usuario): ResponseEntity<Usuario> {
-        usuario.password = BCryptPasswordEncoder().encode(usuario.password)
-        return ResponseEntity<Usuario>(usuarioService.save(usuario), HttpStatus.OK)
+    fun save(@RequestBody usuarioDto: UsuarioDto): ResponseEntity<Usuario> {
+        usuarioDto.usuario.password = BCryptPasswordEncoder().encode(usuarioDto.usuario.password)
+
+        val usuario = usuarioService.save(usuarioDto.usuario)
+        val empresa = empresaService.get(usuarioDto.empresaId)
+        if(empresa != null){
+            cargoService.save(Cargo(0,usuario,empresa, usuarioDto.rol))
+        }
+
+        return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
     }
 
     @GetMapping("/deleteUsuario/{id}")
@@ -66,4 +82,15 @@ class UsuarioController {
 
         return ResponseEntity<MutableSet<GenericItemDto>>(HttpStatus.NO_CONTENT)
     }
+
+    @GetMapping("/getAllRol")
+    fun getAllRoles(): ResponseEntity<MutableSet<TipoCargoNombre>>? {
+        return ResponseEntity<MutableSet<TipoCargoNombre>>(TipoCargoNombre.values().toMutableSet(), HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllSexo")
+    fun getAllSexo(): ResponseEntity<MutableSet<Sexo>>? {
+        return ResponseEntity<MutableSet<Sexo>>(Sexo.values().toMutableSet(), HttpStatus.OK)
+    }
+
 }

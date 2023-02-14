@@ -1,9 +1,13 @@
 package com.estonianport.agendaza.dto
 
-class UsuarioDto(var username: String, var password: String) {
+import com.estonianport.agendaza.model.TipoCargoNombre
+import com.estonianport.agendaza.model.Usuario
 
-}
+class UsuarioDto(var usuario: Usuario, var empresaId : Long, var rol : TipoCargoNombre){}
 
-class UsuarioAbmDto(var id: Long, var nombre: String, var apellido: String, var username: String) {
+class UsuarioLoginDto(var username: String, var password: String) {}
 
-}
+class UsuarioAbmDto(var id: Long, var nombre: String, var apellido: String, var username: String) {}
+
+class UsuarioEmpresaDto(var usuarioId: Long, var empresaId: Long) {}
+

@@ -5,13 +5,4 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-
-@Entity(name = "medio_de_pago")
-data class MedioDePago(
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
-
-    @Column
-    val nombre: String){}
+enum class MedioDePago { EFECTIVO, TARJETA, TRANFERENCIA }
