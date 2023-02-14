@@ -61,12 +61,6 @@ class UsuarioController {
         return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
     }
 
-    @PutMapping("/disableUsuario/{id}")
-    fun disable(@PathVariable("id") id: Long): ResponseEntity<Usuario> {
-        usuarioService.delete(id)
-        return ResponseEntity<Usuario>(HttpStatus.OK)
-    }
-
     @PutMapping("/getUsuarioIdByUsername")
     fun getUsuarioIdByUsername(@RequestBody username: String): Long {
         return usuarioService.getUsuarioIdByUsername(username)
