@@ -15,6 +15,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 
 @Entity
@@ -28,9 +29,13 @@ data class Extra(
 
     @Column
     @Enumerated(EnumType.STRING)
-    val tipoExtra : TipoExtra){
+    val tipoExtra : TipoExtra,
 
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    val empresa: Empresa){
+
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "tipo_evento_extra",
@@ -39,7 +44,5 @@ data class Extra(
     )
     val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "listaExtra", cascade = arrayOf(CascadeType.ALL))
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+
 }

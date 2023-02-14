@@ -49,25 +49,15 @@ abstract class Empresa(
     open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaEmpresa", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
-    @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "empresa_extra",
-        joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
-    )
+    @JsonIgnore
+    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "empresa_tipo_evento",
-        joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
-    )
+    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL))
     open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     fun getCargoOfUsuario(usuario: Usuario) : TipoCargo {

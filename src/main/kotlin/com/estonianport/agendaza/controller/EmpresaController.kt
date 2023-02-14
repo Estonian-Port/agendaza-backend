@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,6 +69,14 @@ class EmpresaController {
             return ResponseEntity<MutableSet<TipoEvento>>(empresaService.get(id)?.listaTipoEvento, HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllServicioByEmpresaId/{id}")
+    fun getAllServicioByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Servicio>>? {
+        if (id != 0L) {
+            return ResponseEntity<MutableSet<Servicio>>(empresaService.get(id)?.listaServicio, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Servicio>>(HttpStatus.NO_CONTENT)
     }
 
 }

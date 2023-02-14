@@ -44,7 +44,11 @@ data class TipoEvento(
     val cantPersonal : Int,
 
     @Column(name = "valor_fin_semana")
-    val valorFinSemana : Int){
+    val valorFinSemana : Int,
+
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    val empresa: Empresa){
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
@@ -57,4 +61,5 @@ data class TipoEvento(
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
     val listaExtra: MutableSet<Extra> = mutableSetOf()
+
 }
