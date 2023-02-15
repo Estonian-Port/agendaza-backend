@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.GenericItemDto
 import com.estonianport.agendaza.dto.UsuarioDto
+import com.estonianport.agendaza.dto.UsuarioEditPasswordDto
 import com.estonianport.agendaza.dto.UsuarioEmpresaDto
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Sexo
@@ -41,7 +42,7 @@ class UsuarioController {
     }
 
     @GetMapping("/getUsuario/{id}")
-    fun showSave(@PathVariable("id") id: Long): ResponseEntity<Usuario>? {
+    fun getUsuario(@PathVariable("id") id: Long): ResponseEntity<Usuario>? {
         if (id != 0L) {
             return ResponseEntity<Usuario>(usuarioService.get(id), HttpStatus.OK)
         }
@@ -49,7 +50,7 @@ class UsuarioController {
     }
 
     @PutMapping("/getRolByUsuarioIdAndEmpresaId")
-    fun showSave(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargoNombre>? {
+    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargoNombre>? {
         val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)
         if(usuario != null){
             val cargo = usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}
@@ -60,18 +61,40 @@ class UsuarioController {
         return ResponseEntity<TipoCargoNombre>(HttpStatus.NO_CONTENT)
     }
 
-
     @PostMapping("/saveUsuario")
     fun save(@RequestBody usuarioDto: UsuarioDto): ResponseEntity<Usuario> {
-        usuarioDto.usuario.password = BCryptPasswordEncoder().encode(usuarioDto.usuario.password)
-
-        val usuario = usuarioService.save(usuarioDto.usuario)
-        val empresa = empresaService.get(usuarioDto.empresaId)
-        if(empresa != null){
-            cargoService.save(Cargo(0,usuario,empresa, usuarioDto.rol))
+        // Si llega por primera vez se encripta la contraseña sino se deja igual
+        // para cambiar contraseña se debe usar editPassword
+        if (usuarioDto.usuario.id == 0L) {
+            usuarioDto.usuario.password = BCryptPasswordEncoder().encode(usuarioDto.usuario.password)
         }
 
+        val usuario = usuarioService.save(usuarioDto.usuario)
+
+        val empresa = empresaService.get(usuarioDto.empresaId)
+
+        if(empresa != null) {
+
+            val cargoOld = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
+
+            if (cargoOld != null){
+                cargoOld.tipoCargo = usuarioDto.rol
+                cargoService.save(cargoOld)
+            }else{
+                cargoService.save(Cargo(0, usuario, empresa, usuarioDto.rol))
+            }
+        }
         return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+    }
+
+    @PostMapping("/editPassword")
+    fun editPassword(@RequestBody usuarioEditPasswordDto: UsuarioEditPasswordDto): ResponseEntity<Usuario>? {
+        val usuario = usuarioService.get(usuarioEditPasswordDto.id)
+        if(usuario != null) {
+            usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
+            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+        }
+        return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
     }
 
     @PutMapping("/getUsuarioIdByUsername")

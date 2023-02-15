@@ -5,7 +5,7 @@ import com.estonianport.agendaza.model.Usuario
 
 class UsuarioDto(var usuario: Usuario, var empresaId : Long, var rol : TipoCargoNombre){}
 
-class UsuarioLoginDto(var username: String, var password: String) {}
+class UsuarioEditPasswordDto(var id : Long, var password: String) {}
 
 class UsuarioAbmDto(var id: Long, var nombre: String, var apellido: String, var username: String) {}
 

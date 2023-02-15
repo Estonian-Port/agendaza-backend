@@ -29,4 +29,4 @@ data class Cargo(
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)
-    val tipoCargo : TipoCargoNombre){}
+    var tipoCargo : TipoCargoNombre){}
