@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.GenericItemDto
 import com.estonianport.agendaza.dto.UsuarioDto
+import com.estonianport.agendaza.dto.UsuarioEmpresaDto
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Sexo
 import com.estonianport.agendaza.model.TipoCargoNombre
@@ -34,7 +35,6 @@ class UsuarioController {
     @Autowired
     lateinit var cargoService: CargoService
 
-
     @GetMapping("/getAllUsuario")
     fun abm(): MutableList<Usuario>? {
         return usuarioService.getAll()
@@ -43,10 +43,23 @@ class UsuarioController {
     @GetMapping("/getUsuario/{id}")
     fun showSave(@PathVariable("id") id: Long): ResponseEntity<Usuario>? {
         if (id != 0L) {
-            ResponseEntity<Usuario>(usuarioService.get(id), HttpStatus.OK)
+            return ResponseEntity<Usuario>(usuarioService.get(id), HttpStatus.OK)
         }
         return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
     }
+
+    @PutMapping("/getRolByUsuarioIdAndEmpresaId")
+    fun showSave(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargoNombre>? {
+        val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)
+        if(usuario != null){
+            val cargo = usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}
+            if(cargo != null){
+                return ResponseEntity<TipoCargoNombre>(cargo.tipoCargo ,HttpStatus.OK)
+            }
+        }
+        return ResponseEntity<TipoCargoNombre>(HttpStatus.NO_CONTENT)
+    }
+
 
     @PostMapping("/saveUsuario")
     fun save(@RequestBody usuarioDto: UsuarioDto): ResponseEntity<Usuario> {

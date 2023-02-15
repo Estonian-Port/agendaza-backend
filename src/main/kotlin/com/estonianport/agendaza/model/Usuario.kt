@@ -54,11 +54,11 @@ data class Usuario(
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))
-    val listaEventosContratados : MutableSet<Evento> = mutableSetOf()
+    var listaEventosContratados : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
-    val listaCargo: MutableSet<Cargo> = mutableSetOf()
+    var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
     @Column
     var habilitado : Boolean = true
