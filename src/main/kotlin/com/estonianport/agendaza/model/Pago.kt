@@ -35,5 +35,4 @@ data class Pago (
 
     @ManyToOne
     @JoinColumn(name = "encargado_id")
-    val encargado: Usuario
-){}
+    val encargado: Usuario){}

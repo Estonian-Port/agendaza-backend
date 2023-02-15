@@ -37,7 +37,7 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
         empresa.listaEvento.forEach {
             it.listaPago.forEach {
-                listaPago.add(PagoDto(it.id, it.monto,it.evento.codigo, it.medioDePago.name,
+                listaPago.add(PagoDto(it.id, it.monto,it.evento.codigo, it.medioDePago,
                     it.evento.nombre, it.fecha))
             }
         }

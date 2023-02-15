@@ -7,6 +7,7 @@ import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
@@ -25,7 +26,7 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         val evento = empresa.listaEvento.find { it.codigo == codigo }
 
         if(evento != null){
-            return PagoDto(0, 0, evento.codigo, "", evento.nombre, evento.inicio)
+            return PagoDto(0, 0, evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
         }
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }
