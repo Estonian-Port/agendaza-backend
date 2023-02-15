@@ -47,14 +47,4 @@ class AgendaService {
             empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.size,
             empresa.listaServicio.size)
     }
-
-    fun getAllUsuariosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {
-        val listaUsuarioAbmDto : MutableSet<UsuarioAbmDto> = mutableSetOf()
-
-         empresa.listaEmpleados.forEach {
-             listaUsuarioAbmDto.add(UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username))
-         }
-
-        return listaUsuarioAbmDto
-    }
 }

@@ -92,7 +92,7 @@ class UsuarioController {
         val usuario = usuarioService.get(usuarioEditPasswordDto.id)
         if(usuario != null) {
             usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
-            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+            return ResponseEntity<Usuario>(usuarioService.save(usuario), HttpStatus.OK)
         }
         return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
     }

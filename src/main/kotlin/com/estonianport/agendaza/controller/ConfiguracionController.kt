@@ -40,13 +40,4 @@ class ConfiguracionController {
         }
         return ResponseEntity<ConfiguracionDto>(HttpStatus.NO_CONTENT)
     }
-
-    @GetMapping("/getAllUsuariosByEmpresaId/{id}")
-    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<UsuarioAbmDto>>? {
-        val empresa = empresaService.get(id)
-        if(empresa != null){
-            return ResponseEntity<MutableSet<UsuarioAbmDto>>(agendaService.getAllUsuariosByEmpresaId(empresa), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<UsuarioAbmDto>>(HttpStatus.NO_CONTENT)
-    }
 }

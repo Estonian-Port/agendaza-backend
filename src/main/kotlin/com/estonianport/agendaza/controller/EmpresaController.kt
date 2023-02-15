@@ -1,7 +1,11 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.EventoDto
+import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.EmpresaService
@@ -55,6 +59,24 @@ class EmpresaController {
         return ResponseEntity<Empresa>(HttpStatus.OK)
     }
 
+    @GetMapping("/getAllEventoByEmpresaId/{id}")
+    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<EventoDto>>? {
+        val empresa = empresaService.get(id)
+        if(empresa != null){
+            return ResponseEntity<MutableSet<EventoDto>>(empresaService.getAllEventoByEmpresaId(empresa), HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<EventoDto>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllUsuariosByEmpresaId/{id}")
+    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<UsuarioAbmDto>>? {
+        val empresa = empresaService.get(id)
+        if(empresa != null){
+            return ResponseEntity<MutableSet<UsuarioAbmDto>>(empresaService.getAllUsuariosByEmpresaId(empresa), HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<UsuarioAbmDto>>(HttpStatus.NO_CONTENT)
+    }
+
     @GetMapping("/getAllExtraByEmpresaId/{id}")
     fun getListaExtra(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
         if (id != 0L) {
@@ -77,6 +99,17 @@ class EmpresaController {
             return ResponseEntity<MutableSet<Servicio>>(empresaService.get(id)?.listaServicio, HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<Servicio>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllPagoByEmpresaId/{id}")
+    fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<PagoDto>>? {
+        if (id != 0L) {
+            val empresa = empresaService.get(id)
+            if(empresa != null){
+                return ResponseEntity<MutableSet<PagoDto>>(empresaService.getAllPagoByEmpresaId(empresa), HttpStatus.OK)
+            }
+        }
+        return ResponseEntity<MutableSet<PagoDto>>(HttpStatus.NO_CONTENT)
     }
 
 }

@@ -23,9 +23,6 @@ class EventoController {
     @Autowired
     lateinit var eventoService: EventoService
 
-    @Autowired
-    lateinit var empresaService : EmpresaService
-
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
         return eventoService.getAll()
@@ -50,12 +47,4 @@ class EventoController {
         return ResponseEntity<Evento>(HttpStatus.OK)
     }
 
-    @GetMapping("/getAllEventoByEmpresaId/{id}")
-    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<EventoDto>>? {
-        val empresa = empresaService.get(id)
-        if(empresa != null){
-            return ResponseEntity<MutableSet<EventoDto>>(empresaService.getAllEventoByEmpresaId(empresa), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<EventoDto>>(HttpStatus.NO_CONTENT)
-    }
 }

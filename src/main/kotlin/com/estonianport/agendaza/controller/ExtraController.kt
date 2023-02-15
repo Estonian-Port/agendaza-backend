@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin("*")
 class ExtraController {
+
     @Autowired
     lateinit var extraService: ExtraService
 
