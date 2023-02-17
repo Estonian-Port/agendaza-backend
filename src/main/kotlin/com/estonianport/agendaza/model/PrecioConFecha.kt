@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -41,7 +42,7 @@ class PrecioConFechaExtra(
     hasta: LocalDateTime,
     empresa: Empresa,
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "extra_id")
     val extra: Extra
@@ -56,7 +57,7 @@ class PrecioConFechaTipoEvento(
     hasta: LocalDateTime,
     empresa: Empresa,
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_evento_id")
     val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {}

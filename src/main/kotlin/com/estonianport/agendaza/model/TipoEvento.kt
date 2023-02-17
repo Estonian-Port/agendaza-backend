@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 data class TipoEvento(
@@ -33,15 +34,15 @@ data class TipoEvento(
     @Enumerated(EnumType.STRING)
     val duracion : Duracion,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "capacidad_id")
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST, CascadeType.PERSIST])
+    @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
     @Column
     val cantidadDuracion: LocalTime,
 
     @ManyToOne
-    @JoinColumn(name = "empresa_id")
+    @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
     @JsonIgnore
