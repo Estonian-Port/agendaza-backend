@@ -76,7 +76,7 @@ class TipoEventoController {
 
         val listaServicios = tipoEventoEliminar.listaServicio
 
-        // Elimina en los servicio el tipoEventoEliminar
+        // Elimina en los servicios
         listaServicios.forEach { servicio ->
             if(servicio.listaTipoEvento.contains(tipoEventoEliminar)){
                 servicio.listaTipoEvento.remove(tipoEventoEliminar)
@@ -86,7 +86,7 @@ class TipoEventoController {
 
         val listaExtra = tipoEventoEliminar.listaExtra
 
-        // Elimina en los servicio el tipoEventoEliminar
+        // Elimina en los extra
         listaExtra.forEach { extra ->
             if(extra.listaTipoEvento.contains(tipoEventoEliminar)){
                 extra.listaTipoEvento.remove(tipoEventoEliminar)
@@ -96,7 +96,7 @@ class TipoEventoController {
 
         val listaPrecioConFecha = tipoEventoEliminar.listaPrecioConFecha
 
-        // Elimina en los servicio el tipoEventoEliminar
+        // Elimina en los precio con fecha
         listaPrecioConFecha.forEach { precioConFecha ->
             if(precioConFecha.tipoEvento == tipoEventoEliminar){
                 precioConFechaTipoEventoService.delete(precioConFecha.id)
