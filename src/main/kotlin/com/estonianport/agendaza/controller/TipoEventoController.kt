@@ -1,6 +1,8 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Capacidad
+import com.estonianport.agendaza.model.Duracion
+import com.estonianport.agendaza.model.TipoCargoNombre
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.ServicioService
@@ -88,5 +90,10 @@ class TipoEventoController {
             tipoEventoService.delete(id)
         }
         return ResponseEntity<TipoEvento>(HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllDuracion")
+    fun getAllDuracion(): ResponseEntity<MutableSet<Duracion>>? {
+        return ResponseEntity<MutableSet<Duracion>>(Duracion.values().toMutableSet(), HttpStatus.OK)
     }
 }

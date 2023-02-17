@@ -40,12 +40,6 @@ data class TipoEvento(
     @Column
     val cantidadDuracion: LocalTime,
 
-    @Column(name = "cant_personal")
-    val cantPersonal : Int,
-
-    @Column(name = "valor_fin_semana")
-    val valorFinSemana : Int,
-
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     val empresa: Empresa){
