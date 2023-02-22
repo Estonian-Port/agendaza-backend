@@ -1,9 +1,11 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.TipoEventoDto
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.CapacidadService
+import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.PrecioConFechaTipoEventoService
 import com.estonianport.agendaza.service.ServicioService
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalTime
 
 
 @RestController
@@ -39,6 +42,9 @@ class TipoEventoController {
     @Autowired
     lateinit var  extraService: ExtraService
 
+    @Autowired
+    lateinit var  empresaService: EmpresaService
+
     @GetMapping("/getAllTipoEvento")
     fun getAll(): MutableList<TipoEvento>? {
         return tipoEventoService.getAll()
@@ -53,20 +59,23 @@ class TipoEventoController {
     }
 
     @PostMapping("/saveTipoEvento")
-    fun save(@RequestBody tipoEvento: TipoEvento): TipoEvento {
+    fun save(@RequestBody tipoEventoDto: TipoEventoDto): TipoEvento {
         val listaCapacidad: MutableList<Capacidad>? = capacidadService.getAll()
 
         // Reutilizar capacidades ya guardadas
         if (listaCapacidad != null && listaCapacidad.size != 0) {
             for (capacidad in listaCapacidad) {
-                if (capacidad.capacidadAdultos == tipoEvento.capacidad.capacidadAdultos
-                    && capacidad.capacidadNinos == tipoEvento.capacidad.capacidadNinos) {
-                    tipoEvento.capacidad = capacidad
+                if (capacidad.capacidadAdultos == tipoEventoDto.capacidad.capacidadAdultos
+                    && capacidad.capacidadNinos == tipoEventoDto.capacidad.capacidadNinos) {
+                    tipoEventoDto.capacidad = capacidad
                 }
             }
         }
 
-        return tipoEventoService.save(tipoEvento)
+        return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
+        tipoEventoDto.duracion, tipoEventoDto.capacidad,
+            LocalTime.of(tipoEventoDto.cantidadDuracion.hour, tipoEventoDto.cantidadDuracion.minute),
+            empresaService.get(tipoEventoDto.empresaId)!!))
     }
 
     @DeleteMapping("/deleteTipoEvento/{id}")
