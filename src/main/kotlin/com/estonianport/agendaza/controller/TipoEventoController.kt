@@ -112,9 +112,6 @@ class TipoEventoController {
             }
         }
 
-        // Setea una capacidad sin guardar en la DB a tipoEventoEliminar
-        tipoEventoEliminar.capacidad = Capacidad(0,0,0)
-
         // Eliminar tipoEventoEliminar
         tipoEventoService.delete(id)
 
