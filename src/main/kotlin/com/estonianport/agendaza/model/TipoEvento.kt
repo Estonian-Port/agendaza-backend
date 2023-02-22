@@ -43,15 +43,15 @@ data class TipoEvento(
     val empresa: Empresa){
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "tipoEvento")
+    @OneToMany(mappedBy = "tipoEvento")
     val listaPrecioConFecha: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    @ManyToMany(mappedBy = "listaTipoEvento")
     val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaTipoEvento")
+    @ManyToMany(mappedBy = "listaTipoEvento")
     val listaExtra: MutableSet<Extra> = mutableSetOf()
 
 }

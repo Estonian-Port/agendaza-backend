@@ -73,7 +73,7 @@ class TipoEventoController {
         }
 
         return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
-        tipoEventoDto.duracion, tipoEventoDto.capacidad,
+            tipoEventoDto.duracion, tipoEventoDto.capacidad,
             LocalTime.of(tipoEventoDto.cantidadDuracion.hour, tipoEventoDto.cantidadDuracion.minute),
             empresaService.get(tipoEventoDto.empresaId)!!))
     }
