@@ -41,7 +41,7 @@ abstract class Empresa(
     open val nombre: String){
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaEmpresa", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "listaEmpresa", fetch = FetchType.LAZY)
     open val listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore

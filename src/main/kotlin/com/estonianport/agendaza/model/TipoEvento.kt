@@ -31,7 +31,7 @@ data class TipoEvento(
     @Enumerated(EnumType.STRING)
     val duracion : Duracion,
 
-    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST, CascadeType.PERSIST])
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST])
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
