@@ -17,6 +17,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 data class Extra(
@@ -32,7 +33,7 @@ data class Extra(
     val tipoExtra : TipoExtra,
 
     @ManyToOne
-    @JoinColumn(name = "empresa_id")
+    @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
     @JsonIgnore
@@ -42,7 +43,7 @@ data class Extra(
         joinColumns = arrayOf(JoinColumn(name = "extra_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
     )
-    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
 
 }

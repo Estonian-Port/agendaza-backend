@@ -8,6 +8,7 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -54,7 +55,7 @@ class EmpresaController {
         return ResponseEntity<MutableSet<EventoDto>>(HttpStatus.NO_CONTENT)
     }
 
-    @GetMapping("/getAllUsuariosByEmpresaId/{id}")
+    @GetMapping("/getAllUsuarioByEmpresaId/{id}")
     fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<UsuarioAbmDto>>? {
         val empresa = empresaService.get(id)
         if(empresa != null){
@@ -63,10 +64,20 @@ class EmpresaController {
         return ResponseEntity<MutableSet<UsuarioAbmDto>>(HttpStatus.NO_CONTENT)
     }
 
-    @GetMapping("/getAllExtraByEmpresaId/{id}")
-    fun getListaExtra(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+    @GetMapping("/getAllExtraTipoEventoByEmpresaId/{id}")
+    fun getAllExtraTipoEventoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
         if (id != 0L) {
-            return ResponseEntity<MutableSet<Extra>>(empresaService.get(id)?.listaExtra, HttpStatus.OK)
+            val listaExtra = empresaService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllExtraCateringByEmpresaId/{id}")
+    fun getAllExtraCateringByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            val listaExtra = empresaService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
     }

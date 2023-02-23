@@ -1,8 +1,13 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.ExtraDto
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
+import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,6 +24,12 @@ class ExtraController {
 
     @Autowired
     lateinit var extraService: ExtraService
+
+    @Autowired
+    lateinit var tipoEventoService : TipoEventoService
+
+    @Autowired
+    lateinit var empresaService: EmpresaService
 
     @GetMapping("/getAllExtra")
     fun abm(): MutableList<Extra>? {
@@ -42,7 +53,16 @@ class ExtraController {
     }
 
     @PostMapping("/saveExtra")
-    fun save(@RequestBody extra: Extra): ResponseEntity<Extra> {
+    fun save(@RequestBody extraDto: ExtraDto): ResponseEntity<Extra> {
+        val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
+
+        extraDto.listaTipoEventoId.forEach {
+            tipoEventoService.get(it)?.let { it1 -> listaTipoEvento.add(it1) }
+        }
+
+        val extra = Extra(extraDto.id, extraDto.nombre, extraDto.tipoExtra, empresaService.get(extraDto.empresaId)!!)
+        extra.listaTipoEvento = listaTipoEvento
+
         return ResponseEntity<Extra>(extraService.save(extra), HttpStatus.OK)
     }
 
@@ -60,5 +80,15 @@ class ExtraController {
         }*/
         extraService.delete(id)
         return ResponseEntity<Extra>(HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllEventoTipoExtra")
+    fun getAllEventoTipoExtra(): ResponseEntity<MutableSet<TipoExtra>>? {
+        return ResponseEntity<MutableSet<TipoExtra>>(mutableSetOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO),HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllCateringTipoExtra")
+    fun getAllCateringTipoExtra(): ResponseEntity<MutableSet<TipoExtra>>? {
+        return ResponseEntity<MutableSet<TipoExtra>>(mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING),HttpStatus.OK)
     }
 }

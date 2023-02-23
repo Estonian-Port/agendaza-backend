@@ -61,22 +61,19 @@ class ServicioController {
 
     @PostMapping("/saveServicio")
     fun save(@RequestBody genericItemDto: GenericItemDto): ResponseEntity<Servicio>  {
-        val empresa = empresaService.get(genericItemDto.empresaId)
+        val empresa = empresaService.get(genericItemDto.empresaId)!!
 
-        if(empresa != null){
+        val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
 
-            val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
-
-            genericItemDto.listaTipoEventoId.forEach {
-                tipoEventoService.get(it)?.let { it1 -> listaTipoEvento.add(it1) }
-            }
-
-            val servicio = Servicio(genericItemDto.id, genericItemDto.nombre, empresa)
-            servicio.listaTipoEvento = listaTipoEvento
-            return ResponseEntity<Servicio>(servicioService.save(servicio), HttpStatus.OK)
-
+        genericItemDto.listaTipoEventoId.forEach {
+            tipoEventoService.get(it)?.let { it1 -> listaTipoEvento.add(it1) }
         }
-        return ResponseEntity<Servicio>(HttpStatus.NOT_FOUND)
+
+        val servicio = Servicio(genericItemDto.id, genericItemDto.nombre, empresa)
+        servicio.listaTipoEvento = listaTipoEvento
+
+        return ResponseEntity<Servicio>(servicioService.save(servicio), HttpStatus.OK)
+
     }
 
     @DeleteMapping("/deleteServicio/{id}")
