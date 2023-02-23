@@ -30,9 +30,9 @@ data class Pago (
     val fecha: LocalDateTime,
 
     @ManyToOne
-    @JoinColumn(name = "evento_id")
+    @PrimaryKeyJoinColumn
     val evento: Evento,
 
     @ManyToOne
-    @JoinColumn(name = "encargado_id")
+    @PrimaryKeyJoinColumn
     val encargado: Usuario){}

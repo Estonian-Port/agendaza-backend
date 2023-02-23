@@ -80,7 +80,7 @@ class ServicioController {
     }
 
     @DeleteMapping("/deleteServicio/{id}")
-    fun delete(@PathVariable(value = "id") id : Long): ResponseEntity<Servicio> {
+    fun delete(@PathVariable("id") id : Long): ResponseEntity<Servicio> {
         servicioService.delete(id)
         return ResponseEntity<Servicio>(HttpStatus.OK)
     }

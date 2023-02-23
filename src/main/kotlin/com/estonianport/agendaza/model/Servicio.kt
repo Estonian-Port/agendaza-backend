@@ -1,8 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonManagedReference
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -14,6 +12,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 data class Servicio(
@@ -25,8 +24,8 @@ data class Servicio(
     @Column
     var nombre: String,
 
-    @ManyToOne
-    @JoinColumn(name = "empresa_id")
+    @ManyToOne(cascade = [CascadeType.PERSIST])
+    @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
     @JsonIgnore

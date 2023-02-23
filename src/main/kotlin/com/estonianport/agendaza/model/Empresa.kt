@@ -45,19 +45,19 @@ abstract class Empresa(
     open val listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "empresa")
     open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "empresa")
     open val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "empresa")
     open val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "empresa", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "empresa")
     open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     fun getCargoOfUsuario(usuario: Usuario) : TipoCargoNombre {

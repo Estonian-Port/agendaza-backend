@@ -45,20 +45,6 @@ class EmpresaController {
         return ResponseEntity<Empresa>(empresaService.save(empresa), HttpStatus.OK)
     }
 
-    @DeleteMapping("/deleteEmpresa/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Empresa> {
-
-        // TODO Elimina todos los eventos del Empresa
-        //val listaEventos: List<Evento> = eventoService.getEventosByEmpresa(EmpresaService.get(id))
-        //for (evento in listaEventos) {
-          //  eventoService.delete(evento.getId())
-        //}
-
-        //Elmina el Empresa
-        empresaService.delete(id)
-        return ResponseEntity<Empresa>(HttpStatus.OK)
-    }
-
     @GetMapping("/getAllEventoByEmpresaId/{id}")
     fun getAllEventoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<EventoDto>>? {
         val empresa = empresaService.get(id)
