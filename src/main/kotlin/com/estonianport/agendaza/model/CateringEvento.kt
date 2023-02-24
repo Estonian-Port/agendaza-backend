@@ -30,9 +30,9 @@ data class CateringEvento(
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "catering_evento__tipo_catering",
+        name = "catering_evento_tipo_catering",
         joinColumns = arrayOf(JoinColumn(name = "catering_evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_catering_id"))
+        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
     )
     val listaTipoCatering: MutableSet<Extra>,
 

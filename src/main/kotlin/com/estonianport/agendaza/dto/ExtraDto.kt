@@ -5,6 +5,6 @@ import com.estonianport.agendaza.model.TipoExtra
 
 class ExtraDto(val id : Long, val nombre : String, val tipoExtra : TipoExtra, val empresaId : Long){
 
-    val listaTipoEventoId: MutableSet<Long> = mutableSetOf()
+    var listaTipoEventoId: MutableSet<Long> = mutableSetOf()
 
 }

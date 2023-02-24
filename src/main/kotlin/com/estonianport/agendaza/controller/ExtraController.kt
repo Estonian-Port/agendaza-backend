@@ -38,11 +38,14 @@ class ExtraController {
     }
 
     @GetMapping("/getExtra/{id}")
-    fun showSave(@PathVariable("id") id: Long): ResponseEntity<Extra>? {
+    fun showSave(@PathVariable("id") id: Long): ResponseEntity<ExtraDto>? {
         if (id != 0L) {
-            ResponseEntity<Extra>(extraService.get(id), HttpStatus.OK)
+            val extra = extraService.get(id)!!
+            val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id)
+            extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
+            return ResponseEntity<ExtraDto>(extraDto, HttpStatus.OK)
         }
-        return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+        return ResponseEntity<ExtraDto>(HttpStatus.NO_CONTENT)
     }
 
     @GetMapping("/getExtraListaTipoEvento/{id}")
@@ -69,16 +72,6 @@ class ExtraController {
 
     @DeleteMapping("/deleteExtra/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Extra> {
-        /*val extraCatering: ExtraVariableCatering = extraCateringService.get(id)
-
-        // Elimina los subTipoEvento Vinculados
-        extraCatering.setListaSubTipoEvento(null)
-        extraCateringService.save(extraCatering)
-
-        // Elimina los precios seteados para este extra variable
-        for (precioConFecha in extraCatering.getListaPrecioConFecha()) {
-            precioConFechaExtraVariableCateringService.delete(precioConFecha.getId())
-        }*/
         extraService.delete(id)
         return ResponseEntity<Extra>(HttpStatus.OK)
     }
