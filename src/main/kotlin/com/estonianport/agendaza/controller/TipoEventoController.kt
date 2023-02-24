@@ -1,8 +1,10 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.PrecioConFechaDto
 import com.estonianport.agendaza.dto.TipoEventoDto
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
+import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.EmpresaService
@@ -112,7 +114,29 @@ class TipoEventoController {
     }
 
     @GetMapping("/getAllDuracion")
-    fun getAllDuracion(): ResponseEntity<MutableSet<Duracion>>? {
+    fun getAllDuracion(@RequestBody listaPrecioConFechaDto: TipoEventoDto): ResponseEntity<MutableSet<Duracion>>? {
         return ResponseEntity<MutableSet<Duracion>>(Duracion.values().toMutableSet(), HttpStatus.OK)
     }
+
+    @PostMapping("/saveTipoEventoPrecio")
+    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<String>? {
+        val tipoEvento = tipoEventoService.get(listaPrecioConFechaDto.first().itemId)!!
+        val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
+
+        listaPrecioConFechaDto.forEach{
+
+            precioConFechaTipoEventoService.save(PrecioConFechaTipoEvento(
+                it.id,
+                it.precio,
+                it.desde,
+                it.hasta,
+                empresa,
+                tipoEvento
+            ))
+        }
+
+        return ResponseEntity<String>(HttpStatus.OK)
+    }
+
+
 }
