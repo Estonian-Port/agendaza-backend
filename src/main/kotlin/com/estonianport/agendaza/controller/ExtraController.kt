@@ -133,12 +133,15 @@ class ExtraController {
 
         listaPrecioConFechaDto.forEach{
 
+            // Busca el ultimo dia del mes del hasta
+            val fechaHasta = it.hasta.plusMonths(1).minusDays(1).plusHours(20).plusMinutes(59).plusSeconds(59)
+
             precioConFechaExtraService.save(
                 PrecioConFechaExtra(
                 it.id,
                 it.precio,
                 it.desde,
-                it.hasta,
+                fechaHasta,
                 empresa,
                 extra
             )
