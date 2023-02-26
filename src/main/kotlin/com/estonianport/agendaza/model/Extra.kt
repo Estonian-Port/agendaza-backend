@@ -45,5 +45,9 @@ data class Extra(
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "extra")
+    val listaPrecioConFecha: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+
 
 }

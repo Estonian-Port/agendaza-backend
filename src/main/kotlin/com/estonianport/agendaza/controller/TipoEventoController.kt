@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 
@@ -118,10 +119,40 @@ class TipoEventoController {
         return ResponseEntity<MutableSet<Duracion>>(Duracion.values().toMutableSet(), HttpStatus.OK)
     }
 
+    @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
+    fun getAllDuracion(@PathVariable("id") id: Long): ResponseEntity<MutableSet<PrecioConFechaDto>>? {
+        val tipoEvento = tipoEventoService.get(id)!!
+
+        // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
+        val listaPrecioSinYearAnterior = tipoEvento.listaPrecioConFecha.filter { it.desde.year >= LocalDateTime.now().year }
+
+        val listaPrecioConFechaDto : MutableSet<PrecioConFechaDto> = mutableSetOf()
+
+
+        listaPrecioSinYearAnterior.forEach{
+            listaPrecioConFechaDto.add(PrecioConFechaDto(
+                it.id,
+                it.desde,
+                it.hasta,
+                it.precio,
+                it.empresa.id,
+                it.tipoEvento.id
+            ))
+        }
+
+        return ResponseEntity<MutableSet<PrecioConFechaDto>>(listaPrecioConFechaDto, HttpStatus.OK)
+    }
+
     @PostMapping("/saveTipoEventoPrecio")
     fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<String>? {
         val tipoEvento = tipoEventoService.get(listaPrecioConFechaDto.first().itemId)!!
         val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
+
+        tipoEvento.listaPrecioConFecha.forEach{
+            if(!listaPrecioConFechaDto.any { it2 -> it2.id == it.id  }){
+                precioConFechaTipoEventoService.delete(it.id)
+            }
+        }
 
         listaPrecioConFechaDto.forEach{
 

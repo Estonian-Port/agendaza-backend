@@ -2,9 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.dao.PagoDao
-import com.estonianport.agendaza.dao.PrecioConFechaDao
 import com.estonianport.agendaza.dto.PagoDto
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.MedioDePago
