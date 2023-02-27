@@ -11,6 +11,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDateTime
 
 @MappedSuperclass
@@ -44,10 +45,8 @@ class PrecioConFechaExtra(
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_id")
-    val extra: Extra
-
-    ) : PrecioConFecha(id, precio, desde, hasta, empresa) {}
+    @PrimaryKeyJoinColumn
+    val extra: Extra) : PrecioConFecha(id, precio, desde, hasta, empresa) {}
 
 @Entity(name = "precio_con_fecha_tipo_evento")
 class PrecioConFechaTipoEvento(
@@ -59,6 +58,6 @@ class PrecioConFechaTipoEvento(
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_evento_id")
+    @PrimaryKeyJoinColumn
     val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {}
 

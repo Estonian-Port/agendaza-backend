@@ -115,7 +115,7 @@ class TipoEventoController {
     }
 
     @GetMapping("/getAllDuracion")
-    fun getAllDuracion(@RequestBody listaPrecioConFechaDto: TipoEventoDto): ResponseEntity<MutableSet<Duracion>>? {
+    fun getAllDuracion(): ResponseEntity<MutableSet<Duracion>>? {
         return ResponseEntity<MutableSet<Duracion>>(Duracion.values().toMutableSet(), HttpStatus.OK)
     }
 
