@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.model
 
-enum class TipoCargoNombre { ADMIN, ENCARGADO, EMPLEADO }
+enum class TipoCargoNombre { ADMIN, ENCARGADO, EMPLEADO, CLIENTE }
 
 interface TipoCargo{
 

@@ -4,8 +4,11 @@ import com.estonianport.agendaza.dto.PrecioConFechaDto
 import com.estonianport.agendaza.dto.TipoEventoDto
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
+import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
+import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -168,8 +171,53 @@ class TipoEventoController {
                 tipoEvento
             ))
         }
-
         return ResponseEntity<String>(HttpStatus.OK)
+    }
+
+    // Todos los get by tipo evento id para nuevoEvento
+    @GetMapping("/getAllServicioByTipoEventoId/{id}")
+    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Servicio>>? {
+        if (id != 0L) {
+            val listaExtra = tipoEventoService.get(id)!!.listaServicio
+            return ResponseEntity<MutableSet<Servicio>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Servicio>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllExtraEventoByTipoEventoId/{id}")
+    fun getAllExtraEventoByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllExtraEventoVariableByTipoEventoId/{id}")
+    fun getAllExtraEventoVariableByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllTipoCateringByTipoEventoId/{id}")
+    fun getAllTipoCateringByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.TIPO_CATERING }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/getAllCateringExtraByTipoEventoId/{id}")
+    fun getAllCateringExtraByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Extra>>? {
+        if (id != 0L) {
+            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet()
+            return ResponseEntity<MutableSet<Extra>>(listaExtra, HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
     }
 
 
