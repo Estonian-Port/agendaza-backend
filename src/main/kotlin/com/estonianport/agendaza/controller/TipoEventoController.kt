@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
@@ -175,11 +176,20 @@ class TipoEventoController {
     }
 
     // Todos los get by tipo evento id para nuevoEvento
+    @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
+    fun getAllServicioByTipoEventoId(@PathVariable("id") id : Long, @RequestBody duracion : String): ResponseEntity<MutableSet<TipoEvento>>? {
+        if (id != 0L) {
+            val listaTipoEvento = empresaService.get(id)!!.listaTipoEvento
+            val duracionEnum = Duracion.values().find { it.name == duracion }
+            return ResponseEntity<MutableSet<TipoEvento>>(listaTipoEvento.filter { it.duracion == duracionEnum }.toMutableSet(), HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    }
     @GetMapping("/getAllServicioByTipoEventoId/{id}")
     fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Servicio>>? {
         if (id != 0L) {
-            val listaExtra = tipoEventoService.get(id)!!.listaServicio
-            return ResponseEntity<MutableSet<Servicio>>(listaExtra, HttpStatus.OK)
+            val listaTipoEvento = tipoEventoService.get(id)!!.listaServicio
+            return ResponseEntity<MutableSet<Servicio>>(listaTipoEvento, HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<Servicio>>(HttpStatus.NO_CONTENT)
     }

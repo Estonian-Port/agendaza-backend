@@ -83,7 +83,7 @@ class EmpresaController {
     }
 
     @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
+    fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
         if (id != 0L) {
             return ResponseEntity<MutableSet<TipoEvento>>(empresaService.get(id)?.listaTipoEvento, HttpStatus.OK)
         }
