@@ -28,6 +28,9 @@ data class CateringEvento(
     @Column(name = "catering_otro")
     val canteringOtro : Int,
 
+    @Column
+    val descripcion : String,
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "catering_evento_tipo_catering",
