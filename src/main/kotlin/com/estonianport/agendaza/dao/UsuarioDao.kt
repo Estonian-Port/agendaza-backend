@@ -10,4 +10,9 @@ interface UsuarioDao : CrudRepository<Usuario, Long> {
 
     fun findOneByUsername(username: String): Usuario?
 
+    fun getUsuarioByDni(dni : Long): Usuario?
+
+    fun getUsuarioByEmail(email : String): Usuario?
+
+    fun getUsuarioByCelular(celular : Long) : Usuario?
 }

@@ -4,6 +4,7 @@ import com.estonianport.agendaza.dto.GenericItemDto
 import com.estonianport.agendaza.dto.UsuarioDto
 import com.estonianport.agendaza.dto.UsuarioEditPasswordDto
 import com.estonianport.agendaza.dto.UsuarioEmpresaDto
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Sexo
 import com.estonianport.agendaza.model.TipoCargoNombre
@@ -11,9 +12,11 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
+import jakarta.persistence.NonUniqueResultException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -39,6 +42,42 @@ class UsuarioController {
     @GetMapping("/getAllUsuario")
     fun abm(): MutableList<Usuario>? {
         return usuarioService.getAll()
+    }
+
+    @PutMapping("/getUsuarioByDni")
+    fun getUsuarioByDni(@RequestBody dni: Long): ResponseEntity<Usuario>? {
+        try {
+            val usuario = usuarioService.getUsuarioByDni(dni)?:
+                throw NotFoundException("No se encontró el Cliente")
+
+            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+        }catch (e : Exception){
+            throw NotFoundException("No se encontró el Cliente")
+        }
+    }
+
+    @PutMapping("/getUsuarioByEmail")
+    fun getUsuarioByEmail(@RequestBody email : String): ResponseEntity<Usuario>? {
+        try {
+            val usuario = usuarioService.getUsuarioByEmail(email)?:
+                throw NotFoundException("No se encontró el Cliente")
+
+            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+        }catch (e : Exception){
+            throw NotFoundException("No se encontró el Cliente")
+        }
+    }
+
+    @PutMapping("/getUsuarioByCelular")
+    fun getUsuarioByCelular(@RequestBody celular : Long): ResponseEntity<Usuario>? {
+        try {
+            val usuario = usuarioService.getUsuarioByCelular(celular)?:
+                throw NotFoundException("No se encontró el Cliente")
+
+            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+        }catch (e : Exception){
+            throw NotFoundException("No se encontró el Cliente")
+        }
     }
 
     @GetMapping("/getUsuario/{id}")
