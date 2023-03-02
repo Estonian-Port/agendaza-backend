@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -246,5 +247,13 @@ class TipoEventoController {
                 timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong()), HttpStatus.OK)
         }
         return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
+    }
+
+    @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
+    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<Int>? {
+        if (id != 0L) {
+            return ResponseEntity<Int>(tipoEventoService.get(id)!!.listaPrecioConFecha.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) }!!.precio, HttpStatus.OK)
+        }
+        return ResponseEntity<Int>(HttpStatus.NO_CONTENT)
     }
 }
