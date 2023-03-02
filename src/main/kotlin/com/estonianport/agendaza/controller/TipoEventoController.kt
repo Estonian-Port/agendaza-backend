@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.PrecioConFechaDto
+import com.estonianport.agendaza.dto.TimeDto
 import com.estonianport.agendaza.dto.TipoEventoDto
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
@@ -230,5 +231,20 @@ class TipoEventoController {
         return ResponseEntity<MutableSet<Extra>>(HttpStatus.NO_CONTENT)
     }
 
+    @GetMapping("/getDuracionByTipoEventoId/{id}")
+    fun getDuracionByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<LocalTime>? {
+        if (id != 0L) {
+            return ResponseEntity<LocalTime>(tipoEventoService.get(id)!!.cantidadDuracion , HttpStatus.OK)
+        }
+        return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
+    }
 
+    @PutMapping("/getTimeEndByTipoEventoIdAndTimeStart/{id}")
+    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : TimeDto): ResponseEntity<LocalTime>? {
+        if (id != 0L) {
+            return ResponseEntity<LocalTime>(tipoEventoService.get(id)!!.cantidadDuracion.plusHours(
+                timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong()), HttpStatus.OK)
+        }
+        return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
+    }
 }
