@@ -243,6 +243,30 @@ class TipoEventoController {
         return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
     }
 
+    @GetMapping("/getCapacidadByTipoEventoId/{id}")
+    fun getCapacidadByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Capacidad>? {
+        if (id != 0L) {
+            return ResponseEntity<Capacidad>(tipoEventoService.get(id)!!.capacidad , HttpStatus.OK)
+        }
+        return ResponseEntity<Capacidad>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/findExtraNinoByTipoEventoId/{id}")
+    fun findExtraNinoByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Extra>? {
+        if (id != 0L) {
+            return ResponseEntity<Extra>(tipoEventoService.get(id)!!.listaExtra.find { it.nombre == "Niño" } , HttpStatus.OK)
+        }
+        return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+    }
+
+    @GetMapping("/findExtraCamareraByTipoEventoId/{id}")
+    fun findExtraCamareraByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Extra>? {
+        if (id != 0L) {
+            return ResponseEntity<Extra>(tipoEventoService.get(id)!!.listaExtra.find { it.nombre.split(" ")[0] == "Camarera" } , HttpStatus.OK)
+        }
+        return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+    }
+
     @PutMapping("/getTimeEndByTipoEventoIdAndTimeStart/{id}")
     fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : TimeDto): ResponseEntity<LocalTime>? {
         if (id != 0L) {
