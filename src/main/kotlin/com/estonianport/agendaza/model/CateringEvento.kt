@@ -23,10 +23,10 @@ data class CateringEvento(
     val id: Long,
 
     @Column
-    val presupuesto : Int,
+    val presupuesto : Long,
 
     @Column(name = "catering_otro")
-    val canteringOtro : Int,
+    val canteringOtro : Long,
 
     @Column
     val descripcion : String,

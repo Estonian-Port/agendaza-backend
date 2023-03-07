@@ -34,10 +34,10 @@ data class Agregados(
     val listaEventoExtraVariable: MutableSet<EventoExtraVariableTipoEvento>,
 
     @Column
-    val extraOtro: Int,
+    val extraOtro: Long,
 
     @Column
-    val descuento : Int) {
+    val descuento : Long) {
 
     @JsonIgnore
     @OneToOne(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))

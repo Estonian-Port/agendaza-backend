@@ -70,17 +70,7 @@ class TipoEventoController {
 
     @PostMapping("/saveTipoEvento")
     fun save(@RequestBody tipoEventoDto: TipoEventoDto): TipoEvento {
-        val listaCapacidad: MutableList<Capacidad>? = capacidadService.getAll()
-
-        // Reutilizar capacidades ya guardadas
-        if (listaCapacidad != null && listaCapacidad.size != 0) {
-            for (capacidad in listaCapacidad) {
-                if (capacidad.capacidadAdultos == tipoEventoDto.capacidad.capacidadAdultos
-                    && capacidad.capacidadNinos == tipoEventoDto.capacidad.capacidadNinos) {
-                    tipoEventoDto.capacidad = capacidad
-                }
-            }
-        }
+        tipoEventoDto.capacidad = capacidadService.reutilizarCapacidad(tipoEventoDto.capacidad)
 
         return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
             tipoEventoDto.duracion, tipoEventoDto.capacidad,

@@ -51,7 +51,7 @@ data class Evento(
     val catering: CateringEvento,
 
     @Column
-    val presupuesto: Int,
+    val presupuesto: Long,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
