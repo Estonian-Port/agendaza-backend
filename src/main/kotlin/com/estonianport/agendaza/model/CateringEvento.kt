@@ -11,13 +11,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
-import jakarta.persistence.MapsId
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 
 @Entity
 data class CateringEvento(
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
@@ -25,8 +24,8 @@ data class CateringEvento(
     @Column
     val presupuesto : Long,
 
-    @Column(name = "catering_otro")
-    val canteringOtro : Long,
+    @Column
+    val cateringOtro : Long,
 
     @Column
     val descripcion : String,

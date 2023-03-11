@@ -68,7 +68,7 @@ class EventoController {
         val empresa : Empresa = empresaService.get(eventoReservaDto.empresaId)!!
         val tipoEvento : TipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
         val encargado : Usuario = usuarioService.get(eventoReservaDto.encargadoId)!!
-
+0
         // Generar codigo de reserva
         if(eventoReservaDto.codigo.isEmpty()){
             eventoReservaDto.codigo = eventoService.generateCodigoForEventoOfEmpresa(empresa)
@@ -82,10 +82,10 @@ class EventoController {
 
         val agregados : Agregados = Agregados(
             eventoReservaDto.agregados.id,
-            mutableSetOf(),
-            mutableSetOf(),
             eventoReservaDto.agregados.extraOtro,
-            eventoReservaDto.agregados.descuento)
+            eventoReservaDto.agregados.descuento,
+            mutableSetOf(),
+            mutableSetOf())
 
         eventoReservaDto.agregados.listaExtra.forEach {
             agregados.listaExtra.add(extraService.get(it)!!)
@@ -93,14 +93,18 @@ class EventoController {
 
         eventoReservaDto.agregados.listaExtraVariable.forEach {
             val extra = extraService.get(it.id)!!
-            val extraVariable = EventoExtraVariableTipoEvento(0,agregados, extra ,it.cantidad)
+            val extraVariable = EventoExtraVariableTipoEvento(0, extra ,it.cantidad)
             agregados.listaEventoExtraVariable.add(extraVariable)
+        }
+
+        agregados.listaEventoExtraVariable.forEach{
+            it.agregados = agregados
         }
 
         // Creacion de Catering
 
         val catering : CateringEvento = CateringEvento(
-            0,
+            eventoReservaDto.catering.id,
             eventoReservaDto.catering.presupuesto,
             eventoReservaDto.catering.cateringOtro,
             eventoReservaDto.catering.descripcion,
@@ -112,8 +116,12 @@ class EventoController {
         }
 
         eventoReservaDto.catering.listaExtraCateringVariable.forEach{
-            val extraVariable = CateringEventoExtraVariableCatering(0,catering, extraService.get(it.id)!!, it.cantidad)
+            val extraVariable = CateringEventoExtraVariableCatering(0, extraService.get(it.id)!!, it.cantidad)
             catering.listaCateringExtraVariableCatering.add(extraVariable)
+        }
+
+        catering.listaCateringExtraVariableCatering.forEach{
+            it.cateringEvento = catering
         }
 
         // Inicializacion Evento
@@ -134,8 +142,8 @@ class EventoController {
             eventoReservaDto.estado
         )
 
+        // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
-
 
         return ResponseEntity<Long>(eventoService.save(evento).id, HttpStatus.OK)
     }

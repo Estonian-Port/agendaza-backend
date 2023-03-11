@@ -19,11 +19,12 @@ data class EventoExtraVariableTipoEvento(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    val agregados: Agregados,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
     val extra: Extra,
 
     @Column
-    val cantidad : Int){}
+    val cantidad : Int){
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    var agregados: Agregados = Agregados(0,0,0, mutableSetOf(), mutableSetOf())
+}

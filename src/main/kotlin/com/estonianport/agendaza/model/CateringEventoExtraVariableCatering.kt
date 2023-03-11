@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrimaryKeyJoinColumn
 
 @Entity
 data class CateringEventoExtraVariableCatering(
@@ -17,12 +18,14 @@ data class CateringEventoExtraVariableCatering(
     val id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "catering_evento_id")
-    val cateringEvento: CateringEvento,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extra_id")
+    @PrimaryKeyJoinColumn
     val extra: Extra,
 
     @Column
-    val cantidad : Int) {}
+    val cantidad : Int) {
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    var cateringEvento: CateringEvento = CateringEvento(0,0,0,"", mutableSetOf(), mutableSetOf())
+}
