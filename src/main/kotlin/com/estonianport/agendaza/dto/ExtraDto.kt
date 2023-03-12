@@ -11,4 +11,10 @@ class ExtraDto(val id : Long, val nombre : String, val tipoExtra : TipoExtra, va
 
 }
 
+class ExtraVariableDto(val id : Long, val nombre : String, val tipoExtra : TipoExtra, val cantidad : Int){
+
+    var precio : Int = 0
+}
+
 class ExtraVariableReservaDto(val id : Long, val cantidad : Int){}
+

@@ -21,9 +21,14 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     fun generateCodigoForEventoOfEmpresa(empresa : Empresa) : String{
         var codigo : String = CodeGeneratorUtil.base26Only4Letters
 
-        while (this.existCodigoInEmpresa(codigo, empresa)){
-            codigo = CodeGeneratorUtil.base26Only4Letters
+        try{
+            while (this.existCodigoInEmpresa(codigo, empresa)){
+                codigo = CodeGeneratorUtil.base26Only4Letters
+            }
+        }catch (error : NullPointerException){
+            return codigo
         }
+
         return codigo
     }
 

@@ -1,6 +1,10 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.EventoAgendaDto
+import com.estonianport.agendaza.dto.AgregadosEditDto
+import com.estonianport.agendaza.dto.CateringEventoDto
+import com.estonianport.agendaza.dto.CateringEventoEditDto
+import com.estonianport.agendaza.dto.EventoCateringDto
+import com.estonianport.agendaza.dto.EventoExtraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.PagoDto
@@ -82,7 +86,6 @@ class EventoController {
 
 
         // Creacion de Agregados
-
         val agregados : Agregados = Agregados(
             eventoReservaDto.agregados.id,
             eventoReservaDto.agregados.extraOtro,
@@ -106,7 +109,7 @@ class EventoController {
 
         // Creacion de Catering
 
-        val catering : CateringEvento = CateringEvento(
+        val catering = CateringEvento(
             eventoReservaDto.catering.id,
             eventoReservaDto.catering.presupuesto,
             eventoReservaDto.catering.cateringOtro,
@@ -129,7 +132,7 @@ class EventoController {
 
         // Inicializacion Evento
 
-        val evento : Evento = Evento(
+        val evento = Evento(
             eventoReservaDto.id,
             eventoReservaDto.nombre,
             tipoEvento,
@@ -144,6 +147,9 @@ class EventoController {
             eventoReservaDto.codigo,
             eventoReservaDto.estado
         )
+
+        evento.agregados.evento = evento
+        evento.catering.evento = evento
 
         // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
@@ -172,6 +178,33 @@ class EventoController {
         }
 
         return ResponseEntity<EventoPagoDto>(EventoPagoDto(evento.id, evento.nombre, evento.codigo, total, listaPago), HttpStatus.OK)
+    }
+
+    @GetMapping("/getEventoExtra/{id}")
+    fun getEventoExtra(@PathVariable("id") id: Long): ResponseEntity<EventoExtraDto>? {
+        val evento = eventoService.get(id)!!
+
+        val agregados = AgregadosEditDto(evento.agregados.id,
+            evento.agregados.extraOtro,
+            evento.agregados.descuento,
+            extraService.getListaExtraDto(evento.agregados.listaExtra, evento.inicio),
+            extraService.getListaExtraVariableDto(evento.agregados.listaEventoExtraVariable, evento.inicio))
+
+        return ResponseEntity<EventoExtraDto>(EventoExtraDto(evento.id, evento.nombre, evento.codigo, evento.presupuesto, agregados), HttpStatus.OK)
+    }
+
+    @GetMapping("/getEventoCatering/{id}")
+    fun getEventoCatering(@PathVariable("id") id: Long): ResponseEntity<EventoCateringDto>? {
+        val evento = eventoService.get(id)!!
+
+        val catering = CateringEventoEditDto(evento.catering.id,
+            evento.catering.cateringOtro,
+            evento.catering.presupuesto,
+            evento.catering.descripcion,
+            extraService.getListaExtraDto(evento.catering.listaTipoCatering, evento.inicio),
+            extraService.getListaExtraVariableCateringDto(evento.catering.listaCateringExtraVariableCatering, evento.inicio))
+
+        return ResponseEntity<EventoCateringDto>(EventoCateringDto(evento.id, evento.nombre, evento.codigo, catering), HttpStatus.OK)
     }
 
 }

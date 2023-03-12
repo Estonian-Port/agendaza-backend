@@ -43,11 +43,11 @@ data class Evento(
     val capacidad: Capacidad,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @JoinColumn(name = "agregados_id")
+    @PrimaryKeyJoinColumn
     val agregados: Agregados,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @JoinColumn(name = "catering_evento_id")
+    @PrimaryKeyJoinColumn
     val catering: CateringEvento,
 
     @Column
