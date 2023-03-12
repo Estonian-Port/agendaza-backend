@@ -1,6 +1,9 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.EventoAgendaDto
+import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
+import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.model.Agregados
 import com.estonianport.agendaza.model.CateringEvento
 import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
@@ -68,7 +71,7 @@ class EventoController {
         val empresa : Empresa = empresaService.get(eventoReservaDto.empresaId)!!
         val tipoEvento : TipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
         val encargado : Usuario = usuarioService.get(eventoReservaDto.encargadoId)!!
-0
+
         // Generar codigo de reserva
         if(eventoReservaDto.codigo.isEmpty()){
             eventoReservaDto.codigo = eventoService.generateCodigoForEventoOfEmpresa(empresa)
@@ -157,6 +160,18 @@ class EventoController {
     @GetMapping("/getAllEstado")
     fun getAllEstado(): ResponseEntity<MutableSet<Estado>>? {
         return ResponseEntity<MutableSet<Estado>>(Estado.values().toMutableSet(), HttpStatus.OK)
+    }
+
+    @GetMapping("/getEventoPago/{id}")
+    fun getEventoPago(@PathVariable("id") id: Long): ResponseEntity<EventoPagoDto>? {
+        val evento = eventoService.get(id)!!
+        val total = evento.presupuesto + evento.catering.presupuesto
+        val listaPago: MutableSet<PagoDto> = mutableSetOf()
+        evento.listaPago.forEach {
+            listaPago.add(PagoDto(it.id, it.monto, it.evento.codigo, it.medioDePago, it.evento.nombre, it.fecha))
+        }
+
+        return ResponseEntity<EventoPagoDto>(EventoPagoDto(evento.id, evento.nombre, evento.codigo, total, listaPago), HttpStatus.OK)
     }
 
 }
