@@ -33,10 +33,10 @@ data class Evento(
     val tipoEvento: TipoEvento,
 
     @Column
-    val inicio: LocalDateTime,
+    var inicio: LocalDateTime,
 
     @Column
-    val fin: LocalDateTime,
+    var fin: LocalDateTime,
 
     @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn

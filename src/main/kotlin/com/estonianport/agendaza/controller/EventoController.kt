@@ -209,7 +209,7 @@ class EventoController {
     }
 
     @GetMapping("/getEventoHora/{id}")
-    fun getEventoHora(@PathVariable("id") id: Long): ResponseEntity<EventoHoraDto>? {
+    fun editEventoHora(@PathVariable("id") id: Long): ResponseEntity<EventoHoraDto>? {
         val evento = eventoService.get(id)!!
 
         return ResponseEntity<EventoHoraDto>(EventoHoraDto(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin), HttpStatus.OK)
@@ -236,6 +236,18 @@ class EventoController {
         return ResponseEntity<EventoVerDto>(EventoVerDto(evento.id, evento.nombre, evento.codigo,
             evento.inicio,evento.fin,evento.tipoEvento.nombre,evento.capacidad,agregados,catering,
             evento.cliente,evento.presupuesto,evento.estado), HttpStatus.OK)
+    }
+
+    @PostMapping("/editEventoHora")
+    fun getEventoHora(@RequestBody eventoHoraDto: EventoHoraDto): ResponseEntity<EventoHoraDto>? {
+        val evento = eventoService.get(eventoHoraDto.id)!!
+
+        evento.inicio = eventoHoraDto.inicio
+        evento.fin = eventoHoraDto.fin
+
+        eventoService.save(evento)
+
+        return ResponseEntity<EventoHoraDto>(EventoHoraDto(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin), HttpStatus.OK)
     }
 
 }
