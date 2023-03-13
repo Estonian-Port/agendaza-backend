@@ -30,3 +30,6 @@ class EventoVerDto(val id : Long, val nombre : String, val codigo : String, val 
                    val fin : LocalDateTime, val tipoEvento : String, val capacidad : Capacidad, val agregados : AgregadosEditDto,
                    val catering : CateringEventoEditDto, val cliente : Usuario, val presupuesto : Long,
                    val estado : Estado) {}
+
+class EventoBuscarFechaDto(val empresaId : Long, val desde : LocalDateTime, val hasta : LocalDateTime) {
+}

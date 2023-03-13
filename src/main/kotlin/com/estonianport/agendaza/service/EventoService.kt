@@ -8,6 +8,7 @@ import com.estonianport.agendaza.model.Evento
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class EventoService : GenericServiceImpl<Evento, Long>() {
@@ -34,5 +35,9 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     fun existCodigoInEmpresa(codigo : String, empresa : Empresa) : Boolean{
         return empresa.listaEvento.any{ it.codigo == codigo}
+    }
+
+    fun findAllByStartdBetweenAndEmpresa(inicio: LocalDateTime, fin: LocalDateTime, empresa: Empresa): List<Evento> {
+        return eventoDao.findAllByInicioBetweenAndListaEmpresa(inicio, fin, empresa)
     }
 }
