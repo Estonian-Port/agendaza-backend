@@ -1,12 +1,13 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.AgregadosEditDto
-import com.estonianport.agendaza.dto.CateringEventoDto
 import com.estonianport.agendaza.dto.CateringEventoEditDto
 import com.estonianport.agendaza.dto.EventoCateringDto
 import com.estonianport.agendaza.dto.EventoExtraDto
+import com.estonianport.agendaza.dto.EventoHoraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
+import com.estonianport.agendaza.dto.EventoVerDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.model.Agregados
 import com.estonianport.agendaza.model.CateringEvento
@@ -205,6 +206,36 @@ class EventoController {
             extraService.getListaExtraVariableCateringDto(evento.catering.listaCateringExtraVariableCatering, evento.inicio))
 
         return ResponseEntity<EventoCateringDto>(EventoCateringDto(evento.id, evento.nombre, evento.codigo, catering), HttpStatus.OK)
+    }
+
+    @GetMapping("/getEventoHora/{id}")
+    fun getEventoHora(@PathVariable("id") id: Long): ResponseEntity<EventoHoraDto>? {
+        val evento = eventoService.get(id)!!
+
+        return ResponseEntity<EventoHoraDto>(EventoHoraDto(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin), HttpStatus.OK)
+    }
+
+    @GetMapping("/getEventoVer/{id}")
+    fun getEventoVer(@PathVariable("id") id: Long): ResponseEntity<EventoVerDto>? {
+        val evento = eventoService.get(id)!!
+
+        val agregados = AgregadosEditDto(evento.agregados.id,
+            evento.agregados.extraOtro,
+            evento.agregados.descuento,
+            extraService.getListaExtraDto(evento.agregados.listaExtra, evento.inicio),
+            extraService.getListaExtraVariableDto(evento.agregados.listaEventoExtraVariable, evento.inicio))
+
+        val catering = CateringEventoEditDto(evento.catering.id,
+            evento.catering.cateringOtro,
+            evento.catering.presupuesto,
+            evento.catering.descripcion,
+            extraService.getListaExtraDto(evento.catering.listaTipoCatering, evento.inicio),
+            extraService.getListaExtraVariableCateringDto(evento.catering.listaCateringExtraVariableCatering, evento.inicio))
+
+
+        return ResponseEntity<EventoVerDto>(EventoVerDto(evento.id, evento.nombre, evento.codigo,
+            evento.inicio,evento.fin,evento.tipoEvento.nombre,evento.capacidad,agregados,catering,
+            evento.cliente,evento.presupuesto,evento.estado), HttpStatus.OK)
     }
 
 }
