@@ -197,7 +197,8 @@ class EventoController {
             extraService.getListaExtraDto(evento.agregados.listaExtra, evento.inicio),
             extraService.getListaExtraVariableDto(evento.agregados.listaEventoExtraVariable, evento.inicio))
 
-        return ResponseEntity<EventoExtraDto>(EventoExtraDto(evento.id, evento.nombre, evento.codigo, evento.presupuesto, agregados), HttpStatus.OK)
+        return ResponseEntity<EventoExtraDto>(EventoExtraDto(evento.id, evento.nombre, evento.codigo, evento.presupuesto,
+            agregados, evento.tipoEvento.id, evento.inicio), HttpStatus.OK)
     }
 
     @GetMapping("/getEventoCatering/{id}")
@@ -211,7 +212,8 @@ class EventoController {
             extraService.getListaExtraDto(evento.catering.listaTipoCatering, evento.inicio),
             extraService.getListaExtraVariableCateringDto(evento.catering.listaCateringExtraVariableCatering, evento.inicio))
 
-        return ResponseEntity<EventoCateringDto>(EventoCateringDto(evento.id, evento.nombre, evento.codigo, catering), HttpStatus.OK)
+        return ResponseEntity<EventoCateringDto>(EventoCateringDto(evento.id, evento.nombre, evento.codigo, catering,
+            evento.tipoEvento.id, evento.inicio, evento.capacidad), HttpStatus.OK)
     }
 
     @GetMapping("/getEventoHora/{id}")

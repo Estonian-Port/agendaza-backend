@@ -20,9 +20,11 @@ class EventoPagoDto(val id : Long, val nombre : String, val codigo : String,
                       val precioTotal : Long, val listaPagos : MutableSet<PagoDto>) {}
 
 class EventoExtraDto(val id : Long, val nombre : String, val codigo : String,
-                    val presupuesto : Long, val agregados : AgregadosEditDto) {}
+                     val presupuesto : Long, val agregados : AgregadosEditDto, val tipoEventoId : Long,
+                     val fechaEvento : LocalDateTime) {}
 
-class EventoCateringDto(val id : Long, val nombre : String, val codigo : String, val catering : CateringEventoEditDto) {}
+class EventoCateringDto(val id : Long, val nombre : String, val codigo : String, val catering : CateringEventoEditDto,
+                        val tipoEventoId : Long, val fechaEvento : LocalDateTime, val capacidad: Capacidad) {}
 
 class EventoHoraDto(val id : Long, val nombre : String, val codigo : String, val inicio : LocalDateTime, val fin : LocalDateTime) {}
 
