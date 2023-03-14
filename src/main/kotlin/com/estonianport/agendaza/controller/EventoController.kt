@@ -17,7 +17,6 @@ import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Estado
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.EventoExtraVariableTipoEvento
-import com.estonianport.agendaza.model.Salon
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CapacidadService
@@ -309,7 +308,7 @@ class EventoController {
             val listaDeRangos: MutableList<List<Int>> = ArrayList()
 
             // Variable usada para obtener la hora final del evento
-            var horaFinal: String = ""
+            var horaFinal = ""
 
             // Obtiene el rango horario de los eventos agendados
             for (evento in listaEvento) {
@@ -322,12 +321,12 @@ class EventoController {
             }
 
             // Obtiene el rango horario del nuevo evento a agendar
-            if (inicio.dayOfMonth != fin.dayOfMonth) {
-                horaFinal = suma24Horas(fin)
+            if (eventoBuscarFechaDto.desde.dayOfMonth != eventoBuscarFechaDto.hasta.dayOfMonth) {
+                horaFinal = suma24Horas(eventoBuscarFechaDto.hasta)
             } else {
-                horaFinal = fin.toLocalTime().toString()
+                horaFinal = eventoBuscarFechaDto.hasta.toLocalTime().toString()
             }
-            val rangoEventoNuevo = getRangoConMargen(inicio.toLocalTime().toString(), horaFinal)
+            val rangoEventoNuevo = getRangoConMargen(eventoBuscarFechaDto.desde.toLocalTime().toString(), horaFinal)
 
             // Si contiene a alguna fecha devuelve false
 
