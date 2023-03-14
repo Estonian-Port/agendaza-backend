@@ -290,5 +290,5 @@ class EventoController {
 
         return ResponseEntity<Boolean>(eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta), HttpStatus.OK)
     }
-    
+
 }
