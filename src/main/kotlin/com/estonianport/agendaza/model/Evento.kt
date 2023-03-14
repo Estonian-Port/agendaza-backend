@@ -44,14 +44,14 @@ data class Evento(
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
-    val agregados: Agregados,
+    var agregados: Agregados,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
-    val catering: CateringEvento,
+    var catering: CateringEvento,
 
     @Column
-    val presupuesto: Long,
+    var presupuesto: Long,
 
     @ManyToOne
     @PrimaryKeyJoinColumn

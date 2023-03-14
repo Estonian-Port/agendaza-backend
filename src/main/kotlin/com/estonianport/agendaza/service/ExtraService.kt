@@ -4,6 +4,7 @@ import GenericServiceImpl
 import com.estonianport.agendaza.dao.ExtraDao
 import com.estonianport.agendaza.dto.ExtraDto
 import com.estonianport.agendaza.dto.ExtraVariableDto
+import com.estonianport.agendaza.dto.ExtraVariableReservaDto
 import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
 import com.estonianport.agendaza.model.EventoExtraVariableTipoEvento
 import com.estonianport.agendaza.model.Extra
@@ -53,6 +54,16 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
         return listaExtraDto
     }
 
+    fun getListaExtraVariableReservaDto(listaExtraVariable: MutableSet<EventoExtraVariableTipoEvento>, fechaEvento: LocalDateTime): MutableSet<ExtraVariableReservaDto>{
+        val listaExtraDto = mutableSetOf<ExtraVariableReservaDto>()
+
+        listaExtraVariable.forEach{
+            val extraDto = ExtraVariableReservaDto(it.extra.id, it.cantidad)
+            listaExtraDto.add(extraDto)
+        }
+        return listaExtraDto
+    }
+
     fun getListaExtraVariableCateringDto(listaExtraVariable: MutableSet<CateringEventoExtraVariableCatering>, fechaEvento: LocalDateTime): MutableSet<ExtraVariableDto>{
         val listaExtraDto = mutableSetOf<ExtraVariableDto>()
 
@@ -63,6 +74,17 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
             }else{
                 extraDto.precio = 0
             }
+            listaExtraDto.add(extraDto)
+        }
+        return listaExtraDto
+    }
+
+    fun getListaExtraVariableReservaCateringDto(listaExtraVariable: MutableSet<CateringEventoExtraVariableCatering>, fechaEvento: LocalDateTime): MutableSet<ExtraVariableReservaDto>{
+        val listaExtraDto = mutableSetOf<ExtraVariableReservaDto>()
+
+        listaExtraVariable.forEach{
+            val extraDto = ExtraVariableReservaDto(it.extra.id, it.cantidad)
+
             listaExtraDto.add(extraDto)
         }
         return listaExtraDto

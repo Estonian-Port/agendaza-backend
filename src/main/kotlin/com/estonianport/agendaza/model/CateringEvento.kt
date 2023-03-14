@@ -22,13 +22,13 @@ data class CateringEvento(
     val id: Long,
 
     @Column
-    val presupuesto : Long,
+    var presupuesto : Long,
 
     @Column
-    val cateringOtro : Long,
+    var cateringOtro : Long,
 
     @Column
-    val descripcion : String,
+    var descripcion : String,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -36,10 +36,10 @@ data class CateringEvento(
         joinColumns = arrayOf(JoinColumn(name = "catering_evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
     )
-    val listaTipoCatering: MutableSet<Extra>,
+    var listaTipoCatering: MutableSet<Extra>,
 
     @OneToMany(mappedBy = "cateringEvento", cascade = arrayOf(CascadeType.ALL))
-    val listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){
+    var listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){
 
     @JsonIgnore
     @OneToOne(mappedBy = "catering", cascade = arrayOf(CascadeType.ALL))

@@ -23,10 +23,10 @@ data class Agregados(
     val id: Long,
 
     @Column
-    val extraOtro: Long,
+    var extraOtro: Long,
 
     @Column
-    val descuento : Long,
+    var descuento : Long,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -34,10 +34,10 @@ data class Agregados(
         joinColumns = arrayOf(JoinColumn(name = "agregados_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
     )
-    val listaExtra: MutableSet<Extra>,
+    var listaExtra: MutableSet<Extra>,
 
     @OneToMany(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))
-    val listaEventoExtraVariable: MutableSet<EventoExtraVariableTipoEvento>) {
+    var listaEventoExtraVariable: MutableSet<EventoExtraVariableTipoEvento>) {
 
     @JsonIgnore
     @OneToOne(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))

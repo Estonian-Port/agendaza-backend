@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.dto
 
+import com.estonianport.agendaza.model.Agregados
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Estado
 import com.estonianport.agendaza.model.Pago
@@ -20,17 +21,17 @@ class EventoPagoDto(val id : Long, val nombre : String, val codigo : String,
                       val precioTotal : Long, val listaPagos : MutableSet<PagoDto>) {}
 
 class EventoExtraDto(val id : Long, val nombre : String, val codigo : String,
-                     val presupuesto : Long, val agregados : AgregadosEditDto, val tipoEventoId : Long,
+                     val presupuesto : Long, val agregados : AgregadosDto, val tipoEventoId : Long,
                      val fechaEvento : LocalDateTime) {}
 
-class EventoCateringDto(val id : Long, val nombre : String, val codigo : String, val catering : CateringEventoEditDto,
+class EventoCateringDto(val id : Long, val nombre : String, val codigo : String, val catering : CateringEventoDto,
                         val tipoEventoId : Long, val fechaEvento : LocalDateTime, val capacidad: Capacidad) {}
 
 class EventoHoraDto(val id : Long, val nombre : String, val codigo : String, val inicio : LocalDateTime, val fin : LocalDateTime) {}
 
 class EventoVerDto(val id : Long, val nombre : String, val codigo : String, val inicio : LocalDateTime,
-                   val fin : LocalDateTime, val tipoEvento : String, val capacidad : Capacidad, val agregados : AgregadosEditDto,
-                   val catering : CateringEventoEditDto, val cliente : Usuario, val presupuesto : Long,
+                   val fin : LocalDateTime, val tipoEvento : String, val capacidad : Capacidad, val agregados : AgregadosDto,
+                   val catering : CateringEventoDto, val cliente : Usuario, val presupuesto : Long,
                    val estado : Estado) {}
 
 class EventoBuscarFechaDto(val empresaId : Long, val desde : LocalDateTime, val hasta : LocalDateTime) {
