@@ -28,7 +28,6 @@ import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.util.CollectionUtils
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,11 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDateTime
 import java.util.*
-import java.util.stream.Collectors
-import java.util.stream.IntStream
-import kotlin.collections.ArrayList
 
 @RestController
 @CrossOrigin("*")
@@ -95,7 +90,7 @@ class EventoController {
 
 
         // Creacion de Agregados
-        val agregados : Agregados = Agregados(
+        val agregados = Agregados(
             eventoReservaDto.agregados.id,
             eventoReservaDto.agregados.extraOtro,
             eventoReservaDto.agregados.descuento,
@@ -117,7 +112,6 @@ class EventoController {
         }
 
         // Creacion de Catering
-
         val catering = CateringEvento(
             eventoReservaDto.catering.id,
             eventoReservaDto.catering.presupuesto,
@@ -140,7 +134,6 @@ class EventoController {
         }
 
         // Inicializacion Evento
-
         val evento = Evento(
             eventoReservaDto.id,
             eventoReservaDto.nombre,
@@ -260,19 +253,18 @@ class EventoController {
 
     @PutMapping("/getListaEventoByDiaAndEmpresaId")
     fun getListaEventoByDiaAndEmpresaId(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): ResponseEntity<List<String>> {
-        val empresa : Empresa = empresaService.get(eventoBuscarFechaDto.empresaId)!!
-        val inicio: LocalDateTime = LocalDateTime.of(eventoBuscarFechaDto.desde.year, eventoBuscarFechaDto.desde.month, eventoBuscarFechaDto.desde.dayOfMonth, 0,0 )
-        val fin: LocalDateTime = LocalDateTime.of(eventoBuscarFechaDto.desde.year, eventoBuscarFechaDto.desde.month, eventoBuscarFechaDto.desde.dayOfMonth, 23,59 )
 
-        val listaEvento: List<Evento> = eventoService.findAllByStartdBetweenAndEmpresa(inicio, fin, empresa)
+        val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
+            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
+
         val listaFecha: MutableList<String> = mutableListOf()
 
-        if (!listaEvento.isEmpty()) {
+        if (listaEvento.isNotEmpty()) {
             for (evento in listaEvento) {
                 val fecha = StringBuilder()
 
                 // En caso de que sea el dia siguiente le agrega la fecha tambien no solo la hora
-                if (evento.inicio.plusDays(1).getDayOfMonth() == evento.fin.getDayOfMonth()) {
+                if (evento.inicio.plusDays(1).dayOfMonth == evento.fin.dayOfMonth) {
                     fecha.append(
                         evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime().toString() + " del dia " + evento.fin.toLocalDate().toString()
                     )
@@ -284,7 +276,7 @@ class EventoController {
                 listaFecha.add(fecha.toString())
 
                 // Ordena la lista de mas temprano a mas tarde
-                //Collections.sort(listaFecha)
+                listaFecha.sort()
             }
         }
         return ResponseEntity<List<String>>(listaFecha, HttpStatus.OK)
@@ -292,84 +284,11 @@ class EventoController {
 
     @PutMapping("/horarioDisponible")
     fun horarioDisponible(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): ResponseEntity<Boolean> {
-        val empresa : Empresa = empresaService.get(eventoBuscarFechaDto.empresaId)!!
 
-        // Crea la hora inicio y la hora final de un dia para buscar todos los eventos en X dia
-        val inicio: LocalDateTime = LocalDateTime.of(eventoBuscarFechaDto.desde.year, eventoBuscarFechaDto.desde.month, eventoBuscarFechaDto.desde.dayOfMonth, 0,0 )
-        val fin: LocalDateTime = LocalDateTime.of(eventoBuscarFechaDto.desde.year, eventoBuscarFechaDto.desde.month, eventoBuscarFechaDto.desde.dayOfMonth, 23,59 )
+        val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
+            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
 
-        // lista de todos los eventos
-        val listaEvento: List<Evento> = eventoService.findAllByStartdBetweenAndEmpresa(inicio, fin, empresa)
-
-        // En caso de no existir ningun evento para esa fecha devolver disponible
-        if (!listaEvento.isEmpty()) {
-
-            // lista de todas las lista de rangos horarios
-            val listaDeRangos: MutableList<List<Int>> = ArrayList()
-
-            // Variable usada para obtener la hora final del evento
-            var horaFinal = ""
-
-            // Obtiene el rango horario de los eventos agendados
-            for (evento in listaEvento) {
-                if (evento.inicio.plusDays(1).getDayOfMonth() == evento.fin.getDayOfMonth()) {
-                    horaFinal = suma24Horas(evento.fin)
-                } else {
-                    horaFinal = evento.fin.toLocalTime().toString()
-                }
-                listaDeRangos.add(getRango(evento.inicio.toLocalTime().toString(), horaFinal))
-            }
-
-            // Obtiene el rango horario del nuevo evento a agendar
-            if (eventoBuscarFechaDto.desde.dayOfMonth != eventoBuscarFechaDto.hasta.dayOfMonth) {
-                horaFinal = suma24Horas(eventoBuscarFechaDto.hasta)
-            } else {
-                horaFinal = eventoBuscarFechaDto.hasta.toLocalTime().toString()
-            }
-            val rangoEventoNuevo = getRangoConMargen(eventoBuscarFechaDto.desde.toLocalTime().toString(), horaFinal)
-
-            // Si contiene a alguna fecha devuelve false
-
-            for (rangos in listaDeRangos) {
-                if (CollectionUtils.containsAny(rangos, rangoEventoNuevo)){
-                    return ResponseEntity<Boolean>(false, HttpStatus.OK)
-                }
-            }
-        }
-        // Si no intercepta a ninguna da el disponible
-        return ResponseEntity<Boolean>(true, HttpStatus.OK)
+        return ResponseEntity<Boolean>(eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta), HttpStatus.OK)
     }
-
-    private fun getRango(inicio: String, fin: String): List<Int> {
-        val horaInicioSplit = inicio.split(":")
-        val horaFinSplit = fin.split(":")
-
-        val horaInicio = (horaInicioSplit[0] + horaInicioSplit[1]).toInt()
-        val horaFin = (horaFinSplit[0] + horaFinSplit[1]).toInt()
-
-        return IntStream.range(horaInicio, horaFin).boxed().collect(Collectors.toList())
-    }
-
-    private fun getRangoConMargen(inicio: String, fin: String): List<Int> {
-        val horaInicioSplit = inicio.split(":")
-
-        val horaFinSplit = fin.split(":")
-
-        var horaInicio = (horaInicioSplit[0] + horaInicioSplit[1]).toInt()
-        var horaFin = (horaFinSplit[0] + horaFinSplit[1]).toInt()
-
-        // Le agrega una hora antes y una hora despues para tener margen
-        horaInicio -= 100
-        horaFin += 100
-        return IntStream.range(horaInicio, horaFin).boxed().collect(Collectors.toList())
-    }
-
-    private fun suma24Horas(fechaFin: LocalDateTime): String {
-        var horaFin: String = fechaFin.toLocalTime().hour.toString()
-        val minutosFin: String = fechaFin.toLocalTime().minute.toString()
-        val finHoraEventos = horaFin.toInt() + 24
-        horaFin = Integer.toString(finHoraEventos)
-        return "$horaFin:$minutosFin"
-    }
-
+    
 }
