@@ -170,6 +170,11 @@ class EventoController {
         return ResponseEntity<MutableSet<Estado>>(Estado.values().toMutableSet(), HttpStatus.OK)
     }
 
+    @GetMapping("/getAllEstadoForSaveEvento")
+    fun getAllEstadoForSaveEvento(): ResponseEntity<MutableSet<Estado>>? {
+        return ResponseEntity<MutableSet<Estado>>(mutableSetOf(Estado.COTIZADO, Estado.RESERVADO), HttpStatus.OK)
+    }
+
     @GetMapping("/getEventoPago/{id}")
     fun getEventoPago(@PathVariable("id") id: Long): ResponseEntity<EventoPagoDto>? {
         val evento = eventoService.get(id)!!
