@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @CrossOrigin("*")
@@ -51,6 +54,16 @@ class EmpresaController {
         val empresa = empresaService.get(id)
         if(empresa != null){
             return ResponseEntity<MutableSet<EventoDto>>(empresaService.getAllEventoByEmpresaId(empresa), HttpStatus.OK)
+        }
+        return ResponseEntity<MutableSet<EventoDto>>(HttpStatus.NO_CONTENT)
+    }
+
+    @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
+    fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): ResponseEntity<MutableSet<EventoDto>>? {
+        val empresa = empresaService.get(id)
+        if(empresa != null){
+            val listaEventos = empresaService.getAllEventoByEmpresaId(empresa)
+            return ResponseEntity<MutableSet<EventoDto>>(listaEventos.filter { it.inicio.toLocalDate() == fechaFiltro }.toMutableSet(), HttpStatus.OK)
         }
         return ResponseEntity<MutableSet<EventoDto>>(HttpStatus.NO_CONTENT)
     }
