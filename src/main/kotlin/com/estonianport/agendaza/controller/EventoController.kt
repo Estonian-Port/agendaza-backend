@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.dto.AgregadosDto
 import com.estonianport.agendaza.dto.CateringEventoDto
 import com.estonianport.agendaza.dto.EventoBuscarFechaDto
@@ -70,6 +71,9 @@ class EventoController {
     @Autowired
     lateinit var cateringEventoExtraVariableCateringService : CateringEventoExtraVariableCateringService
 
+    @Autowired
+    lateinit var emailService : EmailService
+    
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
         return eventoService.getAll()
@@ -175,6 +179,9 @@ class EventoController {
         evento.catering.listaCateringExtraVariableCatering.forEach {
             cateringEventoExtraVariableCateringService.save(it)
         }
+
+        // Envia mail con comprobante
+        emailService.enviarMailComprabanteReserva(evento, "sido reservado");
 
         return ResponseEntity<Long>(eventoSave.id, HttpStatus.OK)
     }
