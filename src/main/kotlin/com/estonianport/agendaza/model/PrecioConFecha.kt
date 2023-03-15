@@ -31,7 +31,7 @@ abstract class PrecioConFecha (
     open var hasta: LocalDateTime,
 
     @ManyToOne
-    @JoinColumn(name = "empresa_id")
+    @PrimaryKeyJoinColumn
     open var empresa: Empresa){
 }
 

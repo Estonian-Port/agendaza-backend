@@ -27,4 +27,4 @@ data class Cargo(
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)
-    var tipoCargo : TipoCargoNombre){}
+    var tipoCargo : TipoCargo){}

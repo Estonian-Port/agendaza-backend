@@ -1,0 +1,6 @@
+package com.estonianport.agendaza.dao
+
+import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
+import org.springframework.data.repository.CrudRepository
+
+interface CateringEventoExtraVariableCateringDao : CrudRepository<CateringEventoExtraVariableCatering, Long>

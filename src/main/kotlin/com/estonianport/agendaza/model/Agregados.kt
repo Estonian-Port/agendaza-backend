@@ -36,7 +36,7 @@ data class Agregados(
     )
     var listaExtra: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "agregados", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "agregados")
     var listaEventoExtraVariable: MutableSet<EventoExtraVariableTipoEvento>) {
 
     @JsonIgnore

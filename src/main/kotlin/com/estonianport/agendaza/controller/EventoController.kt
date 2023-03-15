@@ -21,6 +21,7 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CapacidadService
+import com.estonianport.agendaza.service.CateringEventoExtraVariableCateringService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoExtraVariableTipoEventoService
 import com.estonianport.agendaza.service.EventoService
@@ -64,6 +65,9 @@ class EventoController {
 
     @Autowired
     lateinit var eventoExtraVariableTipoEventoService : EventoExtraVariableTipoEventoService
+
+    @Autowired
+    lateinit var cateringEventoExtraVariableCateringService : CateringEventoExtraVariableCateringService
 
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
@@ -135,7 +139,7 @@ class EventoController {
         }
 
         catering.listaCateringExtraVariableCatering.forEach{
-            it.cateringEvento = catering
+            it.catering = catering
         }
 
         // Inicializacion Evento
@@ -161,7 +165,17 @@ class EventoController {
         // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
 
-        return ResponseEntity<Long>(eventoService.save(evento).id, HttpStatus.OK)
+        val eventoSave = eventoService.save(evento)
+
+        evento.agregados.listaEventoExtraVariable.forEach {
+            eventoExtraVariableTipoEventoService.save(it)
+        }
+
+        evento.catering.listaCateringExtraVariableCatering.forEach {
+            cateringEventoExtraVariableCateringService.save(it)
+        }
+
+        return ResponseEntity<Long>(eventoSave.id, HttpStatus.OK)
     }
 
     @DeleteMapping("/deleteEvento/{id}")
@@ -264,59 +278,75 @@ class EventoController {
     }
 
     @PostMapping("/editEventoExtra")
-    fun editEventoExtra(@RequestBody eventoExtraDto: EventoExtraDto): ResponseEntity<EventoHoraDto>? {
+    fun editEventoExtra(@RequestBody eventoExtraDto: EventoExtraDto): ResponseEntity<Long>? {
         val evento = eventoService.get(eventoExtraDto.id)!!
 
-        //TODO No estaria eliminando...
-        evento.agregados.listaEventoExtraVariable.forEach {
-            eventoExtraVariableTipoEventoService.delete(it.id)
-        }
-
+        // Seteo listaExtra
         val listaExtra = mutableSetOf<Extra>()
         eventoExtraDto.agregados.listaExtra.forEach {
             listaExtra.add(extraService.get(it.id)!!)
         }
 
+        // Elimina la lista de extraVariable
+        evento.agregados.listaEventoExtraVariable.forEach {
+            eventoExtraVariableTipoEventoService.delete(it.id)
+        }
+
+        // Seteo listaExtraVariable
         val listaExtraVariable = mutableSetOf<EventoExtraVariableTipoEvento>()
         eventoExtraDto.agregados.listaExtraVariable.forEach{
             val extraVariable = EventoExtraVariableTipoEvento(0, extraService.get(it.id)!!, it.cantidad)
             listaExtraVariable.add(extraVariable)
         }
 
+        // Vinculo listaExtraVariable con agregados
         listaExtraVariable.forEach { it.agregados = evento.agregados }
 
-        evento.presupuesto = eventoExtraDto.presupuesto
+        // Guarda la lista de extraVariable
+        listaExtraVariable.forEach {
+            eventoExtraVariableTipoEventoService.save(it)
+        }
+
         evento.agregados.listaExtra = listaExtra
         evento.agregados.listaEventoExtraVariable = listaExtraVariable
         evento.agregados.extraOtro = eventoExtraDto.agregados.extraOtro
         evento.agregados.descuento = eventoExtraDto.agregados.descuento
+        evento.presupuesto = eventoExtraDto.presupuesto
 
         eventoService.save(evento)
 
-        return ResponseEntity<EventoHoraDto>(EventoHoraDto(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin), HttpStatus.OK)
+        return ResponseEntity<Long>(evento.id, HttpStatus.OK)
     }
 
     @PostMapping("/editEventoCatering")
     fun editEventoCatering(@RequestBody eventoCateringDto: EventoCateringDto): ResponseEntity<EventoHoraDto>? {
         val evento = eventoService.get(eventoCateringDto.id)!!
 
-        evento.catering.listaTipoCatering = mutableSetOf()
-        evento.catering.listaCateringExtraVariableCatering = mutableSetOf()
-
-        eventoService.save(evento)
-
+        // Seteo listaExtra
         val listaExtra = mutableSetOf<Extra>()
         eventoCateringDto.catering.listaExtraTipoCatering.forEach {
             listaExtra.add(extraService.get(it.id)!!)
         }
 
+        // Elimina la lista de extraVariable
+        evento.catering.listaCateringExtraVariableCatering.forEach {
+            cateringEventoExtraVariableCateringService.delete(it.id)
+        }
+
+        // Seteo listaExtraVariable
         val listaExtraVariable = mutableSetOf<CateringEventoExtraVariableCatering>()
         eventoCateringDto.catering.listaExtraCateringVariable.forEach{
             val extraVariable = CateringEventoExtraVariableCatering(0, extraService.get(it.id)!!, it.cantidad)
             listaExtraVariable.add(extraVariable)
         }
 
-        listaExtraVariable.forEach { it.cateringEvento = evento.catering }
+        // Vinculo listaExtraVariable con catering
+        listaExtraVariable.forEach { it.catering = evento.catering }
+
+        // Guarda la lista de extraVariable
+        listaExtraVariable.forEach {
+            cateringEventoExtraVariableCateringService.save(it)
+        }
 
         evento.catering.listaTipoCatering = listaExtra
         evento.catering.listaCateringExtraVariableCatering = listaExtraVariable

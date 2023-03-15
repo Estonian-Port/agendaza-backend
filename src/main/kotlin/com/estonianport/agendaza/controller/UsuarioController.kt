@@ -7,16 +7,14 @@ import com.estonianport.agendaza.dto.UsuarioEmpresaDto
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Sexo
-import com.estonianport.agendaza.model.TipoCargoNombre
+import com.estonianport.agendaza.model.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
-import jakarta.persistence.NonUniqueResultException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -89,15 +87,15 @@ class UsuarioController {
     }
 
     @PutMapping("/getRolByUsuarioIdAndEmpresaId")
-    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargoNombre>? {
+    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargo>? {
         val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)
         if(usuario != null){
             val cargo = usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}
             if(cargo != null){
-                return ResponseEntity<TipoCargoNombre>(cargo.tipoCargo ,HttpStatus.OK)
+                return ResponseEntity<TipoCargo>(cargo.tipoCargo ,HttpStatus.OK)
             }
         }
-        return ResponseEntity<TipoCargoNombre>(HttpStatus.NO_CONTENT)
+        return ResponseEntity<TipoCargo>(HttpStatus.NO_CONTENT)
     }
 
     @PostMapping("/saveUsuario")
@@ -153,8 +151,8 @@ class UsuarioController {
     }
 
     @GetMapping("/getAllRol")
-    fun getAllRoles(): ResponseEntity<MutableSet<TipoCargoNombre>>? {
-        return ResponseEntity<MutableSet<TipoCargoNombre>>(TipoCargoNombre.values().toMutableSet(), HttpStatus.OK)
+    fun getAllRoles(): ResponseEntity<MutableSet<TipoCargo>>? {
+        return ResponseEntity<MutableSet<TipoCargo>>(TipoCargo.values().toMutableSet(), HttpStatus.OK)
     }
 
     @GetMapping("/getAllSexo")
