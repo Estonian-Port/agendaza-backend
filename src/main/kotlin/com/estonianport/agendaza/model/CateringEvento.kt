@@ -38,7 +38,7 @@ data class CateringEvento(
     )
     var listaTipoCatering: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "catering")
+    @OneToMany(mappedBy = "cateringEvento")
     var listaCateringExtraVariableCatering: MutableSet<CateringEventoExtraVariableCatering>){
 
     @JsonIgnore

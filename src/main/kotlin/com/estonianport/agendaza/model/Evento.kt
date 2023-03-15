@@ -40,7 +40,7 @@ data class Evento(
 
     @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
-    val capacidad: Capacidad,
+    var capacidad: Capacidad,
 
     @OneToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn

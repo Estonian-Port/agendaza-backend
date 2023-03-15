@@ -44,7 +44,7 @@ class CateringEventoExtraVariableCatering(
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    var catering : CateringEvento = CateringEvento(0,0,0,"", mutableSetOf(), mutableSetOf())
+    var cateringEvento : CateringEvento = CateringEvento(0,0,0,"", mutableSetOf(), mutableSetOf())
 }
 
 /*

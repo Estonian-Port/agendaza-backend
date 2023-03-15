@@ -11,6 +11,7 @@ import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.EventoVerDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.model.Agregados
+import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.CateringEvento
 import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
 import com.estonianport.agendaza.model.Empresa
@@ -139,7 +140,7 @@ class EventoController {
         }
 
         catering.listaCateringExtraVariableCatering.forEach{
-            it.catering = catering
+            it.cateringEvento = catering
         }
 
         // Inicializacion Evento
@@ -180,6 +181,18 @@ class EventoController {
 
     @DeleteMapping("/deleteEvento/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Evento> {
+        val evento = eventoService.get(id)!!
+
+        evento.agregados.listaEventoExtraVariable.forEach {
+            eventoExtraVariableTipoEventoService.delete(it.id)
+        }
+
+        evento.catering.listaCateringExtraVariableCatering.forEach {
+            cateringEventoExtraVariableCateringService.delete(it.id)
+        }
+
+        evento.capacidad = Capacidad(0,0,0)
+
         eventoService.delete(id)
         return ResponseEntity<Evento>(HttpStatus.OK)
     }
@@ -341,7 +354,7 @@ class EventoController {
         }
 
         // Vinculo listaExtraVariable con catering
-        listaExtraVariable.forEach { it.catering = evento.catering }
+        listaExtraVariable.forEach { it.cateringEvento = evento.catering }
 
         // Guarda la lista de extraVariable
         listaExtraVariable.forEach {
