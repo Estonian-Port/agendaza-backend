@@ -34,10 +34,6 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return listaEmpresaDto
     }
 
-    fun getUsuarioByDni(dni : Long) : Usuario?{
-        return usuarioDao.getUsuarioByDni(dni)
-    }
-
     fun getUsuarioByEmail(email : String) : Usuario?{
         return usuarioDao.getUsuarioByEmail(email)
     }

@@ -42,18 +42,6 @@ class UsuarioController {
         return usuarioService.getAll()
     }
 
-    @PutMapping("/getUsuarioByDni")
-    fun getUsuarioByDni(@RequestBody dni: Long): ResponseEntity<Usuario>? {
-        try {
-            val usuario = usuarioService.getUsuarioByDni(dni)?:
-                throw NotFoundException("No se encontró el Cliente")
-
-            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
-        }catch (e : Exception){
-            throw NotFoundException("No se encontró el Cliente")
-        }
-    }
-
     @PutMapping("/getUsuarioByEmail")
     fun getUsuarioByEmail(@RequestBody email : String): ResponseEntity<Usuario>? {
         try {

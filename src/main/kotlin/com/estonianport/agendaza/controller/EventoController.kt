@@ -73,7 +73,7 @@ class EventoController {
 
     @Autowired
     lateinit var emailService : EmailService
-    
+
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
         return eventoService.getAll()

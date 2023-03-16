@@ -31,9 +31,6 @@ data class Usuario(
     val apellido: String,
 
     @Column
-    val dni: Long,
-
-    @Column
     val celular: Long,
 
     @Column
