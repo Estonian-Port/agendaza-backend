@@ -181,7 +181,7 @@ class EventoController {
         }
 
         // Envia mail con comprobante
-        emailService.enviarMailComprabanteReserva(evento, "sido reservado");
+        emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
 
         return ResponseEntity<Long>(eventoSave.id, HttpStatus.OK)
     }

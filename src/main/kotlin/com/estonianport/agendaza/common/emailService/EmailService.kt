@@ -2,6 +2,7 @@ package com.estonianport.agendaza.common.emailService
 
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
+import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.EventoExtraVariableTipoEvento
 import com.estonianport.agendaza.model.Extra
@@ -37,7 +38,7 @@ class EmailService {
         }
     }
 
-    fun enviarMailComprabanteReserva(evento: Evento, action: String) {
+    fun enviarMailComprabanteReserva(evento: Evento, action: String, empresa : Empresa) {
 
         // -------------------------- Extra --------------------------
         val listaExtra: Set<Extra> = evento.agregados.listaExtra
@@ -200,7 +201,8 @@ class EmailService {
         val contentEmail = StringBuilder()
         contentEmail.append(createHeadWithStyle())
         contentEmail.append(createBody())
-        contentEmail.append(createHeader(imagenLogo))
+        // TODO ajustar foto de empresa para que aparezca al header
+        //contentEmail.append(createHeader(imagenLogo))
         contentEmail.append(createTitle(evento.nombre, action))
         contentEmail.append(
             createComprobante(
@@ -215,40 +217,34 @@ class EmailService {
                 imagenComprobante
             )
         )
-        contentEmail.append(
-            createSalon(
-                evento.listaEmpresa.first().nombre,
-                // TODO acomodar direccion salon
-                "",//evento.listaEmpresa.first().,
-                "",//evento.listaEmpresa.first().numero,
-                "",//evento.listaEmpresa.first().municipio,
-                imagenSalon
+
+        // TODO rehacer mas entendible, que sea size 3 significa que es un Salon y tiene direccion
+        if (empresa.getContacto().size == 3){
+            contentEmail.append(
+                createSalonConDireccion(
+                    empresa.nombre,
+                    empresa.getContacto(),
+                    imagenSalon
+                )
             )
-        )
+        }else{
+            contentEmail.append(
+                createSalonSinDireccion(
+                    empresa.nombre,
+                    empresa.getContacto(),
+                    imagenSalon
+                )
+            )
+        }
         contentEmail.append(createExtras(extraMail, extraVariableMail, imagenExtra))
         contentEmail.append(createCatering(catering, imagenCatering))
         contentEmail.append(createServicios(servicioMail, imagenServicio))
-        contentEmail.append(createContact(imagenLogo, imagenIg, imagenWpp, imagenFb, imagenMail))
+        //TODO Ajustar contacto de salon para que aparezcan redes sociales y logo
+        //contentEmail.append(createContact(imagenLogo, imagenIg, imagenWpp, imagenFb, imagenMail))
         contentEmail.append(createFooter())
         contentEmail.append("</body>	</html>")
         emailBody.content = contentEmail.toString()
 
-        //		emailBody.setContent(
-        //				"Tu evento: " + evento.getNombre() + ", ha " + action + " exitosamente." + "<br>" +
-        //						"Codigo: " + evento.getCodigo() + "<br>" +
-        //						"Te esperamos el dia " + dia + " de " + horaInicio + " a " + horaFin + "." + "<br>" +
-        //						"En el salon: " + evento.getSalon().getNombre() + " en calle " + evento.getSalon().getCalle() + " " + evento.getSalon().getNumero() + ", " + evento.getSalon().getMunicipio() + "." + "<br>" +
-        //						"Contrataste un evento " + evento.getSubTipoEvento().getTipoEvento().getNombre() +  ", " + evento.getSubTipoEvento().getNombre() + "." + "<br>" +
-        //						"Para " + evento.getCapacidad().getCapacidadAdultos() +  " adultos y " + evento.getCapacidad().getCapacidadNinos() + " niños." + "<br>" +
-        //						"<br>" +
-        //						extraMail + "<br>" +
-        //						extraVariableMail + "<br>" +
-        //						"<br>" +
-        //						catering + "<br>" +
-        //						"<br>" +
-        //						"El precio final del evento es: $" + presupuestoTotal + "<br>" +
-        //						"<br>" +
-        //						servicioMail + "<br>");
         sendEmail(emailBody)
     }
 
@@ -572,11 +568,9 @@ class EmailService {
         return contentMain
     }
 
-    private fun createSalon(
+    private fun createSalonConDireccion(
         salonNombre: String,
-        calle: String,
-        numero: String,
-        municipio: String,
+        contacto : ArrayList<String>,
         imagenSalon: String
     ): StringBuilder {
         val contentMain = StringBuilder()
@@ -634,10 +628,94 @@ class EmailService {
                     + "Nombre de salon: " + salonNombre
                     + "</div>"
                     + "<div style='line-height: 24px'>"
-                    + "Direccion: " + calle + " " + numero
+                    + "Direccion: " + contacto[0] + " " + contacto[1]
                     + "</div>"
                     + "<div style='line-height: 24px'>"
-                    + "Localidad: " + municipio
+                    + "Localidad: " + contacto[2]
+                    + "</div>"
+                    + "</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td height='25' style='font-size: 25px; line-height: 25px;'>&nbsp;</td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "</td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td height='40' style='font-size: 40px; line-height: 40px;'>&nbsp;</td>"
+                    + "</tr>"
+                    + "</table>"
+        )
+        return contentMain
+    }
+
+    private fun createSalonSinDireccion(
+        salonNombre: String,
+        contacto : ArrayList<String>,
+        imagenSalon: String
+    ): StringBuilder {
+        val contentMain = StringBuilder()
+        contentMain.append(
+            "<table border='0' width='100%' cellpadding='0' cellspacing='0' bgcolor='ffffff'>"
+                    + "<tr>"
+                    + "<td align='center'>"
+                    + "<table border='0' align='center' width='590' cellpadding='0' cellspacing='0' class='container590'>"
+                    + "<tr>"
+                    + "<td>"
+                    + "<table border='0' align='left' cellpadding='0' cellspacing='0' style='border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;' class='container590'>"
+                    + "<tr>"
+                    + "<td align='center'>"
+                    + "<a href='' style=' border-style: none !important; border: 0 !important;'><img src='" + imagenSalon + "' style='display: block; width: 280px;' width='280' border='0' alt='' /></a>"
+                    + "</td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "<table border='0' width='5' align='left' cellpadding='0' cellspacing='0' style='border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;' class='container590'>"
+                    + "<tr>"
+                    + "<td width='5' height='20' style='font-size: 20px; line-height: 20px;'>&nbsp;</td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "<table border='0' width='260' align='right' cellpadding='0' cellspacing='0' style='border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;' class='container590'>"
+                    + "<tr>"
+                    + "<td align='left' style='color: #3d3d3d; font-size: 22px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;' class='align-center main-header'>"
+                    + "<div style='line-height: 35px'>"
+                    + "SALON"
+                    + "</div>"
+                    + "</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td height='15' style='font-size: 12px; line-height: 12px;'>&nbsp;</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td align='left'>"
+                    + "<table border='0' align='left' cellpadding='0' cellspacing='0' class='container590'>"
+                    + "<tr>"
+                    + "<td align='center'>"
+                    + "<table align='center' width='40' border='0' cellpadding='0' cellspacing='0' bgcolor='eeeeee'>"
+                    + "<tr>"
+                    + "<td height='2' style='font-size: 2px; line-height: 2px;'></td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "</td>"
+                    + "</tr>"
+                    + "</table>"
+                    + "</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td height='15' style='font-size: 12px; line-height: 12px;'>&nbsp;</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td align='left' style='color: #888888; font-size: 14px; font-family: 'Work Sans', Calibri, sans-serif; line-height: 24px;' class='align-center'>"
+                    + "<div style='line-height: 24px'>"
+                    + "Nombre de salon: " + salonNombre
+                    + "</div>"
+                    + "<div style='line-height: 24px'>"
+                    + "Telefono: " + contacto[0]
+                    + "</div>"
+                    + "<div style='line-height: 24px'>"
+                    + "Mail: " + contacto[1]
                     + "</div>"
                     + "</td>"
                     + "</tr>"
