@@ -25,7 +25,7 @@ class EventoExtraVariableTipoEvento(
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    var agregados: Agregados = Agregados(0,0,0, mutableSetOf(), mutableSetOf())
+    lateinit var agregados: Agregados
 }
 
 @Entity
@@ -44,7 +44,7 @@ class CateringEventoExtraVariableCatering(
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    var cateringEvento : CateringEvento = CateringEvento(0,0,0,"", mutableSetOf(), mutableSetOf())
+    lateinit var cateringEvento : CateringEvento
 }
 
 /*

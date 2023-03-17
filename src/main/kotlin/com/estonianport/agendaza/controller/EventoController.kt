@@ -11,6 +11,7 @@ import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.EventoVerDto
 import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Agregados
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.CateringEvento
@@ -102,7 +103,6 @@ class EventoController {
         // Capacidad evento
         eventoReservaDto.capacidad = capacidadService.reutilizarCapacidad(eventoReservaDto.capacidad)
 
-
         // Creacion de Agregados
         val agregados = Agregados(
             eventoReservaDto.agregados.id,
@@ -180,7 +180,7 @@ class EventoController {
             cateringEventoExtraVariableCateringService.save(it)
         }
 
-        // Envia mail con comprobante
+        // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
         emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
 
         return ResponseEntity<Long>(eventoSave.id, HttpStatus.OK)
@@ -417,6 +417,20 @@ class EventoController {
             empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
 
         return ResponseEntity<Boolean>(eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta), HttpStatus.OK)
+    }
+
+    @PutMapping("/reenviarMail/{id}")
+    fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): ResponseEntity<Boolean> {
+
+        try{
+            val evento = eventoService.get(id)!!
+            val empresa = empresaService.get(empresaId)!!
+
+            emailService.enviarMailComprabanteReserva(evento, "sido reservado (reenvio)", empresa)
+            return ResponseEntity<Boolean>(true, HttpStatus.OK)
+        }catch (e : Exception){
+            throw NotFoundException("No se pudo reenviar mail")
+        }
     }
 
 }
