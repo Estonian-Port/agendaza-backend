@@ -43,51 +43,38 @@ class UsuarioController {
     }
 
     @PutMapping("/getUsuarioByEmail")
-    fun getUsuarioByEmail(@RequestBody email : String): ResponseEntity<Usuario>? {
+    fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
         try {
-            val usuario = usuarioService.getUsuarioByEmail(email)?:
+            return usuarioService.getUsuarioByEmail(email)?:
                 throw NotFoundException("No se encontró el Cliente")
-
-            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
         }catch (e : Exception){
             throw NotFoundException("No se encontró el Cliente")
         }
     }
 
     @PutMapping("/getUsuarioByCelular")
-    fun getUsuarioByCelular(@RequestBody celular : Long): ResponseEntity<Usuario>? {
+    fun getUsuarioByCelular(@RequestBody celular : Long): Usuario? {
         try {
-            val usuario = usuarioService.getUsuarioByCelular(celular)?:
+            return usuarioService.getUsuarioByCelular(celular)?:
                 throw NotFoundException("No se encontró el Cliente")
-
-            return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
         }catch (e : Exception){
             throw NotFoundException("No se encontró el Cliente")
         }
     }
 
     @GetMapping("/getUsuario/{id}")
-    fun getUsuario(@PathVariable("id") id: Long): ResponseEntity<Usuario>? {
-        if (id != 0L) {
-            return ResponseEntity<Usuario>(usuarioService.get(id), HttpStatus.OK)
-        }
-        return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
+    fun getUsuario(@PathVariable("id") id: Long): Usuario? {
+        return usuarioService.get(id)
     }
 
     @PutMapping("/getRolByUsuarioIdAndEmpresaId")
-    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ResponseEntity<TipoCargo>? {
-        val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)
-        if(usuario != null){
-            val cargo = usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}
-            if(cargo != null){
-                return ResponseEntity<TipoCargo>(cargo.tipoCargo ,HttpStatus.OK)
-            }
-        }
-        return ResponseEntity<TipoCargo>(HttpStatus.NO_CONTENT)
+    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): TipoCargo? {
+        val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)!!
+        return usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}!!.tipoCargo
     }
 
     @PostMapping("/saveUsuario")
-    fun save(@RequestBody usuarioDto: UsuarioDto): ResponseEntity<Usuario> {
+    fun save(@RequestBody usuarioDto: UsuarioDto): Usuario {
         // Si llega por primera vez se encripta la contraseña sino se deja igual
         // para cambiar contraseña se debe usar editPassword
         if (usuarioDto.usuario.id == 0L) {
@@ -109,17 +96,14 @@ class UsuarioController {
                 cargoService.save(Cargo(0, usuario, empresa, usuarioDto.rol))
             }
         }
-        return ResponseEntity<Usuario>(usuario, HttpStatus.OK)
+        return usuario
     }
 
     @PostMapping("/editPassword")
-    fun editPassword(@RequestBody usuarioEditPasswordDto: UsuarioEditPasswordDto): ResponseEntity<Usuario>? {
-        val usuario = usuarioService.get(usuarioEditPasswordDto.id)
-        if(usuario != null) {
-            usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
-            return ResponseEntity<Usuario>(usuarioService.save(usuario), HttpStatus.OK)
-        }
-        return ResponseEntity<Usuario>(HttpStatus.NO_CONTENT)
+    fun editPassword(@RequestBody usuarioEditPasswordDto: UsuarioEditPasswordDto): Usuario? {
+        val usuario = usuarioService.get(usuarioEditPasswordDto.id)!!
+        usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
+        return usuarioService.save(usuario)
     }
 
     @PutMapping("/getUsuarioIdByUsername")
@@ -128,24 +112,19 @@ class UsuarioController {
     }
 
     @GetMapping("/getAllEmpresaByUsuarioId/{id}")
-    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<GenericItemDto>>? {
-        val usuario = usuarioService.get(id)
-
-        if(usuario != null){
-            return ResponseEntity<MutableSet<GenericItemDto>>(usuarioService.getAllEmpresaByUsuario(usuario), HttpStatus.OK)
-        }
-
-        return ResponseEntity<MutableSet<GenericItemDto>>(HttpStatus.NO_CONTENT)
+    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): MutableSet<GenericItemDto> {
+        val usuario = usuarioService.get(id)!!
+        return usuarioService.getAllEmpresaByUsuario(usuario)
     }
 
     @GetMapping("/getAllRol")
-    fun getAllRoles(): ResponseEntity<MutableSet<TipoCargo>>? {
-        return ResponseEntity<MutableSet<TipoCargo>>(TipoCargo.values().toMutableSet(), HttpStatus.OK)
+    fun getAllRoles(): MutableSet<TipoCargo> {
+        return TipoCargo.values().toMutableSet()
     }
 
     @GetMapping("/getAllSexo")
-    fun getAllSexo(): ResponseEntity<MutableSet<Sexo>>? {
-        return ResponseEntity<MutableSet<Sexo>>(Sexo.values().toMutableSet(), HttpStatus.OK)
+    fun getAllSexo(): MutableSet<Sexo>? {
+        return Sexo.values().toMutableSet()
     }
 
 }

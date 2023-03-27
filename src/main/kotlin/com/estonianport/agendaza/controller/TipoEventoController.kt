@@ -61,21 +61,18 @@ class TipoEventoController {
     }
 
     @GetMapping("/getTipoEvento/{id}")
-    fun get(@PathVariable("id") id: Long): ResponseEntity<TipoEvento>? {
-        if (id != 0L) {
-            return ResponseEntity<TipoEvento>(tipoEventoService.get(id), HttpStatus.OK)
-        }
-        return ResponseEntity<TipoEvento>(HttpStatus.NO_CONTENT)
+    fun get(@PathVariable("id") id: Long): TipoEvento {
+        return tipoEventoService.get(id)!!
     }
 
     @PostMapping("/saveTipoEvento")
-    fun save(@RequestBody tipoEventoDto: TipoEventoDto): TipoEvento {
+    fun save(@RequestBody tipoEventoDto: TipoEventoDto): TipoEventoDto {
         tipoEventoDto.capacidad = capacidadService.reutilizarCapacidad(tipoEventoDto.capacidad)
 
         return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
             tipoEventoDto.duracion, tipoEventoDto.capacidad,
             LocalTime.of(tipoEventoDto.cantidadDuracion.hour, tipoEventoDto.cantidadDuracion.minute),
-            empresaService.get(tipoEventoDto.empresaId)!!))
+            empresaService.get(tipoEventoDto.empresaId)!!)).toDTO()
     }
 
     @DeleteMapping("/deleteTipoEvento/{id}")
@@ -112,12 +109,12 @@ class TipoEventoController {
     }
 
     @GetMapping("/getAllDuracion")
-    fun getAllDuracion(): ResponseEntity<MutableSet<Duracion>>? {
-        return ResponseEntity<MutableSet<Duracion>>(Duracion.values().toMutableSet(), HttpStatus.OK)
+    fun getAllDuracion(): MutableSet<Duracion> {
+        return Duracion.values().toMutableSet()
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
-    fun getAllDuracion(@PathVariable("id") id: Long): ResponseEntity<MutableSet<PrecioConFechaDto>>? {
+    fun getAllDuracion(@PathVariable("id") id: Long): MutableSet<PrecioConFechaDto>{
         val tipoEvento = tipoEventoService.get(id)!!
 
         // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
@@ -137,11 +134,11 @@ class TipoEventoController {
             ))
         }
 
-        return ResponseEntity<MutableSet<PrecioConFechaDto>>(listaPrecioConFechaDto, HttpStatus.OK)
+        return listaPrecioConFechaDto
     }
 
     @PostMapping("/saveTipoEventoPrecio")
-    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<String>? {
+    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
         val tipoEvento = tipoEventoService.get(listaPrecioConFechaDto.first().itemId)!!
         val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
 
@@ -165,112 +162,75 @@ class TipoEventoController {
                 tipoEvento
             ))
         }
-        return ResponseEntity<String>(HttpStatus.OK)
+        return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
     }
 
     // Todos los get by tipo evento id para nuevoEvento
     @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
-    fun getAllServicioByTipoEventoIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): ResponseEntity<MutableSet<TipoEvento>>? {
-        if (id != 0L) {
-            val listaTipoEvento = empresaService.get(id)!!.listaTipoEvento
-            val duracionEnum = Duracion.values().find { it.name == duracion }
-            return ResponseEntity<MutableSet<TipoEvento>>(listaTipoEvento.filter { it.duracion == duracionEnum }.toMutableSet(), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    fun getAllServicioByTipoEventoIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): MutableSet<TipoEvento> {
+        val listaTipoEvento = empresaService.get(id)!!.listaTipoEvento
+        val duracionEnum = Duracion.values().find { it.name == duracion }
+        return listaTipoEvento.filter { it.duracion == duracionEnum }.toMutableSet()
     }
+
     @GetMapping("/getAllServicioByTipoEventoId/{id}")
-    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<MutableSet<Servicio>>? {
-        if (id != 0L) {
-            val listaTipoEvento = tipoEventoService.get(id)!!.listaServicio
-            return ResponseEntity<MutableSet<Servicio>>(listaTipoEvento, HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<Servicio>>(HttpStatus.NO_CONTENT)
+    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): MutableSet<Servicio>{
+        return tipoEventoService.get(id)!!.listaServicio
     }
 
     @PutMapping("/getAllExtraEventoByTipoEventoIdAndFecha/{id}")
-    fun getAllExtraEventoByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<MutableSet<ExtraDto>>? {
-        if (id != 0L) {
-            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO }.toMutableSet()
-            return ResponseEntity<MutableSet<ExtraDto>>(extraService.getListaExtraDto(listaExtra, fechaEvento), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<ExtraDto>>(HttpStatus.NO_CONTENT)
+    fun getAllExtraEventoByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): MutableSet<ExtraDto> {
+        val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO }.toMutableSet()
+        return extraService.getListaExtraDto(listaExtra, fechaEvento)
     }
 
     @PutMapping("/getAllExtraEventoVariableByTipoEventoIdAndFecha/{id}")
-    fun getAllExtraEventoVariableByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<MutableSet<ExtraDto>>? {
-        if (id != 0L) {
-            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet()
-            return ResponseEntity<MutableSet<ExtraDto>>(extraService.getListaExtraDto(listaExtra, fechaEvento), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<ExtraDto>>(HttpStatus.NO_CONTENT)
+    fun getAllExtraEventoVariableByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): MutableSet<ExtraDto> {
+        val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet()
+        return extraService.getListaExtraDto(listaExtra, fechaEvento)
     }
 
     @PutMapping("/getAllTipoCateringByTipoEventoIdAndFecha/{id}")
-    fun getAllTipoCateringByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<MutableSet<ExtraDto>>? {
-        if (id != 0L) {
-            val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }.toMutableSet()
-            return ResponseEntity<MutableSet<ExtraDto>>(extraService.getListaExtraDto(listaExtra, fechaEvento), HttpStatus.OK)
-
-        }
-        return ResponseEntity<MutableSet<ExtraDto>>(HttpStatus.NO_CONTENT)
+    fun getAllTipoCateringByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): MutableSet<ExtraDto> {
+        val listaExtra = tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }.toMutableSet()
+        return extraService.getListaExtraDto(listaExtra, fechaEvento)
     }
 
     @PutMapping("/getAllCateringExtraByTipoEventoIdAndFecha/{id}")
-    fun getAllCateringExtraByTipoEventoId(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<MutableSet<ExtraDto>>? {
-        if (id != 0L) {
-            val listaExtra =
-                tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet()
-            return ResponseEntity<MutableSet<ExtraDto>>(extraService.getListaExtraDto(listaExtra, fechaEvento), HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<ExtraDto>>(HttpStatus.NO_CONTENT)
+    fun getAllCateringExtraByTipoEventoId(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): MutableSet<ExtraDto> {
+        val listaExtra =
+            tipoEventoService.get(id)!!.listaExtra.filter { it.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet()
+        return extraService.getListaExtraDto(listaExtra, fechaEvento)
     }
 
     @GetMapping("/getDuracionByTipoEventoId/{id}")
-    fun getDuracionByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<LocalTime>? {
-        if (id != 0L) {
-            return ResponseEntity<LocalTime>(tipoEventoService.get(id)!!.cantidadDuracion , HttpStatus.OK)
-        }
-        return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
+    fun getDuracionByTipoEventoId(@PathVariable("id") id: Long): LocalTime {
+        return tipoEventoService.get(id)!!.cantidadDuracion
     }
 
     @GetMapping("/getCapacidadByTipoEventoId/{id}")
-    fun getCapacidadByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Capacidad>? {
-        if (id != 0L) {
-            return ResponseEntity<Capacidad>(tipoEventoService.get(id)!!.capacidad , HttpStatus.OK)
-        }
-        return ResponseEntity<Capacidad>(HttpStatus.NO_CONTENT)
+    fun getCapacidadByTipoEventoId(@PathVariable("id") id: Long): Capacidad {
+        return tipoEventoService.get(id)!!.capacidad
     }
 
     @GetMapping("/findExtraNinoByTipoEventoId/{id}")
-    fun findExtraNinoByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Extra>? {
-        if (id != 0L) {
-            return ResponseEntity<Extra>(tipoEventoService.get(id)!!.listaExtra.find { it.nombre == "Niño" } , HttpStatus.OK)
-        }
-        return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+    fun findExtraNinoByTipoEventoId(@PathVariable("id") id: Long): Extra? {
+        return tipoEventoService.get(id)!!.listaExtra.find { it.nombre == "Niño" }
     }
 
     @GetMapping("/findExtraCamareraByTipoEventoId/{id}")
-    fun findExtraCamareraByTipoEventoId(@PathVariable("id") id: Long): ResponseEntity<Extra>? {
-        if (id != 0L) {
-            return ResponseEntity<Extra>(tipoEventoService.get(id)!!.listaExtra.find { it.nombre.split(" ")[0] == "Camarera" } , HttpStatus.OK)
-        }
-        return ResponseEntity<Extra>(HttpStatus.NO_CONTENT)
+    fun findExtraCamareraByTipoEventoId(@PathVariable("id") id: Long): Extra? {
+        return tipoEventoService.get(id)!!.listaExtra.find { it.nombre.split(" ")[0] == "Camarera" }
     }
 
     @PutMapping("/getTimeEndByTipoEventoIdAndTimeStart/{id}")
-    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : TimeDto): ResponseEntity<LocalTime>? {
-        if (id != 0L) {
-            return ResponseEntity<LocalTime>(tipoEventoService.get(id)!!.cantidadDuracion.plusHours(
-                timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong()), HttpStatus.OK)
-        }
-        return ResponseEntity<LocalTime>(HttpStatus.NO_CONTENT)
+    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : TimeDto): LocalTime? {
+        return tipoEventoService.get(id)!!.cantidadDuracion.plusHours(
+            timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong())
     }
 
     @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
-    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): ResponseEntity<Int>? {
-        if (id != 0L) {
-            return ResponseEntity<Int>(tipoEventoService.getPrecioByFecha(tipoEventoService.get(id)!!.listaPrecioConFecha, fechaEvento), HttpStatus.OK)
-        }
-        return ResponseEntity<Int>(HttpStatus.NO_CONTENT)
+    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): Int? {
+            return tipoEventoService.getPrecioByFecha(tipoEventoService.get(id)!!.listaPrecioConFecha, fechaEvento)
     }
 }

@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.PagoDto
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -35,4 +36,16 @@ data class Pago (
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val encargado: Usuario){}
+    val encargado: Usuario){
+
+    fun toDTO() : PagoDto{
+        return PagoDto(
+            id = id,
+            monto = monto,
+            codigo = evento.codigo,
+            medioDePago = medioDePago,
+            fecha = fecha,
+            nombreEvento = evento.nombre
+        )
+    }
+}

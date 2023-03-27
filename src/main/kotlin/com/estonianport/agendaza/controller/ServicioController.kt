@@ -38,29 +38,23 @@ class ServicioController {
     }
 
     @GetMapping("/getServicio/{id}")
-    fun get(@PathVariable("id") id: Long): ResponseEntity<GenericItemDto>? {
-        if (id != 0L) {
-            val servicio = servicioService.get(id)
-            if(servicio != null){
-                val genericItemDto = GenericItemDto(servicio.id, servicio.nombre)
-                genericItemDto.empresaId = servicio.empresa.id
-                genericItemDto.listaTipoEventoId = servicio.listaTipoEvento.map { it.id }.toMutableSet()
-                return ResponseEntity<GenericItemDto>(genericItemDto, HttpStatus.OK)
-            }
-        }
-        return ResponseEntity<GenericItemDto>(HttpStatus.NO_CONTENT)
+    fun get(@PathVariable("id") id: Long): GenericItemDto {
+        val servicio = servicioService.get(id)!!
+
+        val genericItemDto = GenericItemDto(servicio.id, servicio.nombre)
+        genericItemDto.empresaId = servicio.empresa.id
+        genericItemDto.listaTipoEventoId = servicio.listaTipoEvento.map { it.id }.toMutableSet()
+
+        return genericItemDto
     }
 
     @GetMapping("/getServicioListaTipoEvento/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
-        if (id != 0L) {
-            return ResponseEntity<MutableSet<TipoEvento>>(servicioService.get(id)?.listaTipoEvento, HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    fun getListaTipoEvento(@PathVariable("id") id: Long): MutableSet<TipoEvento> {
+        return servicioService.get(id)!!.listaTipoEvento
     }
 
     @PostMapping("/saveServicio")
-    fun save(@RequestBody genericItemDto: GenericItemDto): ResponseEntity<Servicio>  {
+    fun save(@RequestBody genericItemDto: GenericItemDto): Servicio {
         val empresa = empresaService.get(genericItemDto.empresaId)!!
 
         val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
@@ -72,7 +66,7 @@ class ServicioController {
         val servicio = Servicio(genericItemDto.id, genericItemDto.nombre, empresa)
         servicio.listaTipoEvento = listaTipoEvento
 
-        return ResponseEntity<Servicio>(servicioService.save(servicio), HttpStatus.OK)
+        return servicioService.save(servicio)
 
     }
 

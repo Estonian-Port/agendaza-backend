@@ -37,15 +37,12 @@ class PagoController {
     lateinit var usuarioService: UsuarioService
 
     @GetMapping("/getPago/{id}")
-    fun get(@PathVariable("id") id: Long): ResponseEntity<Pago>? {
-        if (id != 0L) {
-            ResponseEntity<Pago>(pagoService.get(id), HttpStatus.OK)
-        }
-        return ResponseEntity<Pago>(HttpStatus.NO_CONTENT)
+    fun get(@PathVariable("id") id: Long): PagoDto {
+        return pagoService.get(id)!!.toDTO()
     }
 
     @PostMapping("/savePago")
-    fun save(@RequestBody pagoEmpresaEncargado: PagoEmpresaEncargado): ResponseEntity<Pago> {
+    fun save(@RequestBody pagoEmpresaEncargado: PagoEmpresaEncargado): PagoDto {
         val empresa = empresaService.get(pagoEmpresaEncargado.empresaId)!!
         val evento = empresa.listaEvento.find{it.codigo == pagoEmpresaEncargado.pago.codigo}!!
         val encargado = usuarioService.get(pagoEmpresaEncargado.usuarioId)!!
@@ -53,8 +50,7 @@ class PagoController {
 
         val pago = Pago(pagoDto.id, pagoDto.monto, pagoDto.medioDePago, LocalDateTime.now(), evento, encargado)
 
-        pagoService.save(pago)
-        return ResponseEntity<Pago>(HttpStatus.OK)
+        return pagoService.save(pago).toDTO()
     }
 
     @DeleteMapping("/deletePago/{id}")
@@ -64,8 +60,8 @@ class PagoController {
     }
 
     @GetMapping("/getAllMedioDePago")
-    fun getAllMedioDePago(): ResponseEntity<MutableSet<MedioDePago>>? {
-        return ResponseEntity<MutableSet<MedioDePago>>(MedioDePago.values().toMutableSet(),HttpStatus.OK)
+    fun getAllMedioDePago(): MutableSet<MedioDePago> {
+        return MedioDePago.values().toMutableSet()
     }
 
     @PutMapping("/getEventoForPago")

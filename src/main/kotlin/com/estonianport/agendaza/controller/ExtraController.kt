@@ -46,26 +46,20 @@ class ExtraController {
     }
 
     @GetMapping("/getExtra/{id}")
-    fun showSave(@PathVariable("id") id: Long): ResponseEntity<ExtraDto>? {
-        if (id != 0L) {
-            val extra = extraService.get(id)!!
-            val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id)
-            extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
-            return ResponseEntity<ExtraDto>(extraDto, HttpStatus.OK)
-        }
-        return ResponseEntity<ExtraDto>(HttpStatus.NO_CONTENT)
+    fun showSave(@PathVariable("id") id: Long): ExtraDto {
+        val extra = extraService.get(id)!!
+        val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id)
+        extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
+        return extraDto
     }
 
     @GetMapping("/getExtraListaTipoEvento/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long): ResponseEntity<MutableSet<TipoEvento>>? {
-        if (id != 0L) {
-            return ResponseEntity<MutableSet<TipoEvento>>(extraService.get(id)?.listaTipoEvento, HttpStatus.OK)
-        }
-        return ResponseEntity<MutableSet<TipoEvento>>(HttpStatus.NO_CONTENT)
+    fun getListaTipoEvento(@PathVariable("id") id: Long):MutableSet<TipoEvento> {
+        return extraService.get(id)!!.listaTipoEvento
     }
 
     @PostMapping("/saveExtra")
-    fun save(@RequestBody extraDto: ExtraDto): ResponseEntity<Extra> {
+    fun save(@RequestBody extraDto: ExtraDto): Extra {
         val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
 
         extraDto.listaTipoEventoId.forEach {
@@ -75,7 +69,7 @@ class ExtraController {
         val extra = Extra(extraDto.id, extraDto.nombre, extraDto.tipoExtra, empresaService.get(extraDto.empresaId)!!)
         extra.listaTipoEvento = listaTipoEvento
 
-        return ResponseEntity<Extra>(extraService.save(extra), HttpStatus.OK)
+        return extraService.save(extra)
     }
 
     @DeleteMapping("/deleteExtra/{id}")
@@ -85,17 +79,17 @@ class ExtraController {
     }
 
     @GetMapping("/getAllEventoTipoExtra")
-    fun getAllEventoTipoExtra(): ResponseEntity<MutableSet<TipoExtra>>? {
-        return ResponseEntity<MutableSet<TipoExtra>>(mutableSetOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO),HttpStatus.OK)
+    fun getAllEventoTipoExtra(): MutableSet<TipoExtra> {
+        return mutableSetOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
     }
 
     @GetMapping("/getAllCateringTipoExtra")
-    fun getAllCateringTipoExtra(): ResponseEntity<MutableSet<TipoExtra>>? {
-        return ResponseEntity<MutableSet<TipoExtra>>(mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING),HttpStatus.OK)
+    fun getAllCateringTipoExtra(): MutableSet<TipoExtra> {
+        return mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
     }
 
     @GetMapping("/getAllPrecioConFechaByExtraId/{id}")
-    fun getAllDuracion(@PathVariable("id") id: Long): ResponseEntity<MutableSet<PrecioConFechaDto>>? {
+    fun getAllDuracion(@PathVariable("id") id: Long): MutableSet<PrecioConFechaDto> {
         val extra = extraService.get(id)!!
 
         // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
@@ -117,11 +111,11 @@ class ExtraController {
             )
         }
 
-        return ResponseEntity<MutableSet<PrecioConFechaDto>>(listaPrecioConFechaDto, HttpStatus.OK)
+        return listaPrecioConFechaDto
     }
 
     @PostMapping("/saveExtraPrecio")
-    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<String>? {
+    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
         val extra = extraService.get(listaPrecioConFechaDto.first().itemId)!!
         val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
 
@@ -148,7 +142,7 @@ class ExtraController {
             )
         }
 
-        return ResponseEntity<String>(HttpStatus.OK)
+        return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
     }
 
 }

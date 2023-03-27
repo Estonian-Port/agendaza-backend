@@ -26,16 +26,13 @@ class CargoController {
     }
 
     @GetMapping("/getCargo/{id}")
-    fun get(@PathVariable("id") id: Long): ResponseEntity<Cargo>? {
-        if (id != 0L) {
-            return ResponseEntity<Cargo>(cargoService.get(id), HttpStatus.OK)
-        }
-        return ResponseEntity<Cargo>(HttpStatus.NO_CONTENT)
+    fun get(@PathVariable("id") id: Long): Cargo? {
+        return cargoService.get(id)
     }
 
     @PostMapping("/saveCargo")
-    fun save(@RequestBody cargo: Cargo): ResponseEntity<Cargo> {
-        return ResponseEntity<Cargo>(cargoService.save(cargo), HttpStatus.OK)
+    fun save(@RequestBody cargo: Cargo): Cargo {
+        return cargoService.save(cargo)
     }
 
     @DeleteMapping("/deleteCargo/{id}")
