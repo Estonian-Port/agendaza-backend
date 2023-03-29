@@ -22,7 +22,7 @@ abstract class PrecioConFecha (
     var id: Long,
 
     @Column
-    open var precio : Int,
+    open var precio : Double,
 
     @Column
     open var desde: LocalDateTime,
@@ -33,12 +33,23 @@ abstract class PrecioConFecha (
     @ManyToOne
     @PrimaryKeyJoinColumn
     open var empresa: Empresa){
+
+/*    companion object {
+        fun getPrecioByFecha(listaPrecioConFecha: MutableSet<Any>, fecha: LocalDateTime): Long {
+            if(listaPrecioConFecha.isNotEmpty() && listaPrecioConFecha.any { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) } ) {
+                return listaPrecioConFecha.find { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) }!!.precio
+            }else{
+                return 0
+            }
+        }
+    }*/
+
 }
 
 @Entity(name = "precio_con_fecha_extra")
 class PrecioConFechaExtra(
     id: Long,
-    precio: Int,
+    precio: Double,
     desde: LocalDateTime,
     hasta: LocalDateTime,
     empresa: Empresa,
@@ -51,7 +62,7 @@ class PrecioConFechaExtra(
 @Entity(name = "precio_con_fecha_tipo_evento")
 class PrecioConFechaTipoEvento(
     id: Long,
-    precio: Int,
+    precio: Double,
     desde: LocalDateTime,
     hasta: LocalDateTime,
     empresa: Empresa,

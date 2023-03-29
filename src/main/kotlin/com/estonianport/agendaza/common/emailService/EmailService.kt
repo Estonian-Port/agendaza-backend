@@ -105,7 +105,7 @@ class EmailService {
         val catering = StringBuilder()
 
         // -------------------------- Catering --------------------------
-        if (evento.getPresupuestoCatering() != 0L) {
+        if (evento.getPresupuestoCatering() != 0.0) {
 
             // ------------------- Tipo Catering -----------------------
             val listaTipoCatering: List<Extra> = evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }
@@ -165,11 +165,11 @@ class EmailService {
         }
 
         // ------------------- Presupuesto -----------------------
-        var presupuestoTotal = 0L
-        if (evento.getPresupuesto() != 0L) {
+        var presupuestoTotal = 0.0
+        if (evento.getPresupuesto() != 0.0) {
             presupuestoTotal += evento.getPresupuesto()
         }
-        if (evento.getPresupuestoCatering() != 0L) {
+        if (evento.getPresupuestoCatering() != 0.0) {
             presupuestoTotal += evento.getPresupuestoCatering()
         }
 
@@ -471,7 +471,7 @@ class EmailService {
         subTipoEventoNombre: String,
         capacidadAdultos: Int,
         capacidadNinos: Int,
-        presupuestoTotal: Long,
+        presupuestoTotal: Double,
         dia: String,
         horaInicio: String,
         horaFin: String,

@@ -19,13 +19,4 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
     override val dao: CrudRepository<TipoEvento, Long>
         get() = tipoEventoDao
 
-    fun getPrecioByFecha(listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento>, fechaEvento : LocalDateTime): Int{
-
-        if(listaPrecioConFechaTipoEvento.isNotEmpty() && listaPrecioConFechaTipoEvento.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) } != null ){
-            return listaPrecioConFechaTipoEvento.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) }!!.precio
-        }else{
-            return 0
-        }
-    }
-
 }

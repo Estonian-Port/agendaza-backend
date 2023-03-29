@@ -230,7 +230,7 @@ class TipoEventoController {
     }
 
     @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
-    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): Int? {
-            return tipoEventoService.getPrecioByFecha(tipoEventoService.get(id)!!.listaPrecioConFecha, fechaEvento)
+    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): Double? {
+            return tipoEventoService.get(id)!!.getPrecioByFecha(fechaEvento)
     }
 }

@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDateTime
 
 @Entity
 data class TipoEvento(
@@ -65,5 +66,13 @@ data class TipoEvento(
             capacidad = capacidad,
             empresaId = empresa.id
         )
+    }
+
+    fun getPrecioByFecha(fecha : LocalDateTime): Double {
+        if(listaPrecioConFecha.isNotEmpty() && listaPrecioConFecha.any { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) } ) {
+            return listaPrecioConFecha.find { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) }!!.precio
+        }else{
+            return 0.0
+        }
     }
 }

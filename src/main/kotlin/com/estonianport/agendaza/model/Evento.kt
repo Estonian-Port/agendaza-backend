@@ -98,15 +98,26 @@ data class Evento(
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
     val listaPago: MutableSet<Pago> = mutableSetOf()
 
-    fun getPresupuesto(): Long{
-        return 0L
+    fun getPresupuesto(): Double{
+        var presupuesto = tipoEvento.getPrecioByFecha(inicio) +
+                Extra.getPrecioByFechaOfListaExtra(
+                    listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
+                Extra.getPrecioByFechaOfListaExtra(
+                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.
+                    map { it.extra }, inicio) +
+                extraOtro
+
+        if(descuento != 0L){
+            presupuesto -= (presupuesto * (descuento / 100))
+        }
+        return presupuesto
     }
 
-    fun getPresupuestoCatering(): Long{
-        return 0L
+    fun getPresupuestoCatering(): Double{
+        return 0.0
     }
 
-    fun getPresupuestoTotal(): Long{
+    fun getPresupuestoTotal(): Double{
         return this.getPresupuesto() + this.getPresupuestoCatering()
     }
 

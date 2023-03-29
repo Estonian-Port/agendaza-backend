@@ -30,7 +30,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
             if(it.listaPrecioConFecha.isNotEmpty() && it.listaPrecioConFecha.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) } != null ){
                 extraDto.precio = it.listaPrecioConFecha.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) }!!.precio
             }else{
-                extraDto.precio = 0
+                extraDto.precio = 0.0
             }
             listaExtraDto.add(extraDto)
         }
@@ -45,7 +45,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
             if(it.extra.listaPrecioConFecha.isNotEmpty() && it.extra.listaPrecioConFecha.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) } != null ){
                 extraDto.precio = it.extra.listaPrecioConFecha.find { it.desde == fechaEvento || it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento) }!!.precio
             }else{
-                extraDto.precio = 0
+                extraDto.precio = 0.0
             }
             listaExtraDto.add(extraDto)
         }

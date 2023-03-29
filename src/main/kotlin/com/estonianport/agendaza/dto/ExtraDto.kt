@@ -7,13 +7,13 @@ class ExtraDto(val id : Long, val nombre : String, val tipoExtra : TipoExtra, va
 
     var listaTipoEventoId: MutableSet<Long> = mutableSetOf()
 
-    var precio : Int = 0
+    var precio : Double = 0.0
 
 }
 
 class ExtraVariableDto(val id : Long, val nombre : String, val tipoExtra : TipoExtra, val cantidad : Int){
 
-    var precio : Int = 0
+    var precio : Double = 0.0
 }
 
 class ExtraVariableReservaDto(val id : Long, val cantidad : Int){}
