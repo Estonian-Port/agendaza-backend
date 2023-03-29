@@ -1,13 +1,13 @@
 package com.estonianport.agendaza.common.emailService
 
 import com.estonianport.agendaza.errors.BusinessException
-import com.estonianport.agendaza.model.CateringEventoExtraVariableCatering
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.EventoExtraVariableTipoEvento
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.EventoExtraVariable
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
+import com.estonianport.agendaza.model.TipoExtra
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,7 +41,7 @@ class EmailService {
     fun enviarMailComprabanteReserva(evento: Evento, action: String, empresa : Empresa) {
 
         // -------------------------- Extra --------------------------
-        val listaExtra: Set<Extra> = evento.agregados.listaExtra
+        val listaExtra: List<Extra> = evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }
         val extraMail = StringBuilder()
         if (listaExtra.isNotEmpty()) {
             var i = 0
@@ -60,11 +60,11 @@ class EmailService {
         }
 
         // -------------------------- Extra variable --------------------------
-        val listaEventoExtraVariable: Set<EventoExtraVariableTipoEvento> = evento.agregados.listaEventoExtraVariable
+        val listaEventoEventoExtraVariable: List<EventoExtraVariable> = evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
         val extraVariableMail = StringBuilder()
-        if (listaEventoExtraVariable.isNotEmpty()) {
+        if (listaEventoEventoExtraVariable.isNotEmpty()) {
             val listaExtraVariable: MutableSet<Extra> = mutableSetOf()
-            for (eventoExtraVariableSubTipoEvento in listaEventoExtraVariable) {
+            for (eventoExtraVariableSubTipoEvento in listaEventoEventoExtraVariable) {
                 listaExtraVariable.add(eventoExtraVariableSubTipoEvento.extra)
             }
             if (listaExtraVariable.isNotEmpty()) {
@@ -105,10 +105,10 @@ class EmailService {
         val catering = StringBuilder()
 
         // -------------------------- Catering --------------------------
-        if (evento.catering.presupuesto != 0L) {
+        if (evento.getPresupuestoCatering() != 0L) {
 
             // ------------------- Tipo Catering -----------------------
-            val listaTipoCatering: Set<Extra> = evento.catering.listaTipoCatering
+            val listaTipoCatering: List<Extra> = evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }
             val tipoCateringMail = StringBuilder()
             if (listaTipoCatering.isNotEmpty()) {
                 var i = 0
@@ -127,8 +127,7 @@ class EmailService {
             }
 
             // ------------------- Extra Catering -----------------------
-            val listaCateringExtraCatering: Set<CateringEventoExtraVariableCatering> =
-                evento.catering.listaCateringExtraVariableCatering
+            val listaCateringExtraCatering: List<EventoExtraVariable> = evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
             val extraVariableCateringMail = StringBuilder()
             if (listaCateringExtraCatering.isNotEmpty()) {
                 val listaExtraCatering: MutableSet<Extra> = mutableSetOf()
@@ -167,11 +166,11 @@ class EmailService {
 
         // ------------------- Presupuesto -----------------------
         var presupuestoTotal = 0L
-        if (evento.presupuesto != 0L) {
-            presupuestoTotal += evento.presupuesto
+        if (evento.getPresupuesto() != 0L) {
+            presupuestoTotal += evento.getPresupuesto()
         }
-        if (evento.catering.presupuesto != 0L) {
-            presupuestoTotal += evento.catering.presupuesto
+        if (evento.getPresupuestoCatering() != 0L) {
+            presupuestoTotal += evento.getPresupuestoCatering()
         }
 
         // ------------------- Dia y hora ---------------------------
@@ -1134,8 +1133,8 @@ class EmailService {
                     "Fecha de pago: " + diaPago + " hora: " + horaPago + "<br>" +
                     "Monto abonado: $" + pago.monto + "<br>" +
                     "Monto total abonado hasta la fecha: $" + totalPago + "<br>" +
-                    "Monto faltante: $" + Math.abs(evento.presupuesto - totalPago) + "<br>" +
-                    "El precio total del evento: $" + evento.presupuesto + "<br>" +
+                    "Monto faltante: $" + Math.abs(evento.getPresupuesto() - totalPago) + "<br>" +
+                    "El precio total del evento: $" + evento.getPresupuesto() + "<br>" +
                     "Acercate cuando quieras al salon: " + evento.listaEmpresa.first()
                 .nombre + " en calle " + ""/*evento.getSalon().getCalle()*/ + " " + ""/*evento.getSalon()*/
         /*.getNumero() */ "" + ", " + "" /*evento.getSalon().getMunicipio()*/ + "." + "<br>" +

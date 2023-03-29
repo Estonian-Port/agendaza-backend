@@ -14,7 +14,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDateTime
 
@@ -42,16 +41,28 @@ data class Evento(
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
-    @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @PrimaryKeyJoinColumn
-    var agregados: Agregados,
-
-    @OneToOne(cascade = arrayOf(CascadeType.ALL))
-    @PrimaryKeyJoinColumn
-    var catering: CateringEvento,
+    @Column
+    var extraOtro: Long,
 
     @Column
-    var presupuesto: Long,
+    var descuento : Long,
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "evento_extra",
+        joinColumns = arrayOf(JoinColumn(name = "agregados_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+    )
+    var listaExtra: MutableSet<Extra>,
+
+    @OneToMany(mappedBy = "evento")
+    var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
+
+    @Column
+    var cateringOtro : Long,
+
+    @Column
+    var cateringOtroDescripcion : String,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
@@ -66,13 +77,11 @@ data class Evento(
 
     @Column
     @Enumerated(EnumType.STRING)
-    val estado: Estado,
-
-    ){
+    val estado: Estado){
 
     @ManyToMany
     @JoinTable(
-        name = "empresa_evento",
+        name = "evento_empresa",
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
     )
@@ -88,5 +97,13 @@ data class Evento(
 
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
     val listaPago: MutableSet<Pago> = mutableSetOf()
+
+    fun getPresupuesto(): Long{
+        return 0L
+    }
+
+    fun getPresupuestoCatering(): Long{
+        return 0L
+    }
 
 }

@@ -46,5 +46,4 @@ data class Extra(
     @OneToMany(mappedBy = "extra")
     val listaPrecioConFecha: MutableSet<PrecioConFechaExtra> = mutableSetOf()
 
-
 }

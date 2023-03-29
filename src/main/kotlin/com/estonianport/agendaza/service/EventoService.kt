@@ -54,7 +54,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     fun getHorarioDisponible(listaEvento: List<Evento>, desde : LocalDateTime, hasta : LocalDateTime) : Boolean{
         
         // En caso de no existir ningun evento para esa fecha devolver disponible
-        if (!listaEvento.isEmpty()) {
+        if (listaEvento.isNotEmpty()) {
 
             // lista de todas las lista de rangos horarios
             val listaDeRangos: MutableList<List<Int>> = ArrayList()
