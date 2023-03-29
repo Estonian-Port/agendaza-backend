@@ -2,6 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.dao.ExtraDao
+import com.estonianport.agendaza.dto.EventoExtraDto
 import com.estonianport.agendaza.dto.ExtraDto
 import com.estonianport.agendaza.dto.ExtraVariableDto
 import com.estonianport.agendaza.dto.ExtraVariableReservaDto
@@ -51,14 +52,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
         return listaExtraDto
     }
 
-    fun getListaExtraVariableReservaDto(listaEventoExtraVariable: MutableSet<EventoExtraVariable>, fechaEvento: LocalDateTime): MutableSet<ExtraVariableReservaDto>{
-        val listaExtraDto = mutableSetOf<ExtraVariableReservaDto>()
-
-        listaEventoExtraVariable.forEach{
-            val extraDto = ExtraVariableReservaDto(it.extra.id, it.cantidad)
-
-            listaExtraDto.add(extraDto)
-        }
-        return listaExtraDto
+    fun fromListaExtraDtoToListaExtra(listaExtraDto : List<ExtraDto>) : List<Extra>{
+        return listaExtraDto.map { extra -> this.get(extra.id)!! }
     }
 }

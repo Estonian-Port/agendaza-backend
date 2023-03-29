@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.ExtraVariableReservaDto
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -26,4 +27,14 @@ data class EventoExtraVariable(
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     lateinit var evento: Evento
+
+
+
+    fun fromDTO(eventoExtraVariableReservaDto: ExtraVariableReservaDto){
+        // TODO
+    }
+
+    fun toDTO(){
+        // TODO
+    }
 }

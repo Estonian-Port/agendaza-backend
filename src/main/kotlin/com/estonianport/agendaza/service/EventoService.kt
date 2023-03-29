@@ -3,8 +3,13 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.dao.EventoDao
+import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.http.HttpStatus
@@ -121,5 +126,29 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         val finHoraEventos = horaFin.toInt() + 24
         horaFin = Integer.toString(finHoraEventos)
         return "$horaFin:$minutosFin"
+    }
+
+    fun fromEventoReservaDtoToEvento(eventoReservaDto : EventoReservaDto,
+                                     tipoEvento : TipoEvento,
+                                     listaExtra : MutableSet<Extra>,
+                                     listaEventoExtraVariable : MutableSet<EventoExtraVariable>,
+                                     encargado : Usuario): Evento {
+        return Evento(
+            eventoReservaDto.id,
+            eventoReservaDto.nombre,
+            tipoEvento,
+            eventoReservaDto.inicio,
+            eventoReservaDto.fin,
+            eventoReservaDto.capacidad,
+            eventoReservaDto.agregados.extraOtro,
+            eventoReservaDto.agregados.descuento,
+            listaExtra,
+            listaEventoExtraVariable,
+            eventoReservaDto.catering.cateringOtro,
+            eventoReservaDto.catering.descripcion,
+            encargado,
+            eventoReservaDto.cliente,
+            eventoReservaDto.codigo,
+            eventoReservaDto.estado)
     }
 }

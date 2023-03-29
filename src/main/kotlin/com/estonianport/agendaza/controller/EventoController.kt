@@ -10,7 +10,6 @@ import com.estonianport.agendaza.dto.EventoHoraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.EventoVerDto
-import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Empresa
@@ -26,6 +25,7 @@ import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.ExtraVariableService
+import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.TipoEventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,6 +69,9 @@ class EventoController {
     @Autowired
     lateinit var emailService : EmailService
 
+    @Autowired
+    lateinit var pagoService : PagoService
+
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
         return eventoService.getAll()
@@ -98,64 +101,49 @@ class EventoController {
         val listaExtra = mutableSetOf<Extra>()
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
 
-        eventoReservaDto.agregados.listaExtra.forEach {
-            listaExtra.add(extraService.get(it.id)!!)
-        }
+        //TODO Reducir el DTO para q venga todo unificado la listaExtra y ExtraVariable
+        //TODO sin agregados y catering como clase secretaria
+        listaExtra.addAll(
+            extraService.fromListaExtraDtoToListaExtra(
+                eventoReservaDto.agregados.listaExtra.toList()))
 
-        eventoReservaDto.agregados.listaExtraVariable.forEach {
-            val eventoExtraVariable = EventoExtraVariable(0, extraService.get(it.id)!! ,it.cantidad)
-            listaEventoExtraVariable.add(eventoExtraVariable)
-        }
+        listaExtra.addAll(
+            extraService.fromListaExtraDtoToListaExtra(
+                eventoReservaDto.catering.listaExtraTipoCatering.toList()))
 
-        eventoReservaDto.catering.listaExtraTipoCatering.forEach{
-            listaExtra.add(extraService.get(it.id)!!)
-        }
+        listaEventoExtraVariable.addAll(
+            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
+                eventoReservaDto.agregados.listaExtraVariable.toList()))
 
-        eventoReservaDto.catering.listaExtraCateringVariable.forEach{
-            val eventoExtraVariable = EventoExtraVariable(0, extraService.get(it.id)!!, it.cantidad)
-            listaEventoExtraVariable.add(eventoExtraVariable)
-        }
+        listaEventoExtraVariable.addAll(
+            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
+                eventoReservaDto.catering.listaExtraCateringVariable.toList()))
 
         // Inicializacion Evento
-        val evento = Evento(
-            eventoReservaDto.id,
-            eventoReservaDto.nombre,
-            tipoEvento,
-            eventoReservaDto.inicio,
-            eventoReservaDto.fin,
-            eventoReservaDto.capacidad,
-            eventoReservaDto.agregados.extraOtro,
-            eventoReservaDto.agregados.descuento,
-            listaExtra,
-            listaEventoExtraVariable,
-            eventoReservaDto.catering.cateringOtro,
-            eventoReservaDto.catering.descripcion,
-            encargado,
-            eventoReservaDto.cliente,
-            eventoReservaDto.codigo,
-            eventoReservaDto.estado)
-
+        val evento = eventoService.fromEventoReservaDtoToEvento(
+            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado)
 
         // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
 
-        val eventoSave = eventoService.save(evento)
+        val eventoSaved = eventoService.save(evento)
 
         evento.listaEventoExtraVariable.forEach {
-            it.evento = eventoSave
+            it.evento = eventoSaved
             extraVariableService.save(it)
         }
 
         // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
         emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
 
-        return eventoSave.id
+        return eventoSaved.id
     }
 
     @DeleteMapping("/deleteEvento/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Evento> {
         val evento = eventoService.get(id)!!
 
+        // TODO Delegar a service
         evento.listaEventoExtraVariable.forEach {
             extraVariableService.delete(it.id)
         }
@@ -179,15 +167,9 @@ class EventoController {
     @GetMapping("/getEventoPago/{id}")
     fun getEventoPago(@PathVariable("id") id: Long): EventoPagoDto? {
         val evento = eventoService.get(id)!!
-        val total = evento.getPresupuesto() + evento.getPresupuestoCatering()
-        val listaPago: MutableSet<PagoDto> = mutableSetOf()
 
-        // TODO pasar a DTO
-        evento.listaPago.forEach {
-            listaPago.add(PagoDto(it.id, it.monto, it.evento.codigo, it.medioDePago, it.evento.nombre, it.fecha))
-        }
-
-        return EventoPagoDto(evento.id, evento.nombre, evento.codigo, total, listaPago)
+        return EventoPagoDto(evento.id, evento.nombre, evento.codigo, evento.getPresupuestoTotal(),
+            pagoService.fromListaPagoToListaPagoDto(evento.listaPago.toList()))
     }
 
     @GetMapping("/getEventoExtra/{id}")
@@ -198,8 +180,9 @@ class EventoController {
         val agregados = AgregadosDto(0,
             evento.extraOtro,
             evento.descuento,
+            // TODO delegar a extra y extraVariableService
             extraService.getListaExtraDto(evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }.toMutableSet(), evento.inicio),
-            extraService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet(), evento.inicio))
+            extraVariableService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet(), evento.inicio))
 
         return EventoExtraDto(evento.id, evento.nombre, evento.codigo, evento.getPresupuesto(),
             agregados, evento.tipoEvento.id, evento.inicio)
@@ -213,8 +196,9 @@ class EventoController {
             evento.cateringOtro,
             evento.getPresupuestoCatering(),
             evento.cateringOtroDescripcion,
+            // TODO delegar a extra y extraVariableService
             extraService.getListaExtraDto(evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }.toMutableSet(), evento.inicio),
-            extraService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet(), evento.inicio))
+            extraVariableService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet(), evento.inicio))
 
         return EventoCateringDto(evento.id, evento.nombre, evento.codigo, catering,
             evento.tipoEvento.id, evento.inicio, evento.capacidad)
@@ -227,6 +211,7 @@ class EventoController {
         return EventoHoraDto(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin)
     }
 
+    // TODO quitar Agregados y Catering y reemplazar por fromEventoVerDtoToEvento y toEventoVerDto
     @GetMapping("/getEventoVer/{id}")
     fun getEventoVer(@PathVariable("id") id: Long): EventoVerDto? {
         val evento = eventoService.get(id)!!
@@ -235,14 +220,14 @@ class EventoController {
             evento.extraOtro,
             evento.descuento,
             extraService.getListaExtraDto(evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }.toMutableSet(), evento.inicio),
-            extraService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet(), evento.inicio))
+            extraVariableService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet(), evento.inicio))
 
         val catering = CateringEventoDto(0,
             evento.cateringOtro,
             evento.getPresupuestoCatering(),
             evento.cateringOtroDescripcion,
             extraService.getListaExtraDto(evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }.toMutableSet(), evento.inicio),
-            extraService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet(), evento.inicio))
+            extraVariableService.getListaExtraVariableReservaDto(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet(), evento.inicio))
 
 
         return EventoVerDto(evento.id, evento.nombre, evento.codigo, evento.inicio,
@@ -266,31 +251,37 @@ class EventoController {
     fun editEventoExtra(@RequestBody eventoExtraDto: EventoExtraDto): Long? {
         val evento = eventoService.get(eventoExtraDto.id)!!
 
-        // Seteo listaExtra
         val listaExtra = mutableSetOf<Extra>()
-        eventoExtraDto.agregados.listaExtra.forEach {
-            listaExtra.add(extraService.get(it.id)!!)
-        }
+        listaExtra.addAll(
+            extraService.fromListaExtraDtoToListaExtra(
+                eventoExtraDto.agregados.listaExtra.toList()))
 
-        // Elimina la lista de extraVariable
-        evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.forEach {
+        // TODO revisar el delete
+        // Elimina la lista de extraVariable que sean variable evento y no catering
+        evento.listaEventoExtraVariable.filter{ it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.forEach {
             extraVariableService.delete(it.id)
         }
 
         // Seteo listaExtraVariable
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        eventoExtraDto.agregados.listaExtraVariable.forEach{
-            val eventoExtraVariable = EventoExtraVariable(0, extraService.get(it.id)!!, it.cantidad)
-            listaEventoExtraVariable.add(eventoExtraVariable)
-        }
+        listaEventoExtraVariable.addAll(
+            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
+                eventoExtraDto.agregados.listaExtraVariable.toList()))
 
         // Guarda la lista de extraVariable
         listaEventoExtraVariable.forEach {
+            it.evento = evento
             extraVariableService.save(it)
         }
 
+        // Agrega a la lista los extras catering que no deben de ser modificados
+        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING })
         evento.listaExtra = listaExtra
+
+        // Agrega a la lista los extras variables catering que no deben de ser modificados
+        listaEventoExtraVariable.addAll(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING })
         evento.listaEventoExtraVariable = listaEventoExtraVariable
+
         evento.extraOtro = eventoExtraDto.agregados.extraOtro
         evento.descuento = eventoExtraDto.agregados.descuento
 
@@ -303,12 +294,12 @@ class EventoController {
     fun editEventoCatering(@RequestBody eventoCateringDto: EventoCateringDto): EventoHoraDto? {
         val evento = eventoService.get(eventoCateringDto.id)!!
 
-        // Seteo listaExtra
         val listaExtra = mutableSetOf<Extra>()
-        eventoCateringDto.catering.listaExtraTipoCatering.forEach {
-            listaExtra.add(extraService.get(it.id)!!)
-        }
+        listaExtra.addAll(
+            extraService.fromListaExtraDtoToListaExtra(
+                eventoCateringDto.catering.listaExtraTipoCatering.toList()))
 
+        // TODO revisar el delete
         // Elimina la lista de extraVariable
         evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.forEach {
             extraVariableService.delete(it.id)
@@ -316,18 +307,24 @@ class EventoController {
 
         // Seteo listaExtraVariable
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        eventoCateringDto.catering.listaExtraCateringVariable.forEach{
-            val eventoExtraVariable = EventoExtraVariable(0, extraService.get(it.id)!!, it.cantidad)
-            listaEventoExtraVariable.add(eventoExtraVariable)
-        }
+        listaEventoExtraVariable.addAll(
+            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
+                eventoCateringDto.catering.listaExtraCateringVariable.toList()))
 
         // Guarda la lista de extraVariable
         listaEventoExtraVariable.forEach {
+            it.evento = evento
             extraVariableService.save(it)
         }
 
+        // Agrega a la lista los extras evento que no deben de ser modificados
+        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO })
         evento.listaExtra = listaExtra
+
+        // Agrega a la lista los extras variables evento que no deben de ser modificados
+        listaEventoExtraVariable.addAll(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO })
         evento.listaEventoExtraVariable = listaEventoExtraVariable
+
         evento.cateringOtro = eventoCateringDto.catering.cateringOtro
         evento.cateringOtroDescripcion = eventoCateringDto.catering.descripcion
 
@@ -376,6 +373,7 @@ class EventoController {
         return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
     }
 
+    // TODO revisar el return true
     @PutMapping("/reenviarMail/{id}")
     fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
 

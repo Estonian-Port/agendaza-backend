@@ -106,4 +106,8 @@ data class Evento(
         return 0L
     }
 
+    fun getPresupuestoTotal(): Long{
+        return this.getPresupuesto() + this.getPresupuestoCatering()
+    }
+
 }

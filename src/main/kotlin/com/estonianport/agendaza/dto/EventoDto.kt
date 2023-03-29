@@ -16,7 +16,7 @@ class EventoReservaDto(val id: Long, val nombre: String, var capacidad : Capacid
                        val cliente : Usuario, val presupuesto : Long, val encargadoId : Long, val estado : Estado) {}
 
 class EventoPagoDto(val id : Long, val nombre : String, val codigo : String,
-                      val precioTotal : Long, val listaPagos : MutableSet<PagoDto>) {}
+                      val precioTotal : Long, val listaPagos : List<PagoDto>) {}
 
 class EventoExtraDto(val id : Long, val nombre : String, val codigo : String,
                      val presupuesto : Long, val agregados : AgregadosDto, val tipoEventoId : Long,
