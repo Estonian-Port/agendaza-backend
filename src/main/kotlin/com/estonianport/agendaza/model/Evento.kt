@@ -1,5 +1,13 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.EventoCateringDto
+import com.estonianport.agendaza.dto.EventoExtraDto
+import com.estonianport.agendaza.dto.EventoExtraVariableDto
+import com.estonianport.agendaza.dto.EventoHoraDto
+import com.estonianport.agendaza.dto.EventoPagoDto
+import com.estonianport.agendaza.dto.EventoVerDto
+import com.estonianport.agendaza.dto.ExtraDto
+import com.estonianport.agendaza.dto.PagoDto
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -59,7 +67,7 @@ data class Evento(
     var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
 
     @Column
-    var cateringOtro : Long,
+    var cateringOtro : Double,
 
     @Column
     var cateringOtroDescripcion : String,
@@ -98,13 +106,13 @@ data class Evento(
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
     val listaPago: MutableSet<Pago> = mutableSetOf()
 
+    //TODO revisar los filter esos
     fun getPresupuesto(): Double{
         var presupuesto = tipoEvento.getPrecioByFecha(inicio) +
                 Extra.getPrecioByFechaOfListaExtra(
                     listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
-                Extra.getPrecioByFechaOfListaExtra(
-                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.
-                    map { it.extra }, inicio) +
+                EventoExtraVariable.getPrecioByFechaOfListaExtraVariable(
+                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }, inicio) +
                 extraOtro
 
         if(descuento != 0L){
@@ -114,11 +122,45 @@ data class Evento(
     }
 
     fun getPresupuestoCatering(): Double{
-        return 0.0
+        return tipoEvento.getPrecioByFecha(inicio) +
+            capacidad.capacidadAdultos *
+            Extra.getPrecioByFechaOfListaExtra(
+                listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
+                EventoExtraVariable.getPrecioByFechaOfListaExtraVariable(
+                listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }, inicio) +
+            capacidad.capacidadAdultos * cateringOtro
     }
 
     fun getPresupuestoTotal(): Double{
         return this.getPresupuesto() + this.getPresupuestoCatering()
     }
 
+    fun toEventoVerDto(listaExtraEvento : List<ExtraDto>,
+                       listaExtraVariableEvento : List<EventoExtraVariableDto>,
+                       listaExtraCatering : List<ExtraDto>,
+                       listaExtraVariableCatering : List<EventoExtraVariableDto>) : EventoVerDto{
+        return EventoVerDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
+            descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
+            listaExtraCatering, listaExtraVariableCatering, cliente, this.getPresupuestoTotal(), estado)
+    }
+
+    fun toEventoHoraDto(): EventoHoraDto {
+     return EventoHoraDto(id, nombre, codigo, inicio, fin)
+    }
+
+    fun toEventoCateringDto(listaExtra: List<ExtraDto>,
+                            listaExtraVariable: List<EventoExtraVariableDto>): EventoCateringDto {
+    return EventoCateringDto(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
+        listaExtraVariable, this.getPresupuestoCatering(), tipoEvento.id, inicio, capacidad)
+    }
+
+    fun toEventoExtraDto(listaExtra: List<ExtraDto>,
+                         listaExtraVariable: List<EventoExtraVariableDto>): EventoExtraDto {
+        return EventoExtraDto(id, nombre, codigo, getPresupuesto(), extraOtro, descuento, listaExtra,
+            listaExtraVariable, tipoEvento.id, inicio)
+    }
+
+    fun toEventoPagoDto(listaPago: List<PagoDto>): EventoPagoDto {
+        return EventoPagoDto(id, nombre, codigo, getPresupuestoTotal(), listaPago)
+    }
 }

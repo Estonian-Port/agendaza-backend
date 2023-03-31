@@ -48,7 +48,7 @@ class ExtraController {
     @GetMapping("/getExtra/{id}")
     fun showSave(@PathVariable("id") id: Long): ExtraDto {
         val extra = extraService.get(id)!!
-        val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id)
+        val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id,0.0)
         extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
         return extraDto
     }

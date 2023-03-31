@@ -2,10 +2,9 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.dao.ExtraVariableDao
-import com.estonianport.agendaza.dto.ExtraVariableReservaDto
-import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.EventoExtraVariableDto
 import com.estonianport.agendaza.model.EventoExtraVariable
-import com.estonianport.agendaza.model.Pago
+import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -24,23 +23,16 @@ class ExtraVariableService : GenericServiceImpl<EventoExtraVariable, Long>() {
     override val dao: CrudRepository<EventoExtraVariable, Long>
         get() = extraVariableDao
 
-    fun fromListaExtraVariableDtoToListaExtraVariable(listaExtraVariableDto : List<ExtraVariableReservaDto>) : List<EventoExtraVariable>{
-        return listaExtraVariableDto.map { extraVariable -> fromExtraVariableReservaDtoToEventoExtraVariable(extraVariable) }
+    fun fromListaExtraVariableDtoToListaExtraVariable(listaExtraVariableDto : List<EventoExtraVariableDto>) : List<EventoExtraVariable>{
+        return listaExtraVariableDto.map { extraVariable -> EventoExtraVariable(0, extraService.get(extraVariable.id)!!, extraVariable.cantidad) }
     }
 
-    fun fromExtraVariableReservaDtoToEventoExtraVariable(extraVariable : ExtraVariableReservaDto) : EventoExtraVariable{
-        return EventoExtraVariable(0, extraService.get(extraVariable.id)!!, extraVariable.cantidad)
+    fun fromListaExtraVariableToListaExtraVariableDto(listaEventoExtraVariable: List<EventoExtraVariable>, fechaEvento: LocalDateTime): List<EventoExtraVariableDto>{
+        return listaEventoExtraVariable.map { EventoExtraVariableDto(it.extra.id, it.cantidad) }
     }
 
-    fun getListaExtraVariableReservaDto(listaEventoExtraVariable: MutableSet<EventoExtraVariable>, fechaEvento: LocalDateTime): MutableSet<ExtraVariableReservaDto>{
-        val listaExtraDto = mutableSetOf<ExtraVariableReservaDto>()
-
-        listaEventoExtraVariable.forEach{
-            val extraDto = ExtraVariableReservaDto(it.extra.id, it.cantidad)
-
-            listaExtraDto.add(extraDto)
-        }
-        return listaExtraDto
+    fun fromListaExtraVariableToListaExtraVariableDtoByFilter(listaEventoExtraVariable: MutableSet<EventoExtraVariable>, fechaEvento: LocalDateTime, tipoExtra : TipoExtra): List<EventoExtraVariableDto>{
+        return fromListaExtraVariableToListaExtraVariableDto(listaEventoExtraVariable.filter { it.extra.tipoExtra == tipoExtra }, fechaEvento)
     }
 
 }

@@ -29,7 +29,7 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }
 
-    fun fromListaPagoToListaPagoDto(listaPago : List<Pago>) : List<PagoDto>{
+    fun fromListaPagoToListaPagoDto(listaPago : MutableSet<Pago>) : List<PagoDto>{
         return listaPago.map{ pago -> pago.toDTO() }
     }
 }
