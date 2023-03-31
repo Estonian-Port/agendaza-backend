@@ -3,6 +3,7 @@ package com.estonianport.agendaza.model
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.TimeDto
 import com.estonianport.agendaza.dto.TipoEventoDto
+import com.estonianport.agendaza.dto.TipoEventoExtraDto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import java.time.LocalTime
@@ -58,14 +59,8 @@ data class TipoEvento(
     val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     fun toDTO() : TipoEventoDto {
-        return TipoEventoDto(
-            id = id,
-            nombre = nombre,
-            cantidadDuracion = TimeDto(cantidadDuracion.hour, cantidadDuracion.minute),
-            duracion = duracion,
-            capacidad = capacidad,
-            empresaId = empresa.id
-        )
+        return TipoEventoDto(id, nombre, TimeDto(cantidadDuracion.hour, cantidadDuracion.minute),
+            duracion, capacidad, empresa.id)
     }
 
     fun getPrecioByFecha(fecha : LocalDateTime): Double {
@@ -74,5 +69,9 @@ data class TipoEvento(
         }else{
             return 0.0
         }
+    }
+
+    fun toTipoEventoExtraDto(fecha : LocalDateTime): TipoEventoExtraDto {
+        return TipoEventoExtraDto(id, nombre, this.getPrecioByFecha(fecha))
     }
 }

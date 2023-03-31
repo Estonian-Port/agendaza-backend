@@ -7,4 +7,6 @@ import java.time.LocalTime
 class TipoEventoDto(val id : Long, val nombre : String, val cantidadDuracion: TimeDto, val duracion: Duracion,
                     var capacidad : Capacidad, val empresaId : Long) {}
 
+class TipoEventoExtraDto(val id : Long, val nombre : String, val precio : Double)
+
 class TimeDto(val hour: Int, val minute: Int)

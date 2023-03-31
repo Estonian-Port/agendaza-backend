@@ -65,11 +65,11 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             val listaDeRangos: MutableList<List<Int>> = ArrayList()
 
             // Variable usada para obtener la hora final del evento
-            var horaFinal = ""
+            var horaFinal : String
 
             // Obtiene el rango horario de los eventos agendados
             for (evento in listaEvento) {
-                if (evento.inicio.plusDays(1).getDayOfMonth() == evento.fin.getDayOfMonth()) {
+                if (evento.inicio.plusDays(1).dayOfMonth == evento.fin.dayOfMonth) {
                     horaFinal = suma24Horas(evento.fin)
                 } else {
                     horaFinal = evento.fin.toLocalTime().toString()

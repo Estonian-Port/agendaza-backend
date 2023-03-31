@@ -122,8 +122,7 @@ data class Evento(
     }
 
     fun getPresupuestoCatering(): Double{
-        return tipoEvento.getPrecioByFecha(inicio) +
-            capacidad.capacidadAdultos *
+        return capacidad.capacidadAdultos *
             Extra.getPrecioByFechaOfListaExtra(
                 listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
                 EventoExtraVariable.getPrecioByFechaOfListaExtraVariable(
@@ -151,13 +150,13 @@ data class Evento(
     fun toEventoCateringDto(listaExtra: List<ExtraDto>,
                             listaExtraVariable: List<EventoExtraVariableDto>): EventoCateringDto {
     return EventoCateringDto(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
-        listaExtraVariable, this.getPresupuestoCatering(), tipoEvento.id, inicio, capacidad)
+        listaExtraVariable, tipoEvento.id, inicio, capacidad)
     }
 
     fun toEventoExtraDto(listaExtra: List<ExtraDto>,
                          listaExtraVariable: List<EventoExtraVariableDto>): EventoExtraDto {
-        return EventoExtraDto(id, nombre, codigo, getPresupuesto(), extraOtro, descuento, listaExtra,
-            listaExtraVariable, tipoEvento.id, inicio)
+        return EventoExtraDto(id, nombre, codigo, extraOtro, descuento, listaExtra,
+            listaExtraVariable, tipoEvento.toTipoEventoExtraDto(inicio), inicio)
     }
 
     fun toEventoPagoDto(listaPago: List<PagoDto>): EventoPagoDto {
