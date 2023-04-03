@@ -19,7 +19,7 @@ class JWTAuthenticationFilter : UsernamePasswordAuthenticationFilter() {
                 request.reader,
                 AuthCredentials::class.java
             )
-        } catch (e: IOException) {
+        } catch (_: IOException) {
         }
         val usernamePAT = UsernamePasswordAuthenticationToken(
             authCredentials.username,
@@ -30,9 +30,9 @@ class JWTAuthenticationFilter : UsernamePasswordAuthenticationFilter() {
     }
 
     override fun successfulAuthentication(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?, authResult: Authentication?) {
-        var userDetails : UserDetailImpl = authResult?.principal as UserDetailImpl
+        val userDetails : UserDetailImpl = authResult?.principal as UserDetailImpl
 
-        var token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
+        val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
 
         if (response != null) {
             response.addHeader("Authorization", "Bearer $token")

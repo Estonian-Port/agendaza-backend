@@ -16,11 +16,11 @@ class JWTAuthorizationFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        var bearerToken : String? = request.getHeader("Authorization")
+        val bearerToken : String? = request.getHeader("Authorization")
 
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            var token : String = bearerToken.replace("Bearer ", "")
-            var usernamePAT : UsernamePasswordAuthenticationToken? = TokenUtils.getAuthentication(token)
+            val token : String = bearerToken.replace("Bearer ", "")
+            val usernamePAT : UsernamePasswordAuthenticationToken? = TokenUtils.getAuthentication(token)
             SecurityContextHolder.getContext().authentication = usernamePAT
         }
 

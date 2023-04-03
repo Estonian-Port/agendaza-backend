@@ -13,12 +13,12 @@ class TokenUtils {
 
     companion object{
 
-        val ACCESS_TOKEN_SECRET : String = Keys.secretKeyFor(SignatureAlgorithm.HS256).toString();
-        val ACCESS_TOKEN_VALIDITY_SECONDS : Long = 259000
+        private val ACCESS_TOKEN_SECRET : String = Keys.secretKeyFor(SignatureAlgorithm.HS256).toString();
+        const val ACCESS_TOKEN_VALIDITY_SECONDS : Long = 259000
 
         fun createToken(nombre : String, username : String): String {
-            var expirationTime : Long = ACCESS_TOKEN_VALIDITY_SECONDS * 1000
-            var expirationDate : Date = Date(System.currentTimeMillis() + expirationTime)
+            val expirationTime : Long = ACCESS_TOKEN_VALIDITY_SECONDS * 1000
+            val expirationDate : Date = Date(System.currentTimeMillis() + expirationTime)
 
             val extra: MutableMap<String, Any> = HashMap()
             extra["nombre"] = nombre
@@ -34,13 +34,13 @@ class TokenUtils {
         fun getAuthentication(token : String) : UsernamePasswordAuthenticationToken? {
 
             try {
-                var claims : Claims = Jwts.parserBuilder()
+                val claims : Claims = Jwts.parserBuilder()
                     .setSigningKey(ACCESS_TOKEN_SECRET.toByteArray())
                     .build()
                     .parseClaimsJws(token)
                     .body
 
-                var username : String = claims.subject
+                val username : String = claims.subject
 
                 return UsernamePasswordAuthenticationToken(username, null, Collections.emptyList())
             }catch (e : JwtException){
