@@ -10,6 +10,7 @@ import com.estonianport.agendaza.dto.EventoHoraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.EventoVerDto
+import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Empresa
@@ -133,8 +134,14 @@ class EventoController {
             extraVariableService.save(it)
         }
 
-        // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
-        emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
+        try {
+            if(evento.cliente.email.isNotEmpty()) {
+                // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
+                emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
+            }
+        }catch (_: BusinessException){
+            // TODO enviar notificacion de fallo al enviar el mail
+        }
 
         return eventoSaved.id
     }

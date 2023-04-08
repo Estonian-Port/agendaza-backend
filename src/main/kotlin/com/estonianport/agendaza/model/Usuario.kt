@@ -4,17 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
-import jakarta.persistence.PrimaryKeyJoinColumn
-import java.sql.Date
 import java.time.LocalDate
 
 @Entity
@@ -34,20 +27,16 @@ data class Usuario(
     val celular: Long,
 
     @Column
-    val email: String,
-
-    @PrimaryKeyJoinColumn
-    @Enumerated(EnumType.STRING)
-    val sexo: Sexo,
+    val email: String) {
 
     @Column
-    val username: String,
+    val username: String = ""
 
     @Column
-    var password: String,
+    var password: String = ""
 
     @Column(name = "fecha_nacimiento")
-    val fechaNacimiento: LocalDate) {
+    val fechaNacimiento: LocalDate = LocalDate.now()
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))

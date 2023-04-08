@@ -76,7 +76,7 @@ data class Evento(
     @PrimaryKeyJoinColumn
     val encargado: Usuario,
 
-    @ManyToOne
+    @ManyToOne(cascade = arrayOf(CascadeType.PERSIST))
     @PrimaryKeyJoinColumn
     val cliente: Usuario,
 

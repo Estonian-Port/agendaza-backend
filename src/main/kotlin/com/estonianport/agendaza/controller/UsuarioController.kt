@@ -6,15 +6,12 @@ import com.estonianport.agendaza.dto.UsuarioEditPasswordDto
 import com.estonianport.agendaza.dto.UsuarioEmpresaDto
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.Sexo
 import com.estonianport.agendaza.model.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -120,11 +117,6 @@ class UsuarioController {
     @GetMapping("/getAllRol")
     fun getAllRoles(): MutableSet<TipoCargo> {
         return TipoCargo.values().toMutableSet()
-    }
-
-    @GetMapping("/getAllSexo")
-    fun getAllSexo(): MutableSet<Sexo>? {
-        return Sexo.values().toMutableSet()
     }
 
 }
