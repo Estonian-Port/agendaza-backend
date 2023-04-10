@@ -19,6 +19,7 @@ class CapacidadService : GenericServiceImpl<Capacidad, Long>() {
     fun reutilizarCapacidad(capacidad : Capacidad) : Capacidad{
         val listaCapacidad: MutableList<Capacidad>? = this.getAll()
 
+        // TODO refactor
         // Reutilizar capacidades ya guardadas
         if (listaCapacidad != null && listaCapacidad.size != 0) {
             for (capacidadDDBB in listaCapacidad) {

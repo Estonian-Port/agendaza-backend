@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.EventoCateringDto
+import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.EventoExtraDto
 import com.estonianport.agendaza.dto.EventoExtraVariableDto
 import com.estonianport.agendaza.dto.EventoHoraDto
@@ -132,6 +133,10 @@ data class Evento(
 
     fun getPresupuestoTotal(): Double{
         return this.getPresupuesto() + this.getPresupuestoCatering()
+    }
+
+    fun toDto() : EventoDto{
+        return EventoDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre)
     }
 
     fun toEventoVerDto(listaExtraEvento : List<ExtraDto>,

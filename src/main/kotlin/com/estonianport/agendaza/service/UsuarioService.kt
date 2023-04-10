@@ -17,19 +17,12 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     override val dao: CrudRepository<Usuario, Long>
         get() = usuarioRepository
 
-
     fun getUsuarioIdByUsername(username: String): Long {
         return usuarioRepository.getByUsername(username).id
     }
 
-    fun getAllEmpresaByUsuario(usuario : Usuario) : MutableSet<GenericItemDto>{
-        val listaEmpresaDto : MutableSet<GenericItemDto> = mutableSetOf()
-
-        usuario.listaCargo.forEach {
-            listaEmpresaDto.add(GenericItemDto(it.empresa.id, it.empresa.nombre))
-        }
-
-        return listaEmpresaDto
+    fun getAllEmpresaByUsuario(usuario : Usuario) : List<GenericItemDto>{
+        return usuario.listaCargo.map { GenericItemDto(it.empresa.id, it.empresa.nombre) }
     }
 
     fun getUsuarioByEmail(email : String) : Usuario?{
@@ -39,5 +32,4 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun getUsuarioByCelular(celular : Long): Usuario?{
         return usuarioRepository.getUsuarioByCelular(celular)
     }
-
 }

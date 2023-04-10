@@ -27,14 +27,12 @@ class AgendaController {
     lateinit var empresaService: EmpresaService
 
     @GetMapping("/getListaAgendaByUsuarioId/{id}")
-    fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): MutableSet<AgendaDto> {
-        val usuario = usuarioService.get(id)!!
-        return agendaService.getListaAgendasByUsuario(usuario)
+    fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): List<AgendaDto> {
+        return agendaService.getListaAgendasByUsuario(usuarioService.get(id)!!)
     }
 
     @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
-    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): MutableSet<EventoAgendaDto> {
-        val empresa = empresaService.get(id)!!
-        return agendaService.getAllEventosForAgendaByEmpresaId(empresa)
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDto> {
+        return agendaService.getAllEventosForAgendaByEmpresaId(empresaService.get(id)!!)
     }
 }

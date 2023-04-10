@@ -14,44 +14,29 @@ import org.springframework.stereotype.Service
 class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     @Autowired
-    lateinit var EmpresaRepository: EmpresaRepository
+    lateinit var empresaRepository: EmpresaRepository
 
     override val dao: CrudRepository<Empresa, Long>
-        get() = EmpresaRepository
+        get() = empresaRepository
 
-    fun getAllEventoByEmpresaId(empresa : Empresa): MutableSet<EventoDto> {
-
-        val listaAgendaEventoDto : MutableSet<EventoDto> = mutableSetOf()
-
-        empresa.listaEvento.forEach {
-            listaAgendaEventoDto.add(EventoDto(it.id, it.nombre, it.codigo, it.inicio, it.fin, it.tipoEvento.nombre))
+    fun getAllEventoByEmpresaId(empresa : Empresa): List<EventoDto> {
+        return empresa.listaEvento.map { evento ->
+            evento.toDto()
         }
-
-        return listaAgendaEventoDto
     }
 
-    fun getAllPagoByEmpresaId(empresa : Empresa): MutableSet<PagoDto> {
-
-        val listaPago : MutableSet<PagoDto> = mutableSetOf()
-
-        empresa.listaEvento.forEach {
-            it.listaPago.forEach {
-                listaPago.add(PagoDto(it.id, it.monto,it.evento.codigo, it.medioDePago,
-                    it.evento.nombre, it.fecha))
+    fun getAllPagoByEmpresaId(empresa : Empresa): List<PagoDto> {
+        return empresa.listaEvento.flatMap { evento ->
+            evento.listaPago.map { pago ->
+                pago.toDTO()
             }
         }
-
-        return listaPago
     }
 
-    fun getAllUsuariosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {
-        val listaUsuarioAbmDto : MutableSet<UsuarioAbmDto> = mutableSetOf()
-
-        empresa.listaEmpleados.forEach {
-            listaUsuarioAbmDto.add(UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username))
+    fun getAllUsuariosByEmpresaId(empresa: Empresa): List<UsuarioAbmDto> {
+        return empresa.listaEmpleados.map {
+            UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username)
         }
-
-        return listaUsuarioAbmDto
     }
 
 }

@@ -32,6 +32,4 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
     fun fromListaExtraToListaExtraDtoByFilter(listaExtra: MutableSet<Extra>, fechaEvento : LocalDateTime, tipoExtra : TipoExtra) : List<ExtraDto>{
         return this.fromListaExtraToListaExtraDto(listaExtra.filter { it.tipoExtra == tipoExtra }, fechaEvento)
     }
-
-
 }

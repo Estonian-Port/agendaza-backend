@@ -12,27 +12,14 @@ import org.springframework.stereotype.Service
 @Service
 class AgendaService {
 
-    fun getListaAgendasByUsuario(usuario : Usuario): MutableSet<AgendaDto> {
-        val listaAgendaDto : MutableSet<AgendaDto> = mutableSetOf()
-
-        usuario.listaCargo.forEach {
-            val agendaDto = AgendaDto(it.empresa.id, it.empresa.nombre, it.tipoCargo.toString())
-
-            listaAgendaDto.add(agendaDto)
-        }
-
-        return listaAgendaDto
+    //TODO refactor a cargo.toAgendaDto
+    fun getListaAgendasByUsuario(usuario: Usuario): List<AgendaDto> {
+        return usuario.listaCargo.map { AgendaDto(it.empresa.id, it.empresa.nombre, it.tipoCargo.toString()) }
     }
 
-    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): MutableSet<EventoAgendaDto> {
-
-        val listaAgendaEventoDto : MutableSet<EventoAgendaDto> = mutableSetOf()
-
-        empresa.listaEvento.forEach {
-            listaAgendaEventoDto.add(EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin))
-        }
-
-        return listaAgendaEventoDto
+    //TODO refactor a cargo.EventoAgendaDto
+    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): List<EventoAgendaDto> {
+        return empresa.listaEvento.map { EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin)  }
     }
 
     fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {

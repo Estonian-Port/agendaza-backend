@@ -109,9 +109,8 @@ class UsuarioController {
     }
 
     @GetMapping("/getAllEmpresaByUsuarioId/{id}")
-    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): MutableSet<GenericItemDto> {
-        val usuario = usuarioService.get(id)!!
-        return usuarioService.getAllEmpresaByUsuario(usuario)
+    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): List<GenericItemDto> {
+        return usuarioService.getAllEmpresaByUsuario(usuarioService.get(id)!!)
     }
 
     @GetMapping("/getAllRol")
