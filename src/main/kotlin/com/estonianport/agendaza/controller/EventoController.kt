@@ -3,6 +3,7 @@ package com.estonianport.agendaza.controller
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.dto.EventoBuscarFechaDto
 import com.estonianport.agendaza.dto.EventoCateringDto
+import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.EventoExtraDto
 import com.estonianport.agendaza.dto.EventoHoraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
@@ -42,31 +43,31 @@ import java.util.*
 class EventoController {
 
     @Autowired
-    lateinit var eventoService : EventoService
+    lateinit var eventoService: EventoService
 
     @Autowired
-    lateinit var empresaService : EmpresaService
+    lateinit var empresaService: EmpresaService
 
     @Autowired
-    lateinit var tipoEventoService : TipoEventoService
+    lateinit var tipoEventoService: TipoEventoService
 
     @Autowired
-    lateinit var capacidadService : CapacidadService
+    lateinit var capacidadService: CapacidadService
 
     @Autowired
-    lateinit var extraService : ExtraService
+    lateinit var extraService: ExtraService
 
     @Autowired
-    lateinit var extraVariableService : ExtraVariableService
+    lateinit var extraVariableService: ExtraVariableService
 
     @Autowired
-    lateinit var usuarioService : UsuarioService
+    lateinit var usuarioService: UsuarioService
 
     @Autowired
-    lateinit var emailService : EmailService
+    lateinit var emailService: EmailService
 
     @Autowired
-    lateinit var pagoService : PagoService
+    lateinit var pagoService: PagoService
 
     @GetMapping("/getAllEvento")
     fun getAll(): MutableList<Evento>? {
@@ -87,7 +88,7 @@ class EventoController {
         val encargado = usuarioService.get(eventoReservaDto.encargadoId)!!
 
         // Generar codigo de reserva
-        if(eventoReservaDto.codigo.isEmpty()){
+        if (eventoReservaDto.codigo.isEmpty()) {
             eventoReservaDto.codigo = eventoService.generateCodigoForEventoOfEmpresa(empresa)
         }
 
@@ -101,23 +102,32 @@ class EventoController {
         //TODO Reducir el DTO para q venga todo unificado la listaExtra y ExtraVariable
         listaExtra.addAll(
             extraService.fromListaExtraDtoToListaExtra(
-                eventoReservaDto.listaExtra))
+                eventoReservaDto.listaExtra
+            )
+        )
 
         listaExtra.addAll(
             extraService.fromListaExtraDtoToListaExtra(
-                eventoReservaDto.listaExtraTipoCatering))
+                eventoReservaDto.listaExtraTipoCatering
+            )
+        )
 
         listaEventoExtraVariable.addAll(
             extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoReservaDto.listaExtraVariable))
+                eventoReservaDto.listaExtraVariable
+            )
+        )
 
         listaEventoExtraVariable.addAll(
             extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoReservaDto.listaExtraCateringVariable))
+                eventoReservaDto.listaExtraCateringVariable
+            )
+        )
 
         // Inicializacion Evento
         val evento = eventoService.fromEventoReservaDtoToEvento(
-            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado)
+            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado
+        )
 
         // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
@@ -130,11 +140,11 @@ class EventoController {
         }
 
         try {
-            if(evento.cliente.email.isNotEmpty()) {
+            if (evento.cliente.email.isNotEmpty()) {
                 // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
                 emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
             }
-        }catch (_: BusinessException){
+        } catch (_: BusinessException) {
             // TODO enviar notificacion de fallo al enviar el mail
         }
 
@@ -150,7 +160,7 @@ class EventoController {
             extraVariableService.delete(it.id)
         }
 
-        evento.capacidad = Capacidad(0,0,0)
+        evento.capacidad = Capacidad(0, 0, 0)
 
         eventoService.delete(id)
         return ResponseEntity<Evento>(HttpStatus.OK)
@@ -181,7 +191,11 @@ class EventoController {
 
         return evento.toEventoExtraDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)
+            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                evento.listaEventoExtraVariable,
+                evento.inicio,
+                TipoExtra.VARIABLE_EVENTO
+            )
         )
     }
 
@@ -190,8 +204,16 @@ class EventoController {
         val evento = eventoService.get(id)!!
 
         return evento.toEventoCateringDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+            extraService.fromListaExtraToListaExtraDtoByFilter(
+                evento.listaExtra,
+                evento.inicio,
+                TipoExtra.TIPO_CATERING
+            ),
+            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                evento.listaEventoExtraVariable,
+                evento.inicio,
+                TipoExtra.VARIABLE_CATERING
+            )
         )
     }
 
@@ -207,9 +229,21 @@ class EventoController {
 
         return evento.toEventoVerDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO),
-            extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                evento.listaEventoExtraVariable,
+                evento.inicio,
+                TipoExtra.VARIABLE_EVENTO
+            ),
+            extraService.fromListaExtraToListaExtraDtoByFilter(
+                evento.listaExtra,
+                evento.inicio,
+                TipoExtra.TIPO_CATERING
+            ),
+            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                evento.listaEventoExtraVariable,
+                evento.inicio,
+                TipoExtra.VARIABLE_CATERING
+            )
         )
     }
 
@@ -233,11 +267,13 @@ class EventoController {
         val listaExtra = mutableSetOf<Extra>()
         listaExtra.addAll(
             extraService.fromListaExtraDtoToListaExtra(
-                eventoExtraDto.listaExtra.toList()))
+                eventoExtraDto.listaExtra.toList()
+            )
+        )
 
         // TODO revisar el delete
         // Elimina la lista de extraVariable que sean variable evento y no catering
-        evento.listaEventoExtraVariable.filter{ it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.forEach {
+        evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.forEach {
             extraVariableService.delete(it.id)
         }
 
@@ -245,7 +281,9 @@ class EventoController {
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
         listaEventoExtraVariable.addAll(
             extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoExtraDto.listaExtraVariable.toList()))
+                eventoExtraDto.listaExtraVariable.toList()
+            )
+        )
 
         // Guarda la lista de extraVariable
         listaEventoExtraVariable.forEach {
@@ -277,7 +315,9 @@ class EventoController {
         val listaExtra = mutableSetOf<Extra>()
         listaExtra.addAll(
             extraService.fromListaExtraDtoToListaExtra(
-                eventoCateringDto.listaExtraTipoCatering.toList()))
+                eventoCateringDto.listaExtraTipoCatering.toList()
+            )
+        )
 
         // TODO revisar el delete
         // Elimina la lista de extraVariable
@@ -289,7 +329,9 @@ class EventoController {
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
         listaEventoExtraVariable.addAll(
             extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoCateringDto.listaExtraCateringVariable.toList()))
+                eventoCateringDto.listaExtraCateringVariable.toList()
+            )
+        )
 
         // Guarda la lista de extraVariable
         listaEventoExtraVariable.forEach {
@@ -317,7 +359,8 @@ class EventoController {
     fun getListaEventoByDiaAndEmpresaId(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): List<String> {
 
         val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
+            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+        )
 
         val listaFecha: MutableList<String> = mutableListOf()
 
@@ -328,10 +371,13 @@ class EventoController {
                 // En caso de que sea el dia siguiente le agrega la fecha tambien no solo la hora
                 if (evento.inicio.plusDays(1).dayOfMonth == evento.fin.dayOfMonth) {
                     fecha.append(
-                        evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime().toString() + " del dia " + evento.fin.toLocalDate().toString()
+                        evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime()
+                            .toString() + " del dia " + evento.fin.toLocalDate().toString()
                     )
                 } else {
-                    fecha.append(evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime().toString())
+                    fecha.append(
+                        evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime().toString()
+                    )
                 }
 
                 fecha.append(" (" + evento.tipoEvento.nombre + ")")
@@ -348,7 +394,8 @@ class EventoController {
     fun horarioDisponible(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): Boolean {
 
         val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
+            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+        )
 
         return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
     }
@@ -357,15 +404,22 @@ class EventoController {
     @PutMapping("/reenviarMail/{id}")
     fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
 
-        try{
+        try {
             val evento = eventoService.get(id)!!
             val empresa = empresaService.get(empresaId)!!
 
             emailService.enviarMailComprabanteReserva(evento, "sido reservado (reenvio)", empresa)
             return true
-        }catch (e : Exception){
+        } catch (e: Exception) {
             throw NotFoundException("No se pudo reenviar mail")
         }
     }
 
+    @PostMapping("/editEventoAnotaciones/{id}")
+    fun editEventoAnotaciones(@PathVariable("id") id: Long, @RequestBody anotaciones: String): String {
+        val evento = eventoService.get(id)!!
+        evento.anotaciones = anotaciones
+
+        return eventoService.save(evento).anotaciones
+    }
 }

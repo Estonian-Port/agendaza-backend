@@ -89,7 +89,7 @@ data class Evento(
     val estado: Estado,
 
     @Column
-    val anotaciones: String){
+    var anotaciones: String){
 
     @ManyToMany
     @JoinTable(
