@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.TimeDto
 import com.estonianport.agendaza.dto.TipoEventoDto
 import com.estonianport.agendaza.dto.TipoEventoExtraDto

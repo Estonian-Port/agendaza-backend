@@ -2,11 +2,10 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.dao.EmpresaDao
+import com.estonianport.agendaza.repository.EmpresaRepository
 import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.UsuarioAbmDto
-import com.estonianport.agendaza.model.Pago
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -15,10 +14,10 @@ import org.springframework.stereotype.Service
 class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     @Autowired
-    lateinit var EmpresaDao: EmpresaDao
+    lateinit var EmpresaRepository: EmpresaRepository
 
     override val dao: CrudRepository<Empresa, Long>
-        get() = EmpresaDao
+        get() = EmpresaRepository
 
     fun getAllEventoByEmpresaId(empresa : Empresa): MutableSet<EventoDto> {
 

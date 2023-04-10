@@ -1,12 +1,11 @@
-package com.estonianport.agendaza.dao
+package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.Salon
 import org.springframework.data.repository.CrudRepository
 import java.time.LocalDateTime
 
-interface EventoDao : CrudRepository<Evento, Long>{
+interface EventoRepository : CrudRepository<Evento, Long>{
 
     fun findAllByInicioBetweenAndListaEmpresa(inicio: LocalDateTime, fin: LocalDateTime, empresa: Empresa): List<Evento>
 

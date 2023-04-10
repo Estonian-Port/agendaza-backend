@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dao.ExtraDao
+import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.dto.ExtraDto
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoExtra
@@ -14,10 +14,10 @@ import java.time.LocalDateTime
 class ExtraService : GenericServiceImpl<Extra, Long>(){
 
     @Autowired
-    lateinit var extraDao: ExtraDao
+    lateinit var extraRepository: ExtraRepository
 
     override val dao: CrudRepository<Extra, Long>
-        get() = extraDao
+        get() = extraRepository
 
     fun fromListaExtraDtoToListaExtra(listaExtraDto : List<ExtraDto>) : List<Extra>{
         return listaExtraDto.map { extra -> this.get(extra.id)!! }

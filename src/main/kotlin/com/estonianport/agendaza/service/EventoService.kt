@@ -2,7 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
-import com.estonianport.agendaza.dao.EventoDao
+import com.estonianport.agendaza.repository.EventoRepository
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
@@ -12,8 +12,6 @@ import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
@@ -24,10 +22,10 @@ import java.util.stream.IntStream
 class EventoService : GenericServiceImpl<Evento, Long>() {
 
     @Autowired
-    lateinit var eventoDao: EventoDao
+    lateinit var eventoRepository: EventoRepository
 
     override val dao: CrudRepository<Evento, Long>
-        get() = eventoDao
+        get() = eventoRepository
 
     fun generateCodigoForEventoOfEmpresa(empresa : Empresa) : String{
         var codigo : String = CodeGeneratorUtil.base26Only4Letters
@@ -53,7 +51,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         val inicio: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 0,0 )
         val fin: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 23,59 )
 
-        return eventoDao.findAllByInicioBetweenAndListaEmpresa(inicio, fin, empresa)
+        return eventoRepository.findAllByInicioBetweenAndListaEmpresa(inicio, fin, empresa)
     }
 
     fun getHorarioDisponible(listaEvento: List<Evento>, desde : LocalDateTime, hasta : LocalDateTime) : Boolean{

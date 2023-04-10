@@ -1,6 +1,6 @@
-package com.estonianport.agendaza.dao
+package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.model.Cargo
 import org.springframework.data.repository.CrudRepository
 
-interface CargoDao : CrudRepository<Cargo, Long>
+interface CargoRepository : CrudRepository<Cargo, Long>

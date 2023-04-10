@@ -1,6 +1,6 @@
-package com.estonianport.agendaza.dao
+package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.model.Capacidad
 import org.springframework.data.repository.CrudRepository
 
-interface CapacidadDao : CrudRepository<Capacidad, Long>
+interface CapacidadRepository : CrudRepository<Capacidad, Long>

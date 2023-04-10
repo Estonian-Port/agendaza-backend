@@ -1,8 +1,6 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.emailService.EmailService
-import com.estonianport.agendaza.dto.AgregadosDto
-import com.estonianport.agendaza.dto.CateringEventoDto
 import com.estonianport.agendaza.dto.EventoBuscarFechaDto
 import com.estonianport.agendaza.dto.EventoCateringDto
 import com.estonianport.agendaza.dto.EventoExtraDto
@@ -13,14 +11,11 @@ import com.estonianport.agendaza.dto.EventoVerDto
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Capacidad
-import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Estado
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.EventoExtraVariable
-import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.TipoExtra
-import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService

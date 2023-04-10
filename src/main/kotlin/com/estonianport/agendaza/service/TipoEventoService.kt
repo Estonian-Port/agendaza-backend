@@ -1,22 +1,19 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dao.TipoEventoDao
-import com.estonianport.agendaza.dto.ExtraDto
-import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
+import com.estonianport.agendaza.repository.TipoEventoRepository
 import com.estonianport.agendaza.model.TipoEvento
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
 
     @Autowired
-    lateinit var tipoEventoDao: TipoEventoDao
+    lateinit var tipoEventoRepository: TipoEventoRepository
 
     override val dao: CrudRepository<TipoEvento, Long>
-        get() = tipoEventoDao
+        get() = tipoEventoRepository
 
 }
