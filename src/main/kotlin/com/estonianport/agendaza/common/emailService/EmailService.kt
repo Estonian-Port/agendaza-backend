@@ -26,7 +26,7 @@ class EmailService {
     }
 
     private fun sendEmailTool(textMessage: String, email: String, subject: String) {
-        val message: MimeMessage = sender!!.createMimeMessage()
+        val message: MimeMessage = sender.createMimeMessage()
         val helper = MimeMessageHelper(message)
         try {
             helper.setTo(email)

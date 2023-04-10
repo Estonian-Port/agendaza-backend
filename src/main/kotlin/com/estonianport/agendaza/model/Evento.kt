@@ -86,7 +86,10 @@ data class Evento(
 
     @Column
     @Enumerated(EnumType.STRING)
-    val estado: Estado){
+    val estado: Estado,
+
+    @Column
+    val anotaciones: String){
 
     @ManyToMany
     @JoinTable(
@@ -145,7 +148,7 @@ data class Evento(
                        listaExtraVariableCatering : List<EventoExtraVariableDto>) : EventoVerDto{
         return EventoVerDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
             descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
-            listaExtraCatering, listaExtraVariableCatering, cliente, this.getPresupuestoTotal(), estado)
+            listaExtraCatering, listaExtraVariableCatering, cliente, this.getPresupuestoTotal(), estado, anotaciones)
     }
 
     fun toEventoHoraDto(): EventoHoraDto {

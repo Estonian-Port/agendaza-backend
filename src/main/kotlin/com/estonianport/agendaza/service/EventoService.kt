@@ -147,6 +147,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             encargado,
             eventoReservaDto.cliente,
             eventoReservaDto.codigo,
-            eventoReservaDto.estado)
+            eventoReservaDto.estado,
+            eventoReservaDto.anotaciones)
     }
 }

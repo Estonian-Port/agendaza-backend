@@ -17,7 +17,7 @@ class EventoReservaDto(val id: Long, val nombre: String, var capacidad : Capacid
                        val cateringOtro : Double, val cateringOtroDescripcion : String,
                        val listaExtraTipoCatering : List<ExtraDto>,
                        val listaExtraCateringVariable : List<EventoExtraVariableDto>,
-                       val cliente : Usuario, val encargadoId : Long, val estado : Estado) {}
+                       val cliente : Usuario, val encargadoId : Long, val estado : Estado, val anotaciones : String) {}
 
 class EventoPagoDto(val id : Long, val nombre : String, val codigo : String,
                       val precioTotal : Double, val listaPagos : List<PagoDto>) {}
@@ -41,7 +41,7 @@ class EventoVerDto(val id : Long, val nombre : String, val codigo : String, val 
                    val cateringOtro : Double, val cateringOtroDescription : String,
                    val listaExtraTipoCatering : List<ExtraDto>,
                    val listaExtraCateringVariable : List<EventoExtraVariableDto>,
-                   val cliente : Usuario, val presupuesto : Double, val estado : Estado) {}
+                   val cliente : Usuario, val presupuesto : Double, val estado : Estado, val anotaciones: String) {}
 
 class EventoBuscarFechaDto(val empresaId : Long, val desde : LocalDateTime, val hasta : LocalDateTime) {
 }
