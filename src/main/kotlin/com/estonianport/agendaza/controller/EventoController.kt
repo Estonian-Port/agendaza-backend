@@ -70,8 +70,8 @@ class EventoController {
     lateinit var pagoService: PagoService
 
     @GetMapping("/getAllEvento")
-    fun getAll(): MutableList<Evento>? {
-        return eventoService.getAll()
+    fun getAll(): List<EventoDto>? {
+        return eventoService.listaEventoToListaEventoDto(eventoService.getAll())
     }
 
     @GetMapping("/getEvento/{id}")

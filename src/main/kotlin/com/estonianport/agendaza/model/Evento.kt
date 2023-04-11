@@ -46,7 +46,7 @@ data class Evento(
     @Column
     var fin: LocalDateTime,
 
-    @ManyToOne(cascade = arrayOf(CascadeType.ALL))
+    @ManyToOne(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
@@ -64,7 +64,7 @@ data class Evento(
     )
     var listaExtra: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "evento")
+    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
     var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
 
     @Column
@@ -91,7 +91,7 @@ data class Evento(
     @Column
     var anotaciones: String){
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_empresa",
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
@@ -107,7 +107,7 @@ data class Evento(
     )
     val listaEmpleado: MutableSet<Usuario> = mutableSetOf()
 
-    @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     val listaPago: MutableSet<Pago> = mutableSetOf()
 
     //TODO revisar los filter esos

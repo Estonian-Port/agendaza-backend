@@ -10,6 +10,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -34,27 +35,27 @@ data class TipoEvento(
     @Enumerated(EnumType.STRING)
     val duracion : Duracion,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
     @Column
     val cantidadDuracion: LocalTime,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST])
+    @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
     @JsonIgnore
-    @OneToMany(mappedBy = "tipoEvento")
+    @OneToMany(mappedBy = "tipoEvento", fetch = FetchType.LAZY)
     val listaPrecioConFecha: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaTipoEvento")
+    @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     val listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaTipoEvento")
+    @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     fun toDTO() : TipoEventoDto {

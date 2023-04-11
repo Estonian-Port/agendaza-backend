@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -39,11 +40,11 @@ data class Usuario(
     val fechaNacimiento: LocalDate = LocalDate.now()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaEventosContratados : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
     @Column

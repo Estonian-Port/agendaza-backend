@@ -2,6 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
+import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.repository.EventoRepository
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.model.Empresa
@@ -26,6 +27,10 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
+
+    fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDto>?{
+        return listaEvento!!.map { it.toDto() }
+    }
 
     fun generateCodigoForEventoOfEmpresa(empresa : Empresa) : String{
         var codigo : String = CodeGeneratorUtil.base26Only4Letters
