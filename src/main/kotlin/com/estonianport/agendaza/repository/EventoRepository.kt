@@ -13,4 +13,7 @@ interface EventoRepository : CrudRepository<Evento, Long>{
 
     fun findAllByInicioBetweenAndListaEmpresa(inicio: LocalDateTime, fin: LocalDateTime, empresa: Empresa): List<Evento>
 
+    @EntityGraph(attributePaths = ["capacidad", "encargado", "cliente", "tipoEvento.capacidad"])
+    fun findAllByListaEmpresa(empresa: Empresa) : List<Evento>
+
 }

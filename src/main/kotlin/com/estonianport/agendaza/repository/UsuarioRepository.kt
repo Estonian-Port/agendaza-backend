@@ -14,16 +14,15 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     @EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
     override fun findAll() : List<Usuario>
 
-    @EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
-    override fun findById(id: Long): Optional<Usuario>
-
-    @EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
+    @EntityGraph(attributePaths = ["listaCargo"])
     fun getByUsername(username: String): Usuario
 
-    @EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
     fun findOneByUsername(username: String): Usuario?
 
     fun getUsuarioByEmail(email : String): Usuario?
 
     fun getUsuarioByCelular(celular : Long) : Usuario?
+
+    @EntityGraph(attributePaths = ["listaCargo.empresa"])
+    override fun findById(id: Long) : Optional<Usuario>
 }

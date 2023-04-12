@@ -3,9 +3,9 @@ package com.estonianport.agendaza.service
 import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.dto.ConfiguracionDto
-import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.stereotype.Service
@@ -19,8 +19,8 @@ class AgendaService {
     }
 
     //TODO refactor a cargo.EventoAgendaDto
-    fun getAllEventosForAgendaByEmpresaId(empresa : Empresa): List<EventoAgendaDto> {
-        return empresa.listaEvento.map { EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin)  }
+    fun getAllEventosForAgendaByEmpresaId(listaEvento: List<Evento>): List<EventoAgendaDto> {
+        return listaEvento.map { EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin)  }
     }
 
     fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {

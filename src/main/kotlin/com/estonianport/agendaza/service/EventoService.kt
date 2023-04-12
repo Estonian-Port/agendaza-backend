@@ -28,6 +28,10 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
 
+    fun findAllByEmpresa(empresa : Empresa) : List<Evento>{
+       return eventoRepository.findAllByListaEmpresa(empresa)
+    }
+
     fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDto>?{
         return listaEvento!!.map { it.toDto() }
     }
