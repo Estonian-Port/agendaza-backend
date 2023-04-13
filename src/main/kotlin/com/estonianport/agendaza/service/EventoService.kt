@@ -16,8 +16,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
+import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.IntStream
+import kotlin.collections.ArrayList
 
 @Service
 class EventoService : GenericServiceImpl<Evento, Long>() {
@@ -30,6 +32,10 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     fun findAllByEmpresa(empresa : Empresa) : List<Evento>{
        return eventoRepository.findAllByListaEmpresa(empresa)
+    }
+
+    fun findById(id : Long): Evento {
+        return eventoRepository.findById(id).get()
     }
 
     fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDto>?{

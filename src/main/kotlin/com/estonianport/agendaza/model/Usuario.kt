@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -49,6 +50,10 @@ data class Usuario(
 
     @Column
     var habilitado : Boolean = true
+
+    fun toUsuarioAbmDto(): UsuarioAbmDto {
+        return UsuarioAbmDto(id, nombre, apellido, username)
+    }
 }
 
 

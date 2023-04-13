@@ -40,7 +40,7 @@ class EventoVerDto(val id : Long, val nombre : String, val codigo : String, val 
                    val listaExtraVariable : List<EventoExtraVariableDto>,
                    val cateringOtro : Double, val cateringOtroDescription : String,
                    val listaExtraTipoCatering : List<ExtraDto>,
-                   val listaExtraCateringVariable : List<EventoExtraVariableDto>,
+                   val listaExtraCateringVariable : List<EventoExtraVariableDto>, val encargado: UsuarioAbmDto,
                    val cliente : Usuario, val presupuesto : Double, val estado : Estado, val anotaciones: String) {}
 
 class EventoBuscarFechaDto(val empresaId : Long, val desde : LocalDateTime, val hasta : LocalDateTime) {

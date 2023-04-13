@@ -76,16 +76,16 @@ class EventoController {
 
     @GetMapping("/getEvento/{id}")
     fun get(@PathVariable("id") id: Long): Evento? {
-        return eventoService.get(id)
+        return eventoService.findById(id)
     }
 
     //TODO refactor sacar agregados y catering de eventoReservaDto
     @PostMapping("/saveEvento")
     fun save(@RequestBody eventoReservaDto: EventoReservaDto): Long {
 
-        val empresa = empresaService.get(eventoReservaDto.empresaId)!!
+        val empresa = empresaService.findById(eventoReservaDto.empresaId)
         val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
-        val encargado = usuarioService.get(eventoReservaDto.encargadoId)!!
+        val encargado = usuarioService.findById(eventoReservaDto.encargadoId)
 
         // Generar codigo de reserva
         if (eventoReservaDto.codigo.isEmpty()) {
@@ -126,7 +126,7 @@ class EventoController {
 
         // Inicializacion Evento
         val evento = eventoService.fromEventoReservaDtoToEvento(
-            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado
+            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado!!
         )
 
         // vincula el evento a la empresa
@@ -153,7 +153,7 @@ class EventoController {
 
     @DeleteMapping("/deleteEvento/{id}")
     fun delete(@PathVariable("id") id: Long): ResponseEntity<Evento> {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
 
         // TODO Delegar a service
         evento.listaEventoExtraVariable.forEach {
@@ -178,7 +178,7 @@ class EventoController {
 
     @GetMapping("/getEventoPago/{id}")
     fun getEventoPago(@PathVariable("id") id: Long): EventoPagoDto? {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
 
         return evento.toEventoPagoDto(
             pagoService.fromListaPagoToListaPagoDto(evento.listaPago)
@@ -187,7 +187,7 @@ class EventoController {
 
     @GetMapping("/getEventoExtra/{id}")
     fun getEventoExtra(@PathVariable("id") id: Long): EventoExtraDto? {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
 
         return evento.toEventoExtraDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
@@ -201,7 +201,7 @@ class EventoController {
 
     @GetMapping("/getEventoCatering/{id}")
     fun getEventoCatering(@PathVariable("id") id: Long): EventoCateringDto? {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
 
         return evento.toEventoCateringDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
@@ -219,13 +219,13 @@ class EventoController {
 
     @GetMapping("/getEventoHora/{id}")
     fun getEventoHora(@PathVariable("id") id: Long): EventoHoraDto? {
-        return eventoService.get(id)!!.toEventoHoraDto()
+        return eventoService.findById(id).toEventoHoraDto()
     }
 
     // TODO unificar EventoVerDto con EventoReservaDto
     @GetMapping("/getEventoVer/{id}")
     fun getEventoVer(@PathVariable("id") id: Long): EventoVerDto? {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
 
         return evento.toEventoVerDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
@@ -249,7 +249,7 @@ class EventoController {
 
     @PostMapping("/editEventoHora")
     fun editEventoHora(@RequestBody eventoHoraDto: EventoHoraDto): EventoHoraDto? {
-        val evento = eventoService.get(eventoHoraDto.id)!!
+        val evento = eventoService.findById(eventoHoraDto.id)
 
         evento.inicio = eventoHoraDto.inicio
         evento.fin = eventoHoraDto.fin
@@ -262,7 +262,7 @@ class EventoController {
     //TODO Refactorizar
     @PostMapping("/editEventoExtra")
     fun editEventoExtra(@RequestBody eventoExtraDto: EventoExtraDto): Long? {
-        val evento = eventoService.get(eventoExtraDto.id)!!
+        val evento = eventoService.findById(eventoExtraDto.id)
 
         val listaExtra = mutableSetOf<Extra>()
         listaExtra.addAll(
@@ -310,7 +310,7 @@ class EventoController {
     //TODO Refactorizar
     @PostMapping("/editEventoCatering")
     fun editEventoCatering(@RequestBody eventoCateringDto: EventoCateringDto): EventoHoraDto? {
-        val evento = eventoService.get(eventoCateringDto.id)!!
+        val evento = eventoService.findById(eventoCateringDto.id)
 
         val listaExtra = mutableSetOf<Extra>()
         listaExtra.addAll(
@@ -359,7 +359,7 @@ class EventoController {
     fun getListaEventoByDiaAndEmpresaId(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): List<String> {
 
         val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+            empresaService.findById(eventoBuscarFechaDto.empresaId), eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
         )
 
         val listaFecha: MutableList<String> = mutableListOf()
@@ -394,7 +394,7 @@ class EventoController {
     fun horarioDisponible(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDto): Boolean {
 
         val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.get(eventoBuscarFechaDto.empresaId)!!, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+            empresaService.findById(eventoBuscarFechaDto.empresaId), eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
         )
 
         return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
@@ -405,8 +405,8 @@ class EventoController {
     fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
 
         try {
-            val evento = eventoService.get(id)!!
-            val empresa = empresaService.get(empresaId)!!
+            val evento = eventoService.findById(id)
+            val empresa = empresaService.findById(empresaId)
 
             emailService.enviarMailComprabanteReserva(evento, "sido reservado (reenvio)", empresa)
             return true
@@ -417,9 +417,38 @@ class EventoController {
 
     @PostMapping("/editEventoAnotaciones/{id}")
     fun editEventoAnotaciones(@PathVariable("id") id: Long, @RequestBody anotaciones: String): String {
-        val evento = eventoService.get(id)!!
+        val evento = eventoService.findById(id)
         evento.anotaciones = anotaciones
 
         return eventoService.save(evento).anotaciones
+    }
+
+    @PostMapping("/editEventoCantidadAdultos")
+    fun editEventoCantidadAdultos(@RequestBody eventoDto: EventoVerDto): Int {
+        val evento = eventoService.findById(eventoDto.id)
+        evento.capacidad.capacidadAdultos  = eventoDto.capacidad.capacidadAdultos
+
+        return eventoService.save(evento).capacidad.capacidadAdultos
+    }
+
+    @PostMapping("/editEventoCantidadNinos")
+    fun editEventoCantidadNinos(@RequestBody eventoDto: EventoVerDto): Int {
+        val evento = eventoService.findById(eventoDto.id)
+        evento.capacidad.capacidadNinos = eventoDto.capacidad.capacidadNinos
+
+        return eventoService.save(evento).capacidad.capacidadNinos
+    }
+
+    @PostMapping("/editEventoNombre/{id}")
+    fun editEventoCantidadNombre(@PathVariable("id") id: Long, @RequestBody nombre: String): String {
+        val evento = eventoService.findById(id)
+        evento.nombre = nombre
+
+        return eventoService.save(evento).nombre
+    }
+
+    @GetMapping("/getPresupuesto/{id}")
+    fun editEventoCantidadNombre(@PathVariable("id") id: Long): Double {
+        return eventoService.findById(id).getPresupuestoTotal()
     }
 }

@@ -34,7 +34,7 @@ data class Evento(
     val id: Long,
 
     @Column
-    val nombre: String,
+    var nombre: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
@@ -148,7 +148,7 @@ data class Evento(
                        listaExtraVariableCatering : List<EventoExtraVariableDto>) : EventoVerDto{
         return EventoVerDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
             descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
-            listaExtraCatering, listaExtraVariableCatering, cliente, this.getPresupuestoTotal(), estado, anotaciones)
+            listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
     }
 
     fun toEventoHoraDto(): EventoHoraDto {
