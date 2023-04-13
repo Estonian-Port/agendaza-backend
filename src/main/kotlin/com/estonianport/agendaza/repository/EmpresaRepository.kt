@@ -16,10 +16,9 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     ])
     override fun findAll() : List<Empresa>
 
-    //TODO revisar
     @EntityGraph(attributePaths = [
         "listaEmpleados",
-        "listaEvento.listaPago",
+        "listaEvento",
         "listaServicio",
         "listaExtra",
         "listaTipoEvento"
@@ -27,7 +26,14 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     override fun findById(id: Long) : Optional<Empresa>
 
     @EntityGraph(attributePaths = [
-        "listaEvento",
+        "listaExtra",
+        "listaEvento.capacidad",
+        "listaEvento.tipoEvento.capacidad",
+        "listaEvento.encargado",
+        "listaEvento.cliente",
+        "listaEvento.listaExtra",
+        "listaEvento.listaEventoExtraVariable"
     ])
+    //@EntityGraph(attributePaths = ["listaEvento"])
     fun findEmpresaById(id: Long) : Optional<Empresa>
 }

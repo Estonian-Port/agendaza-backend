@@ -59,7 +59,7 @@ data class Evento(
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_extra",
-        joinColumns = arrayOf(JoinColumn(name = "agregados_id")),
+        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
         inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
     )
     var listaExtra: MutableSet<Extra>,

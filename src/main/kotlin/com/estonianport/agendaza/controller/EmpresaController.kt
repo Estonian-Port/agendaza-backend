@@ -43,12 +43,12 @@ class EmpresaController {
 
     @GetMapping("/getAllEventoByEmpresaId/{id}")
     fun getAllEventoByEmpresaId(@PathVariable("id") id: Long): List<EventoDto> {
-        return empresaService.getAllEventoByEmpresaId(empresaService.get(id)!!)
+        return empresaService.getAllEventoByEmpresaId(empresaService.findEmpresaById(id))
     }
 
     @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
     fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): MutableSet<EventoDto> {
-        val listaEventos = empresaService.getAllEventoByEmpresaId(empresaService.get(id)!!)
+        val listaEventos = empresaService.getAllEventoByEmpresaId(empresaService.findEmpresaById(id))
         return listaEventos.filter { it.inicio.toLocalDate() == fechaFiltro }.toMutableSet()
     }
 

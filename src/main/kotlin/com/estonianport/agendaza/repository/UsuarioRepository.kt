@@ -23,6 +23,6 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     fun getUsuarioByCelular(celular : Long) : Usuario?
 
-    @EntityGraph(attributePaths = ["listaCargo.empresa"])
+    @EntityGraph(attributePaths = ["listaCargo"])
     override fun findById(id: Long) : Optional<Usuario>
 }
