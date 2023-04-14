@@ -36,7 +36,7 @@ data class Evento(
     @Column
     var nombre: String,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val tipoEvento: TipoEvento,
 
@@ -46,7 +46,7 @@ data class Evento(
     @Column
     var fin: LocalDateTime,
 
-    @ManyToOne(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
+    @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 

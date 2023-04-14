@@ -9,15 +9,17 @@ import java.util.*
 
 interface EventoRepository : CrudRepository<Evento, Long>{
 
+/*
     @EntityGraph(attributePaths = ["capacidad", "encargado", "cliente", "tipoEvento"])
+*/
     override fun findAll() : List<Evento>
 
-    @EntityGraph(attributePaths = [
+/*    @EntityGraph(attributePaths = [
         "capacidad",
         "cliente",
         "encargado",
         "tipoEvento"
-    ])
+    ])*/
     override fun findById(id: Long) : Optional<Evento>
 
     fun findAllByInicioBetweenAndListaEmpresa(inicio: LocalDateTime, fin: LocalDateTime, empresa: Empresa): List<Evento>

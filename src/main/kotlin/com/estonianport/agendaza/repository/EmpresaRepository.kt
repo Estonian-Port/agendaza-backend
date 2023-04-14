@@ -7,25 +7,25 @@ import java.util.*
 
 interface EmpresaRepository : CrudRepository<Empresa, Long>{
 
-    @EntityGraph(attributePaths = [
+/*    @EntityGraph(attributePaths = [
         "listaEmpleados",
         "listaEvento",
         "listaServicio",
         "listaExtra",
         "listaTipoEvento"
-    ])
+    ])*/
     override fun findAll() : List<Empresa>
 
-    @EntityGraph(attributePaths = [
-        "listaEmpleados",
-        "listaEvento",
-        "listaServicio",
-        "listaExtra",
-        "listaTipoEvento"
-    ])
+    /*  @EntityGraph(attributePaths = [
+         "listaEmpleados",
+         "listaEvento",
+         "listaServicio",
+         "listaExtra",
+         "listaTipoEvento"
+     ])*/
     override fun findById(id: Long) : Optional<Empresa>
 
-    @EntityGraph(attributePaths = [
+    /* @EntityGraph(attributePaths = [
         "listaExtra",
         "listaEvento.capacidad",
         "listaEvento.tipoEvento.capacidad",
@@ -33,7 +33,7 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
         "listaEvento.cliente",
         "listaEvento.listaExtra",
         "listaEvento.listaEventoExtraVariable"
-    ])
+    ])*/
     //@EntityGraph(attributePaths = ["listaEvento"])
     fun findEmpresaById(id: Long) : Optional<Empresa>
 }

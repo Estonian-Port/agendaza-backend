@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.repository.CrudRepository
 
 interface TipoEventoRepository : CrudRepository<TipoEvento, Long>{
-    @EntityGraph(attributePaths = ["capacidad", "empresa"])
+    //@EntityGraph(attributePaths = ["capacidad", "empresa"])
     override fun findAll() : List<TipoEvento>
 
 }

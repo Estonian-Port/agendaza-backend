@@ -35,14 +35,14 @@ data class TipoEvento(
     @Enumerated(EnumType.STRING)
     val duracion : Duracion,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
     @Column
     val cantidadDuracion: LocalTime,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.PERSIST])
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 

@@ -53,7 +53,7 @@ class PrecioConFechaExtra(
     empresa: Empresa,
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val extra: Extra) : PrecioConFecha(id, precio, desde, hasta, empresa) {}
 
@@ -66,7 +66,7 @@ class PrecioConFechaTipoEvento(
     empresa: Empresa,
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {}
 

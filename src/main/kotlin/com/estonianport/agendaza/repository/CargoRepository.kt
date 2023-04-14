@@ -10,13 +10,13 @@ import java.util.*
 
 interface CargoRepository : CrudRepository<Cargo, Long>{
 
-    @EntityGraph(attributePaths = ["usuario", "empresa"])
+    //@EntityGraph(attributePaths = ["usuario", "empresa"])
     override fun findAll() : List<Cargo>
 
-    @EntityGraph(attributePaths = ["usuario", "empresa"])
+    //@EntityGraph(attributePaths = ["usuario", "empresa"])
     override fun findById(id : Long) : Optional<Cargo>
 
-    @EntityGraph(attributePaths = ["usuario", "empresa"])
+    //@EntityGraph(attributePaths = ["usuario", "empresa"])
     fun findAllByUsuario(usuario : Usuario): List<Cargo>
 }
 

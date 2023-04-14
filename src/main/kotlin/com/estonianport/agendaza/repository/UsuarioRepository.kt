@@ -11,10 +11,10 @@ import java.util.*
 @Repository
 interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
-    @EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
+    //@EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
     override fun findAll() : List<Usuario>
 
-    @EntityGraph(attributePaths = ["listaCargo"])
+    //@EntityGraph(attributePaths = ["listaCargo"])
     fun getByUsername(username: String): Usuario
 
     fun findOneByUsername(username: String): Usuario?
@@ -23,6 +23,6 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     fun getUsuarioByCelular(celular : Long) : Usuario?
 
-    @EntityGraph(attributePaths = ["listaCargo"])
+    //@EntityGraph(attributePaths = ["listaCargo"])
     override fun findById(id: Long) : Optional<Usuario>
 }
