@@ -129,6 +129,13 @@ class EventoController {
             eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado!!
         )
 
+        //TODO arreglar con cascade
+        if(eventoReservaDto.cliente.id != 0L){
+            evento.cliente = usuarioService.get(eventoReservaDto.cliente.id)!!
+        }else{
+            evento.cliente = usuarioService.save(evento.cliente)
+        }
+
         // vincula el evento a la empresa
         evento.listaEmpresa.add(empresa)
 
