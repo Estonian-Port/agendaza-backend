@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.ExtraDto
+import com.estonianport.agendaza.dto.ExtraDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -47,7 +47,13 @@ data class Extra(
     @Column
     var fechaBaja : LocalDate? = null
 
-    fun toDTO(fechaEvento: LocalDateTime): ExtraDto {
-        return ExtraDto(id, nombre, tipoExtra, empresa.id, empresa.getPrecioOfExtraByFecha(this, fechaEvento))
+    fun toDTO(): ExtraDTO {
+        return ExtraDTO(id, nombre, tipoExtra, empresa.id)
+    }
+
+    fun toExtraPrecioDTO(fechaEvento: LocalDateTime): ExtraDTO {
+        val extraDTO = ExtraDTO(id, nombre, tipoExtra, empresa.id)
+        extraDTO.precio = empresa.getPrecioOfExtraByFecha(this, fechaEvento)
+        return extraDTO
     }
 }

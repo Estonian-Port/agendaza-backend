@@ -194,7 +194,11 @@ class EventoController {
         val evento = eventoService.findById(id)
 
         return evento.toEventoExtraDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
+            extraService.fromListaExtraToListaExtraDtoByFilter(
+                evento.listaExtra,
+                evento.inicio,
+                TipoExtra.EVENTO
+            ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
                 evento.listaEventoExtraVariable,
                 evento.inicio,

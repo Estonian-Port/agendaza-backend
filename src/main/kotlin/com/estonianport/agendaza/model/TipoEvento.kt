@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.fasterxml.jackson.annotation.JsonIgnore

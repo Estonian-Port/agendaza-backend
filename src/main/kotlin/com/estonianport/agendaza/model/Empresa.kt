@@ -109,14 +109,18 @@ abstract class Empresa(
 
     fun getPrecioOfExtraByFecha(extra: Extra, fecha: LocalDateTime): Double{
         return listaPrecioConFechaExtra.find {
-            it.extra.id == extra.id && it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
+            it.extra.id == extra.id &&
+            it.fechaBaja == null &&
+            (it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha))
         }?.precio ?: return 0.0
 
     }
 
     fun getPrecioOfTipoEvento(tipoEvento: TipoEvento, fecha: LocalDateTime): Double{
         return listaPrecioConFechaTipoEvento.find {
-            it.tipoEvento.id == tipoEvento.id && it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
+            it.tipoEvento.id == tipoEvento.id &&
+            it.fechaBaja == null &&
+            it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
         }?.precio ?: return 0.0
     }
 

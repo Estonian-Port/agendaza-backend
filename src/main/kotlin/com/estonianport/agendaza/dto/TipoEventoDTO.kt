@@ -9,3 +9,4 @@ class TipoEventoDTO(val id : Long, val nombre : String, val cantidadDuracion: Lo
 
 class TipoEventoPrecioDTO(val id : Long, val nombre : String, val precio : Double)
 
+class TimeDTO(val hour: Int, val minute: Int)

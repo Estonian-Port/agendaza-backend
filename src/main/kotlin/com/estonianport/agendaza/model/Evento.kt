@@ -3,11 +3,11 @@ package com.estonianport.agendaza.model
 import com.estonianport.agendaza.dto.EventoCateringDto
 import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.EventoExtraDto
-import com.estonianport.agendaza.dto.EventoExtraVariableDto
+import com.estonianport.agendaza.dto.EventoExtraVariableDTO
 import com.estonianport.agendaza.dto.EventoHoraDto
 import com.estonianport.agendaza.dto.EventoPagoDto
 import com.estonianport.agendaza.dto.EventoVerDto
-import com.estonianport.agendaza.dto.ExtraDto
+import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PagoDto
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -143,10 +143,10 @@ data class Evento(
         return EventoDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre)
     }
 
-    fun toEventoVerDto(listaExtraEvento : List<ExtraDto>,
-                       listaExtraVariableEvento : List<EventoExtraVariableDto>,
-                       listaExtraCatering : List<ExtraDto>,
-                       listaExtraVariableCatering : List<EventoExtraVariableDto>) : EventoVerDto{
+    fun toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
+                       listaExtraVariableEvento : List<EventoExtraVariableDTO>,
+                       listaExtraCatering : List<ExtraDTO>,
+                       listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDto{
         return EventoVerDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
             descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
             listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
@@ -156,14 +156,14 @@ data class Evento(
      return EventoHoraDto(id, nombre, codigo, inicio, fin)
     }
 
-    fun toEventoCateringDto(listaExtra: List<ExtraDto>,
-                            listaExtraVariable: List<EventoExtraVariableDto>): EventoCateringDto {
+    fun toEventoCateringDto(listaExtra: List<ExtraDTO>,
+                            listaExtraVariable: List<EventoExtraVariableDTO>): EventoCateringDto {
     return EventoCateringDto(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
         listaExtraVariable, tipoEvento.id, inicio, capacidad)
     }
 
-    fun toEventoExtraDto(listaExtra: List<ExtraDto>,
-                         listaExtraVariable: List<EventoExtraVariableDto>): EventoExtraDto {
+    fun toEventoExtraDto(listaExtra: List<ExtraDTO>,
+                         listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDto {
         return EventoExtraDto(id, nombre, codigo, extraOtro, descuento, listaExtra,
             listaExtraVariable, tipoEvento.toTipoEventoPrecioDTO(inicio), inicio)
     }
