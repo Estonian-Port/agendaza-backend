@@ -80,6 +80,16 @@ class TipoEventoController {
         tipoEventoEliminar.fechaBaja = LocalDate.now()
         tipoEventoService.save(tipoEventoEliminar)
 
+        // Deja los precios con fecha del tipo evento eliminado sin fecha baja
+        /*val listaPrecioTipoEventoEliminar = tipoEventoEliminar.empresa.listaPrecioConFechaTipoEvento.filter {
+            it.id == tipoEventoEliminar.id
+        }
+
+        listaPrecioTipoEventoEliminar.forEach {
+            it.fechaBaja = LocalDate.now()
+            precioConFechaTipoEventoService.save(it)
+        }*/
+
         return tipoEventoEliminar.toDTO()
     }
 
@@ -136,12 +146,9 @@ class TipoEventoController {
         return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
     }
 
-    // Todos los get by tipo evento id para nuevoEvento
     @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
-    fun getAllServicioByTipoEventoIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): MutableSet<TipoEvento> {
-        val listaTipoEvento = empresaService.get(id)!!.listaTipoEvento
-        val duracionEnum = Duracion.values().find { it.name == duracion }
-        return listaTipoEvento.filter { it.duracion == duracionEnum }.toMutableSet()
+    fun getAllServicioByTipoEventoIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): List<TipoEventoDTO> {
+        return empresaService.get(id)!!.listaTipoEvento.filter { it.fechaBaja == null }.map { it.toDTO() }
     }
 
     @GetMapping("/getAllServicioByTipoEventoId/{id}")

@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.*
 
 @RestController
@@ -156,18 +157,10 @@ class EventoController {
     }
 
     @DeleteMapping("/deleteEvento/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Evento> {
+    fun delete(@PathVariable("id") id: Long): EventoDto {
         val evento = eventoService.findById(id)
-
-        // TODO Delegar a service
-        evento.listaEventoExtraVariable.forEach {
-            extraVariableService.delete(it.id)
-        }
-
-        evento.capacidad = Capacidad(0, 0, 0)
-
-        eventoService.delete(id)
-        return ResponseEntity<Evento>(HttpStatus.OK)
+        evento.fechaBaja = LocalDate.now()
+        return eventoService.save(evento).toDto()
     }
 
     @GetMapping("/getAllEstado")

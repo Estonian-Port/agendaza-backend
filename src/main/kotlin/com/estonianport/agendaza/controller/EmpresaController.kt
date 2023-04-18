@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
@@ -61,24 +62,24 @@ class EmpresaController {
     @GetMapping("/getAllExtraTipoEventoByEmpresaId/{id}")
     fun getAllExtraTipoEventoByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
         return empresaService.get(id)!!.
-            listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.toMutableSet()
+            listaExtra.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.toMutableSet()
     }
 
     //TODO refactor con service getAllExtraCatering
     @GetMapping("/getAllExtraCateringByEmpresaId/{id}")
     fun getAllExtraCateringByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
         return empresaService.get(id)!!.
-        listaExtra.filter{ it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.toMutableSet()
+        listaExtra.filter{ (it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING)  && it.fechaBaja == null }.toMutableSet()
     }
 
     @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
-    fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): MutableSet<TipoEvento> {
-        return empresaService.get(id)!!.listaTipoEvento
+    fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): List<TipoEventoDTO> {
+        return empresaService.get(id)!!.listaTipoEvento.filter { it.fechaBaja == null }.map { it.toDTO() }
     }
 
     @GetMapping("/getAllServicioByEmpresaId/{id}")
-    fun getAllServicioByEmpresaId(@PathVariable("id") id: Long): MutableSet<Servicio> {
-        return empresaService.get(id)!!.listaServicio
+    fun getAllServicioByEmpresaId(@PathVariable("id") id: Long): List<Servicio> {
+        return empresaService.get(id)!!.listaServicio.filter { it.fechaBaja == null }
     }
 
     @GetMapping("/getAllPagoByEmpresaId/{id}")

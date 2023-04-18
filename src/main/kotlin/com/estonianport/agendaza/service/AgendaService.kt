@@ -26,13 +26,13 @@ class AgendaService {
     fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {
         return ConfiguracionDto(
             empresa.listaEmpleados.size,
-            usuario.listaCargo.size,
-            empresa.listaTipoEvento.size,
-            empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.size,
-            empresa.listaEvento.sumOf{ it.listaPago.size },
-            empresa.listaEvento.size,
-            empresa.listaEvento.map { it.cliente }.toSet().size,
-            empresa.listaExtra.filter  { it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.size,
-            empresa.listaServicio.size)
+            usuario.listaCargo.size, // TODO sacar de este panel y llevar a admin de usuario
+            empresa.listaTipoEvento.filter { it.fechaBaja == null }.size,
+            empresa.listaExtra.filter  { (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.size,
+            empresa.listaEvento.sumOf{ it.listaPago.filter { it.fechaBaja == null }.size },
+            empresa.listaEvento.filter { it.fechaBaja == null }.size,
+            empresa.listaEvento.filter { it.fechaBaja == null }.map { it.cliente }.toSet().size,
+            empresa.listaExtra.filter  { (it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING) && it.fechaBaja == null }.size,
+            empresa.listaServicio.filter { it.fechaBaja == null }.size)
     }
 }

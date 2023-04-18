@@ -28,14 +28,16 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     }
 
     fun getAllEventoByEmpresaId(empresa : Empresa): List<EventoDto> {
-        return empresa.listaEvento.map { evento ->
-            evento.toDto()
+        return empresa.listaEvento.filter { it.fechaBaja == null }
+            .map { evento ->
+                evento.toDto()
         }
     }
 
     fun getAllPagoByEmpresaId(empresa : Empresa): List<PagoDto> {
         return empresa.listaEvento.flatMap { evento ->
-            evento.listaPago.map { pago ->
+            evento.listaPago.filter {
+                it.fechaBaja == null }.map { pago ->
                 pago.toDTO()
             }
         }

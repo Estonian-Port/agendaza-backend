@@ -77,6 +77,7 @@ class ExtraController {
         val extraEliminar =  extraService.get(id)!!
         extraEliminar.fechaBaja = LocalDate.now()
         extraService.save(extraEliminar)
+        // Deja los precios con fecha del extra eliminado sin fecha baja
 
         return extraEliminar.toDTO()
     }
