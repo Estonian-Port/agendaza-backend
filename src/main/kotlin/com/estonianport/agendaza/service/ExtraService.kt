@@ -25,7 +25,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
 
     fun fromListaExtraToListaExtraDto(listaExtra: List<Extra>, fechaEvento : LocalDateTime): List<ExtraDto>{
         return listaExtra.map{
-            ExtraDto(it.id, it.nombre, it.tipoExtra, it.empresa.id, it.empresa.getPrecioOfExtraByFecha(it, fechaEvento))
+            it.toDTO(fechaEvento)
         }
     }
 

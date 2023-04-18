@@ -110,9 +110,10 @@ data class Evento(
     @Column
     var fechaBaja : LocalDate? = null
 
-    //TODO revisar los filter esos
+    //TODO Simplificar los filter
     fun getPresupuesto(): Double{
-        var presupuesto = tipoEvento.getPrecioByFecha(inicio) +
+        var presupuesto =
+                empresa.getPrecioOfTipoEvento(tipoEvento, inicio) +
                 empresa.getSumOfPrecioByListaExtra(
                     listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
                 empresa.getSumOfPrecioByListaExtraVariable(
@@ -164,7 +165,7 @@ data class Evento(
     fun toEventoExtraDto(listaExtra: List<ExtraDto>,
                          listaExtraVariable: List<EventoExtraVariableDto>): EventoExtraDto {
         return EventoExtraDto(id, nombre, codigo, extraOtro, descuento, listaExtra,
-            listaExtraVariable, tipoEvento.toTipoEventoExtraDto(inicio), inicio)
+            listaExtraVariable, tipoEvento.toTipoEventoPrecioDTO(inicio), inicio)
     }
 
     fun toEventoPagoDto(listaPago: List<PagoDto>): EventoPagoDto {

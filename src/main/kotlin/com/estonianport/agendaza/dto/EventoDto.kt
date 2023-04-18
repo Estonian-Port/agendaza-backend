@@ -25,7 +25,7 @@ class EventoPagoDto(val id : Long, val nombre : String, val codigo : String,
 class EventoExtraDto(val id : Long, val nombre : String, val codigo : String,
                      val extraOtro : Long, val descuento : Long,
                      val listaExtra : List<ExtraDto>, val listaExtraVariable : List<EventoExtraVariableDto>,
-                     val tipoEventoExtra : TipoEventoExtraDto, val fechaEvento : LocalDateTime) {}
+                     val tipoEventoExtra : TipoEventoPrecioDTO, val fechaEvento : LocalDateTime) {}
 
 class EventoCateringDto(val id : Long, val nombre : String, val codigo : String, val cateringOtro : Double,
                         val cateringOtroDescripcion : String, val listaExtraTipoCatering : List<ExtraDto>,

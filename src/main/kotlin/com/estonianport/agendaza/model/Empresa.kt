@@ -114,6 +114,12 @@ abstract class Empresa(
 
     }
 
+    fun getPrecioOfTipoEvento(tipoEvento: TipoEvento, fecha: LocalDateTime): Double{
+        return listaPrecioConFechaTipoEvento.find {
+            it.tipoEvento.id == tipoEvento.id && it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
+        }?.precio ?: return 0.0
+    }
+
 }
 
 @Entity

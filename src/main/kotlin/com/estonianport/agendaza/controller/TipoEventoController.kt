@@ -2,8 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDto
 import com.estonianport.agendaza.dto.PrecioConFechaDto
-import com.estonianport.agendaza.dto.TimeDto
-import com.estonianport.agendaza.dto.TipoEventoDto
+import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
 import com.estonianport.agendaza.model.Extra
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -60,12 +60,12 @@ class TipoEventoController {
     }
 
     @GetMapping("/getTipoEvento/{id}")
-    fun get(@PathVariable("id") id: Long): TipoEvento {
-        return tipoEventoService.get(id)!!
+    fun get(@PathVariable("id") id: Long): TipoEventoDTO {
+        return tipoEventoService.get(id)!!.toDTO()
     }
 
     @PostMapping("/saveTipoEvento")
-    fun save(@RequestBody tipoEventoDto: TipoEventoDto): TipoEventoDto {
+    fun save(@RequestBody tipoEventoDto: TipoEventoDTO): TipoEventoDTO {
         tipoEventoDto.capacidad = capacidadService.reutilizarCapacidad(tipoEventoDto.capacidad)
 
         return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
@@ -75,36 +75,12 @@ class TipoEventoController {
     }
 
     @DeleteMapping("/deleteTipoEvento/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<TipoEvento> {
+    fun delete(@PathVariable("id") id: Long): TipoEventoDTO {
+        val tipoEventoEliminar =  tipoEventoService.get(id)!!
+        tipoEventoEliminar.fechaBaja = LocalDate.now()
+        tipoEventoService.save(tipoEventoEliminar)
 
-        val tipoEventoEliminar : TipoEvento =  tipoEventoService.get(id)!!
-
-        // Elimina en los servicios
-        tipoEventoEliminar.listaServicio.forEach { servicio ->
-            if(servicio.listaTipoEvento.contains(tipoEventoEliminar)){
-                servicio.listaTipoEvento.remove(tipoEventoEliminar)
-                servicioService.save(servicio)
-            }
-        }
-        // Elimina en los extra
-        tipoEventoEliminar.listaExtra.forEach { extra ->
-            if(extra.listaTipoEvento.contains(tipoEventoEliminar)){
-                extra.listaTipoEvento.remove(tipoEventoEliminar)
-                extraService.save(extra)
-            }
-        }
-
-        // Elimina en los precio con fecha
-        tipoEventoEliminar.listaPrecioConFecha.forEach { precioConFecha ->
-            if(precioConFecha.tipoEvento == tipoEventoEliminar){
-                precioConFechaTipoEventoService.delete(precioConFecha.id)
-            }
-        }
-
-        // Eliminar tipoEventoEliminar
-        tipoEventoService.delete(id)
-
-        return ResponseEntity<TipoEvento>(HttpStatus.OK)
+        return tipoEventoEliminar.toDTO()
     }
 
     @GetMapping("/getAllDuracion")
@@ -113,27 +89,19 @@ class TipoEventoController {
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
-    fun getAllDuracion(@PathVariable("id") id: Long): MutableSet<PrecioConFechaDto>{
+    fun getAllPrecioConFechaByTipoEventoId(@PathVariable("id") id: Long): List<PrecioConFechaDto> {
         val tipoEvento = tipoEventoService.get(id)!!
 
         // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
-        val listaPrecioSinYearAnterior = tipoEvento.listaPrecioConFecha.filter { it.desde.year >= LocalDateTime.now().year }
-
-        val listaPrecioConFechaDto : MutableSet<PrecioConFechaDto> = mutableSetOf()
-
-
-        listaPrecioSinYearAnterior.forEach{
-            listaPrecioConFechaDto.add(PrecioConFechaDto(
-                it.id,
-                it.desde,
-                it.hasta,
-                it.precio,
-                it.empresa.id,
-                it.tipoEvento.id
-            ))
+        val listaPrecioSinYearAnterior = tipoEvento.empresa.listaPrecioConFechaTipoEvento.filter {
+            it.tipoEvento.id == tipoEvento.id &&
+            it.tipoEvento.fechaBaja == null &&
+            it.desde.year >= LocalDateTime.now().year &&
+            it.fechaBaja == null
         }
 
-        return listaPrecioConFechaDto
+        return listaPrecioSinYearAnterior.map { it.toDTO() }
+
     }
 
     @PostMapping("/saveTipoEventoPrecio")
@@ -141,8 +109,8 @@ class TipoEventoController {
         val tipoEvento = tipoEventoService.get(listaPrecioConFechaDto.first().itemId)!!
         val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
 
-        tipoEvento.listaPrecioConFecha.forEach{
-            if(!listaPrecioConFechaDto.any { it2 -> it2.id == it.id  }){
+        empresa.listaPrecioConFechaTipoEvento.forEach{
+            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
                 precioConFechaTipoEventoService.delete(it.id)
             }
         }
@@ -222,13 +190,14 @@ class TipoEventoController {
     }
 
     @PutMapping("/getTimeEndByTipoEventoIdAndTimeStart/{id}")
-    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : TimeDto): LocalTime? {
+    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : LocalTime): LocalTime? {
         return tipoEventoService.get(id)!!.cantidadDuracion.plusHours(
             timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong())
     }
 
     @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
     fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): Double? {
-            return tipoEventoService.get(id)!!.getPrecioByFecha(fechaEvento)
+        val tipoEvento = tipoEventoService.get(id)!!
+        return tipoEvento.empresa.getPrecioOfTipoEvento(tipoEvento, fechaEvento)
     }
 }
