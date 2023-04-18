@@ -28,7 +28,7 @@ class ExtraVariableService : GenericServiceImpl<EventoExtraVariable, Long>() {
     }
 
     fun fromListaExtraVariableToListaExtraVariableDto(listaEventoExtraVariable: List<EventoExtraVariable>, fechaEvento: LocalDateTime): List<EventoExtraVariableDto>{
-        return listaEventoExtraVariable.map { EventoExtraVariableDto(it.extra.id, it.cantidad, it.extra.nombre, it.extra.getPrecioByFecha(fechaEvento)) }
+        return listaEventoExtraVariable.map { EventoExtraVariableDto(it.extra.id, it.cantidad, it.extra.nombre, it.extra.empresa.getPrecioOfExtraVariableByFecha(it, fechaEvento)) }
     }
 
     fun fromListaExtraVariableToListaExtraVariableDtoByFilter(listaEventoExtraVariable: MutableSet<EventoExtraVariable>, fechaEvento: LocalDateTime, tipoExtra : TipoExtra): List<EventoExtraVariableDto>{

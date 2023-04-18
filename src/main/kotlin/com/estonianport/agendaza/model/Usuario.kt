@@ -37,8 +37,14 @@ data class Usuario(
     @Column
     var password: String = ""
 
-    @Column(name = "fecha_nacimiento")
+    @Column
     val fechaNacimiento: LocalDate = LocalDate.now()
+
+    @Column
+    val fechaAlta : LocalDate = LocalDate.now()
+
+    @Column
+    var fechaBaja : LocalDate? = null
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
@@ -47,9 +53,6 @@ data class Usuario(
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
-
-    @Column
-    var habilitado : Boolean = true
 
     fun toUsuarioAbmDto(): UsuarioAbmDto {
         return UsuarioAbmDto(id, nombre, apellido, username)

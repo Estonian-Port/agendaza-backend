@@ -1135,8 +1135,8 @@ class EmailService {
                     "Monto total abonado hasta la fecha: $" + totalPago + "<br>" +
                     "Monto faltante: $" + Math.abs(evento.getPresupuesto() - totalPago) + "<br>" +
                     "El precio total del evento: $" + evento.getPresupuesto() + "<br>" +
-                    "Acercate cuando quieras al salon: " + evento.listaEmpresa.first()
-                .nombre + " en calle " + ""/*evento.getSalon().getCalle()*/ + " " + ""/*evento.getSalon()*/
+                    "Acercate cuando quieras al salon: " + evento.empresa.nombre +
+                    " en calle " + ""/*evento.getSalon().getCalle()*/ + " " + ""/*evento.getSalon()*/
         /*.getNumero() */ "" + ", " + "" /*evento.getSalon().getMunicipio()*/ + "." + "<br>" +
                 "Te recordamos que tu evento se realizara el dia " + dia + " de " + horaInicio + " a " + horaFin + "." + "<br>"
         // TODO salon calle y eso
@@ -1155,7 +1155,7 @@ class EmailService {
             "El evento: " + evento.nombre + " ha sido cancelado exitosamente." + "<br>" +
                     "tu evento se iba a realizar el dia " + dia + " de " + horaInicio + " a " + horaFin + "." + "<br>" +
                     "Ante cualquier consulta" + "<br>" +
-                    "Acercate al salon: " + evento.listaEmpresa.first().nombre + " en calle " + ""/*evento.getSalon()
+                    "Acercate al salon: " + evento.empresa.nombre + " en calle " + ""/*evento.getSalon()
                 .getCalle() */ + " " + ""/*evento.getSalon().getNumero()*/ + ", " + /*evento.getSalon()*/
                     /*.getMunicipio()*/ "" + "." + "<br>"
 

@@ -126,7 +126,7 @@ class EventoController {
 
         // Inicializacion Evento
         val evento = eventoService.fromEventoReservaDtoToEvento(
-            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado!!
+            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado!!, empresa
         )
 
         //TODO arreglar con cascade
@@ -135,9 +135,6 @@ class EventoController {
         }else{
             evento.cliente = usuarioService.save(evento.cliente)
         }
-
-        // vincula el evento a la empresa
-        evento.listaEmpresa.add(empresa)
 
         val eventoSaved = eventoService.save(evento)
 

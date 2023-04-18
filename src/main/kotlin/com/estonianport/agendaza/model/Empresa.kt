@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.errors.BusinessException
+import com.estonianport.agendaza.service.ExtraVariableService
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -14,8 +15,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @JsonTypeInfo(
     use= JsonTypeInfo.Id.NAME,
@@ -26,7 +28,7 @@ import jakarta.persistence.OneToMany
     JsonSubTypes.Type(value = Catering::class, name ="CATERING"),
     JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Empresa(
 
     @Id
@@ -40,10 +42,19 @@ abstract class Empresa(
     open val telefono : Long,
 
     @Column
-    open val email : String){
+    open val email : String,
+
+    @Column
+    open val calle: String,
+
+    @Column
+    open val numero: Int,
+
+    @Column
+    open val municipio: String){
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaEmpresa", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     open val listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
@@ -60,7 +71,18 @@ abstract class Empresa(
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
+    open val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
+    open val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
+
+    @Column
+    open var fechaBaja : LocalDate? = null
 
     fun getCargoOfUsuario(usuario: Usuario) : TipoCargo {
         return listaEmpleados.find { cargo -> cargo.usuario == usuario }
@@ -68,6 +90,30 @@ abstract class Empresa(
     }
 
     abstract fun getContacto() : ArrayList<String>
+
+    fun getSumOfPrecioByListaExtra(listaExtra: List<Extra>, fecha : LocalDateTime): Double{
+        return listaExtra.sumOf {
+            getPrecioOfExtraByFecha(it, fecha)
+        }
+    }
+
+    fun getSumOfPrecioByListaExtraVariable(listaExtraVariable: List<EventoExtraVariable>, fecha : LocalDateTime): Double{
+        return listaExtraVariable.sumOf {
+            getPrecioOfExtraVariableByFecha(it, fecha)
+        }
+    }
+
+    fun getPrecioOfExtraVariableByFecha(extraVariable: EventoExtraVariable, fecha: LocalDateTime): Double{
+        return getPrecioOfExtraByFecha(extraVariable.extra, fecha) * extraVariable.cantidad
+    }
+
+    fun getPrecioOfExtraByFecha(extra: Extra, fecha: LocalDateTime): Double{
+        return listaPrecioConFechaExtra.find {
+            it.extra.id == extra.id && it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
+        }?.precio ?: return 0.0
+
+    }
+
 }
 
 @Entity
@@ -76,15 +122,9 @@ class Salon(
     nombre : String,
     telefono : Long,
     email : String,
-
-    @Column
-    val calle: String,
-
-    @Column
-    val numero: Int,
-
-    @Column
-    val municipio: String) : Empresa(id, nombre, telefono, email){
+    calle : String,
+    numero: Int,
+    municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
     override fun getContacto(): ArrayList<String> {
         return arrayListOf(calle, numero.toString(), municipio)
@@ -97,9 +137,10 @@ class Catering(
     nombre : String,
     telefono : Long,
     email : String,
+    calle : String,
+    numero: Int,
+    municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    @Column
-    val listaMenu : String) : Empresa(id, nombre, telefono, email) {
     override fun getContacto(): ArrayList<String> {
         return arrayListOf(telefono.toString(), email)
     }
@@ -111,10 +152,13 @@ class Prestador(
     nombre : String,
     telefono : Long,
     email : String,
+    calle : String,
+    numero: Int,
+    municipio: String,
 
     @Column
     @Enumerated(EnumType.STRING)
-    var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email){
+    var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
     override fun getContacto(): ArrayList<String> {
         return arrayListOf(telefono.toString(), email)

@@ -93,7 +93,10 @@ class ExtraController {
         val extra = extraService.get(id)!!
 
         // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
-        val listaPrecioSinYearAnterior = extra.listaPrecioConFecha.filter { it.desde.year >= LocalDateTime.now().year }
+
+        val listaPrecioSinYearAnterior = extra.empresa.listaPrecioConFechaExtra.filter {
+            it.extra.id == extra.id  && it.desde.year >= LocalDateTime.now().year
+        }
 
         val listaPrecioConFechaDto : MutableSet<PrecioConFechaDto> = mutableSetOf()
 
@@ -119,8 +122,9 @@ class ExtraController {
         val extra = extraService.get(listaPrecioConFechaDto.first().itemId)!!
         val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
 
-        extra.listaPrecioConFecha.forEach{
-            if(!listaPrecioConFechaDto.any { it2 -> it2.id == it.id  }){
+
+        empresa.listaPrecioConFechaExtra.forEach{
+            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id  }){
                 precioConFechaExtraService.delete(it.id)
             }
         }

@@ -13,6 +13,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 
 @Entity
 data class Servicio(
@@ -37,4 +38,6 @@ data class Servicio(
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
+    @Column
+    var fechaBaja : LocalDate? = null
 }

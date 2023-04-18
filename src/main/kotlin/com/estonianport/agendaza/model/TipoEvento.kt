@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -57,6 +58,9 @@ data class TipoEvento(
     @JsonIgnore
     @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     val listaExtra: MutableSet<Extra> = mutableSetOf()
+
+    @Column
+    var fechaBaja : LocalDate? = null
 
     fun toDTO() : TipoEventoDto {
         return TipoEventoDto(id, nombre, TimeDto(cantidadDuracion.hour, cantidadDuracion.minute),

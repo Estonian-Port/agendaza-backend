@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -43,21 +44,7 @@ data class Extra(
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "extra")
-    val listaPrecioConFecha: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+    @Column
+    var fechaBaja : LocalDate? = null
 
-    fun getPrecioByFecha(fecha : LocalDateTime): Double {
-        if(listaPrecioConFecha.isNotEmpty() && listaPrecioConFecha.any { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) } ) {
-            return listaPrecioConFecha.find { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) }!!.precio
-        }else{
-            return 0.0
-        }
-    }
-
-    companion object {
-        fun getPrecioByFechaOfListaExtra(listaExtra: List<Extra>, fecha: LocalDateTime): Double {
-            return listaExtra.sumOf { it.getPrecioByFecha(fecha) }
-        }
-    }
 }

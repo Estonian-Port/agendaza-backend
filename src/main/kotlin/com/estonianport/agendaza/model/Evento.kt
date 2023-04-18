@@ -24,6 +24,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -89,15 +90,11 @@ data class Evento(
     val estado: Estado,
 
     @Column
-    var anotaciones: String){
+    var anotaciones: String,
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "evento_empresa",
-        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "empresa_id"))
-    )
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    val empresa : Empresa){
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -110,12 +107,15 @@ data class Evento(
     @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     val listaPago: MutableSet<Pago> = mutableSetOf()
 
+    @Column
+    var fechaBaja : LocalDate? = null
+
     //TODO revisar los filter esos
     fun getPresupuesto(): Double{
         var presupuesto = tipoEvento.getPrecioByFecha(inicio) +
-                Extra.getPrecioByFechaOfListaExtra(
+                empresa.getSumOfPrecioByListaExtra(
                     listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
-                EventoExtraVariable.getPrecioByFechaOfListaExtraVariable(
+                empresa.getSumOfPrecioByListaExtraVariable(
                     listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }, inicio) +
                 extraOtro
 
@@ -127,10 +127,10 @@ data class Evento(
 
     fun getPresupuestoCatering(): Double{
         return capacidad.capacidadAdultos *
-            Extra.getPrecioByFechaOfListaExtra(
-                listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
-                EventoExtraVariable.getPrecioByFechaOfListaExtraVariable(
-                listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }, inicio) +
+                empresa.getSumOfPrecioByListaExtra(
+                    listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
+                empresa.getSumOfPrecioByListaExtraVariable(
+                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }, inicio) +
             capacidad.capacidadAdultos * cateringOtro
     }
 

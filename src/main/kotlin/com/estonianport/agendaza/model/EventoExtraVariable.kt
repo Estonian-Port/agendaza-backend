@@ -28,10 +28,4 @@ data class EventoExtraVariable(
     @PrimaryKeyJoinColumn
     lateinit var evento: Evento
 
-    companion object {
-        fun getPrecioByFechaOfListaExtraVariable(listaExtra: List<EventoExtraVariable>, fecha: LocalDateTime): Double {
-            return listaExtra.sumOf { it.extra.getPrecioByFecha(fecha) * it.cantidad }
-        }
-    }
-
 }

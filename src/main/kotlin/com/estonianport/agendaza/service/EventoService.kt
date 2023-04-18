@@ -16,7 +16,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
-import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.IntStream
 import kotlin.collections.ArrayList
@@ -31,7 +30,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         get() = eventoRepository
 
     fun findAllByEmpresa(empresa : Empresa) : List<Evento>{
-       return eventoRepository.findAllByListaEmpresa(empresa)
+       return eventoRepository.findAllByEmpresa(empresa)
     }
 
     fun findById(id : Long): Evento {
@@ -66,7 +65,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         val inicio: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 0,0 )
         val fin: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 23,59 )
 
-        return eventoRepository.findAllByInicioBetweenAndListaEmpresa(inicio, fin, empresa)
+        return eventoRepository.findAllByInicioBetweenAndEmpresa(inicio, fin, empresa)
     }
 
     fun getHorarioDisponible(listaEvento: List<Evento>, desde : LocalDateTime, hasta : LocalDateTime) : Boolean{
@@ -145,7 +144,8 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
                                      tipoEvento : TipoEvento,
                                      listaExtra : MutableSet<Extra>,
                                      listaEventoExtraVariable : MutableSet<EventoExtraVariable>,
-                                     encargado : Usuario): Evento {
+                                     encargado : Usuario,
+                                     empresa : Empresa): Evento {
         return Evento(
             eventoReservaDto.id,
             eventoReservaDto.nombre,
@@ -163,6 +163,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             eventoReservaDto.cliente,
             eventoReservaDto.codigo,
             eventoReservaDto.estado,
-            eventoReservaDto.anotaciones)
+            eventoReservaDto.anotaciones,
+            empresa)
     }
 }
