@@ -2,6 +2,8 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDto
+import com.estonianport.agendaza.dto.ServicioDTO
+import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Duracion
@@ -37,22 +39,22 @@ import java.time.LocalTime
 class TipoEventoController {
 
     @Autowired
-    lateinit var  tipoEventoService: TipoEventoService
+    lateinit var tipoEventoService: TipoEventoService
 
     @Autowired
-    lateinit var  capacidadService: CapacidadService
+    lateinit var capacidadService: CapacidadService
 
     @Autowired
-    lateinit var  servicioService: ServicioService
+    lateinit var servicioService: ServicioService
 
     @Autowired
-    lateinit var  precioConFechaTipoEventoService: PrecioConFechaTipoEventoService
+    lateinit var precioConFechaTipoEventoService: PrecioConFechaTipoEventoService
 
     @Autowired
-    lateinit var  extraService: ExtraService
+    lateinit var extraService: ExtraService
 
     @Autowired
-    lateinit var  empresaService: EmpresaService
+    lateinit var empresaService: EmpresaService
 
     @GetMapping("/getAllTipoEvento")
     fun getAll(): MutableList<TipoEvento>? {
@@ -60,23 +62,27 @@ class TipoEventoController {
     }
 
     @GetMapping("/getTipoEvento/{id}")
-    fun get(@PathVariable("id") id: Long): TipoEvento {
-        return tipoEventoService.get(id)!!
+    fun get(@PathVariable("id") id: Long): TipoEventoDTO {
+        return tipoEventoService.get(id)!!.toDTO()
     }
 
     @PostMapping("/saveTipoEvento")
     fun save(@RequestBody tipoEventoDto: TipoEventoDTO): TipoEventoDTO {
         tipoEventoDto.capacidad = capacidadService.reutilizarCapacidad(tipoEventoDto.capacidad)
 
-        return tipoEventoService.save(TipoEvento(tipoEventoDto.id, tipoEventoDto.nombre,
-            tipoEventoDto.duracion, tipoEventoDto.capacidad,
-            LocalTime.of(tipoEventoDto.cantidadDuracion.hour, tipoEventoDto.cantidadDuracion.minute),
-            empresaService.get(tipoEventoDto.empresaId)!!)).toDTO()
+        return tipoEventoService.save(
+            TipoEvento(
+                tipoEventoDto.id, tipoEventoDto.nombre,
+                tipoEventoDto.duracion, tipoEventoDto.capacidad,
+                LocalTime.of(tipoEventoDto.cantidadDuracion.hour, tipoEventoDto.cantidadDuracion.minute),
+                empresaService.get(tipoEventoDto.empresaId)!!
+            )
+        ).toDTO()
     }
 
     @DeleteMapping("/deleteTipoEvento/{id}")
     fun delete(@PathVariable("id") id: Long): TipoEventoDTO {
-        val tipoEventoEliminar =  tipoEventoService.get(id)!!
+        val tipoEventoEliminar = tipoEventoService.get(id)!!
         tipoEventoEliminar.fechaBaja = LocalDate.now()
         tipoEventoService.save(tipoEventoEliminar)
 
@@ -96,6 +102,20 @@ class TipoEventoController {
     @GetMapping("/getAllDuracion")
     fun getAllDuracion(): MutableSet<Duracion> {
         return Duracion.values().toMutableSet()
+    }
+
+    @GetMapping("/getListaTipoEventoOfExtra/{id}")
+    fun getListaTipoEventoByExtra(@PathVariable("id") id: Long): List<TipoEventoDTO> {
+        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
+            tipoEventoService.getAllByExtra(extraService.get(id)!!)!!
+        )
+    }
+
+    @GetMapping("/getListaTipoEventoByServicio/{id}")
+    fun getListaTipoEventoByServicio(@PathVariable("id") id: Long): List<TipoEventoDTO> {
+        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
+            tipoEventoService.getAllByServicio(servicioService.get(id)!!)!!
+        )
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
@@ -146,14 +166,11 @@ class TipoEventoController {
         return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
     }
 
-    @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
-    fun getAllServicioByTipoEventoIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): List<TipoEventoDTO> {
-        return empresaService.get(id)!!.listaTipoEvento.filter { it.fechaBaja == null }.map { it.toDTO() }
-    }
-
     @GetMapping("/getAllServicioByTipoEventoId/{id}")
-    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): MutableSet<Servicio>{
-        return tipoEventoService.get(id)!!.listaServicio.filter { it.fechaBaja == null }.toMutableSet()
+    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): List<ServicioDTO>{
+        return servicioService.fromListaServicioToListaServicioDto(
+            tipoEventoService.get(id)!!.listaServicio.filter { it.fechaBaja == null }
+        )
     }
 
     @PutMapping("/getAllExtraEventoByTipoEventoIdAndFecha/{id}")
@@ -201,13 +218,13 @@ class TipoEventoController {
     }
 
     @PutMapping("/getTimeEndByTipoEventoIdAndTimeStart/{id}")
-    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart : LocalTime): LocalTime? {
+    fun getTimeEndByTipoEventoIdAndTimeStart(@PathVariable("id") id: Long, @RequestBody timeStart: TimeDTO): LocalTime? {
         return tipoEventoService.get(id)!!.cantidadDuracion.plusHours(
             timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong())
     }
 
     @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
-    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): Double? {
+    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento: LocalDateTime): Double? {
         val tipoEvento = tipoEventoService.get(id)!!
         return tipoEvento.empresa.getPrecioOfTipoEvento(tipoEvento, fechaEvento)
     }

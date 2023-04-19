@@ -4,10 +4,10 @@ import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.UsuarioAbmDto
+import com.estonianport.agendaza.model.Duracion
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
-import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,7 +74,14 @@ class EmpresaController {
 
     @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
     fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return empresaService.get(id)!!.listaTipoEvento.filter { it.fechaBaja == null }.map { it.toDTO() }
+        return empresaService.get(id)!!.listaTipoEvento.filter {
+            it.fechaBaja == null }.map { it.toDTO() }
+    }
+
+    @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
+    fun getAllTipoEventoByEmpresaIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): List<TipoEventoDTO> {
+        return empresaService.get(id)!!.listaTipoEvento.filter {
+            it.fechaBaja == null && it.duracion.name == duracion }.map { it.toDTO() }
     }
 
     @GetMapping("/getAllServicioByEmpresaId/{id}")

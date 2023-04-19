@@ -31,18 +31,9 @@ data class Extra(
     @Enumerated(EnumType.STRING)
     val tipoExtra : TipoExtra,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
-
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "tipo_evento_extra",
-        joinColumns = arrayOf(JoinColumn(name = "extra_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
-    )
-    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @Column
     var fechaBaja : LocalDate? = null

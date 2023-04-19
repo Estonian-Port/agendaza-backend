@@ -4,7 +4,6 @@ import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDto
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
-import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -48,28 +47,24 @@ class ExtraController {
     fun showSave(@PathVariable("id") id: Long): ExtraDTO {
         val extra = extraService.get(id)!!
         val extraDto = extra.toDTO()
-        extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
+
+        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extra)!!.map { it.id }
         return extraDto
     }
 
-    //TODO pasar a TipoEventoDto
-    @GetMapping("/getExtraListaTipoEvento/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long): MutableSet<TipoEvento> {
-        return extraService.get(id)!!.listaTipoEvento
-    }
-
     @PostMapping("/saveExtra")
-    fun save(@RequestBody extraDto: ExtraDTO): Extra {
-        val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
+    fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
+        var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra, empresaService.get(extraDTO.empresaId)!!)
 
-        extraDto.listaTipoEventoId.forEach {
-            tipoEventoService.get(it)?.let { it1 -> listaTipoEvento.add(it1) }
+        extra = extraService.save(extra)
+
+        extraDTO.listaTipoEventoId.forEach {
+            val tipoEvento = tipoEventoService.get(it)!!
+            tipoEvento.listaExtra.add(extra)
+            tipoEventoService.save(tipoEvento)
         }
 
-        val extra = Extra(extraDto.id, extraDto.nombre, extraDto.tipoExtra, empresaService.get(extraDto.empresaId)!!)
-        extra.listaTipoEvento = listaTipoEvento
-
-        return extraService.save(extra)
+        return extra.toDTO()
     }
 
     @DeleteMapping("/deleteExtra/{id}")
