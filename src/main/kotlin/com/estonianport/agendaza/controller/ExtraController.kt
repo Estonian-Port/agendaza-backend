@@ -126,7 +126,7 @@ class ExtraController {
                 PrecioConFechaExtra(
                 it.id,
                 it.precio,
-                it.desde,
+                it.desde.minusHours(3),
                 fechaHasta,
                 empresa,
                 extra

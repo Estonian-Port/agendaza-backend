@@ -157,7 +157,7 @@ class TipoEventoController {
             precioConFechaTipoEventoService.save(PrecioConFechaTipoEvento(
                 it.id,
                 it.precio,
-                it.desde,
+                it.desde.minusHours(3),
                 fechaHasta,
                 empresa,
                 tipoEvento
