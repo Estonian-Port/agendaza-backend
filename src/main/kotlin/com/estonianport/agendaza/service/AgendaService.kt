@@ -20,7 +20,7 @@ class AgendaService {
 
     //TODO refactor a cargo.EventoAgendaDto
     fun getAllEventosForAgendaByEmpresaId(listaEvento: List<Evento>): List<EventoAgendaDto> {
-        return listaEvento.map { EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin)  }
+        return listaEvento.filter{ it.fechaBaja == null }.map { EventoAgendaDto(it.id, it.nombre, it.inicio, it.fin)  }
     }
 
     fun getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario: Usuario, empresa: Empresa): ConfiguracionDto {
