@@ -32,7 +32,7 @@ import java.time.LocalDateTime
 abstract class Empresa(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     open val id: Long,
 
     @Column
