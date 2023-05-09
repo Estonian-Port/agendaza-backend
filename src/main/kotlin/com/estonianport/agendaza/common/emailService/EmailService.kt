@@ -3,13 +3,14 @@ package com.estonianport.agendaza.common.emailService
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoExtra
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
+import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -21,8 +22,16 @@ class EmailService {
     @Autowired
     lateinit var sender: JavaMailSender
 
+    fun isEmailValid(target: String): Boolean {
+        return target.isNotEmpty() && EmailValidator.getInstance().isValid(target)
+    }
+
     fun sendEmail(emailBody: Email) {
-        sendEmailTool(emailBody.content, emailBody.email, emailBody.subject)
+        if(isEmailValid(emailBody.email)){
+            sendEmailTool(emailBody.content, emailBody.email, emailBody.subject)
+        }else{
+            throw BusinessException("Email Invalido")
+        }
     }
 
     private fun sendEmailTool(textMessage: String, email: String, subject: String) {

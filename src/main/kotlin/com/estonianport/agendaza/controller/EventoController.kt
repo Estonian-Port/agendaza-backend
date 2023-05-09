@@ -145,7 +145,7 @@ class EventoController {
         }
 
         try {
-            if (evento.cliente.email.isNotEmpty()) {
+            if (emailService.isEmailValid(evento.cliente.email)) {
                 // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
                 emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
             }
