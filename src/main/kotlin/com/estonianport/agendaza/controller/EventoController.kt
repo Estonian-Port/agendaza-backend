@@ -11,7 +11,6 @@ import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.dto.EventoVerDto
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Estado
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.Extra
@@ -26,8 +25,6 @@ import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.TipoEventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -70,6 +67,7 @@ class EventoController {
     @Autowired
     lateinit var pagoService: PagoService
 
+    // TODO Sacar, no se va a usar, ya que se accede desde empresa
     @GetMapping("/getAllEvento")
     fun getAll(): List<EventoDto>? {
         return eventoService.listaEventoToListaEventoDto(eventoService.getAll())
@@ -80,27 +78,24 @@ class EventoController {
         return eventoService.findById(id)
     }
 
-    //TODO refactor sacar agregados y catering de eventoReservaDto
     @PostMapping("/saveEvento")
     fun save(@RequestBody eventoReservaDto: EventoReservaDto): Long {
 
         val empresa = empresaService.findById(eventoReservaDto.empresaId)
-        val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
-        val encargado = usuarioService.findById(eventoReservaDto.encargadoId)
 
-        // Generar codigo de reserva
+        // TODO Siempre es empty, sacar esto y mandar a fromEventoReservaDtoToEvento
         if (eventoReservaDto.codigo.isEmpty()) {
             eventoReservaDto.codigo = eventoService.generateCodigoForEventoOfEmpresa(empresa)
         }
 
-        // Capacidad evento
+        // TODO Capacidad evento, setear en el fromEventoReservaDtoToEvento por ahi, ver que es mejor
         eventoReservaDto.capacidad = capacidadService.reutilizarCapacidad(eventoReservaDto.capacidad)
 
         // Lista Extra y ExtraVariable
         val listaExtra = mutableSetOf<Extra>()
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
 
-        //TODO Reducir el DTO para q venga todo unificado la listaExtra y ExtraVariable
+        // TODO Reducir el DTO para q venga todo unificado la listaExtra y ExtraVariable
         listaExtra.addAll(
             extraService.fromListaExtraDtoToListaExtra(
                 eventoReservaDto.listaExtra
@@ -127,7 +122,12 @@ class EventoController {
 
         // Inicializacion Evento
         val evento = eventoService.fromEventoReservaDtoToEvento(
-            eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado!!, empresa
+            eventoReservaDto,
+            tipoEventoService.get(eventoReservaDto.tipoEventoId)!!,
+            listaExtra,
+            listaEventoExtraVariable,
+            usuarioService.findById(eventoReservaDto.encargadoId)!!,
+            empresa
         )
 
         //TODO arreglar con cascade
@@ -160,6 +160,8 @@ class EventoController {
     fun delete(@PathVariable("id") id: Long): EventoDto {
         val evento = eventoService.findById(id)
         evento.fechaBaja = LocalDate.now()
+
+        //TODO eliminar pagos (Poner cartel en el front que se va a hacer eso)
         return eventoService.save(evento).toDto()
     }
 
