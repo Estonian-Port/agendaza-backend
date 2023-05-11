@@ -36,4 +36,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     ])*/
     //@EntityGraph(attributePaths = ["listaEvento"])
     fun findEmpresaById(id: Long) : Optional<Empresa>
+
+    // TODO Revisar
+    @EntityGraph(attributePaths = ["listaEvento.listaPago"])
+    fun getEmpresaListaPagoById(id: Long) : Optional<Empresa>
 }

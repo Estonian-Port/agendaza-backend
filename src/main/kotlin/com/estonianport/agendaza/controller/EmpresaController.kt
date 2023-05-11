@@ -91,7 +91,7 @@ class EmpresaController {
 
     @GetMapping("/getAllPagoByEmpresaId/{id}")
     fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDto> {
-        return empresaService.getAllPagoByEmpresaId(empresaService.get(id)!!)
+        return empresaService.getAllPagoByEmpresaId(empresaService.getEmpresaListaPagoById(id))
     }
 
 }

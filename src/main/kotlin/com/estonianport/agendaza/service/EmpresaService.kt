@@ -19,12 +19,16 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     override val dao: CrudRepository<Empresa, Long>
         get() = empresaRepository
 
-    fun findById(id : Long) : Empresa {
+    fun findById(id : Long): Empresa {
         return empresaRepository.findById(id).get()
     }
 
-    fun findEmpresaById(id : Long) : Empresa {
+    fun findEmpresaById(id : Long): Empresa {
         return empresaRepository.findEmpresaById(id).get()
+    }
+
+    fun getEmpresaListaPagoById(id : Long): Empresa{
+        return empresaRepository.getEmpresaListaPagoById(id).get()
     }
 
     fun getAllEventoByEmpresaId(empresa : Empresa): List<EventoDto> {
@@ -40,7 +44,7 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
                 it.fechaBaja == null }.map { pago ->
                 pago.toDTO()
             }
-        }
+        }.sortedByDescending { it.id }
     }
 
     fun getAllUsuariosByEmpresaId(empresa: Empresa): List<UsuarioAbmDto> {
@@ -48,5 +52,4 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
             UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username)
         }
     }
-
 }
