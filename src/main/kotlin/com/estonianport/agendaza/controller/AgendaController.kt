@@ -4,10 +4,9 @@ import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.service.AgendaService
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,15 +25,27 @@ class AgendaController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
+    @Autowired
+    lateinit var eventoService: EventoService
+
     @GetMapping("/getListaAgendaByUsuarioId/{id}")
-    fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): MutableSet<AgendaDto> {
-        val usuario = usuarioService.get(id)!!
-        return agendaService.getListaAgendasByUsuario(usuario)
+    fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): List<AgendaDto> {
+        return agendaService.getListaAgendasByUsuario(usuarioService.findById(id)!!.listaCargo.toList())
     }
 
     @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
-    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): MutableSet<EventoAgendaDto> {
-        val empresa = empresaService.get(id)!!
-        return agendaService.getAllEventosForAgendaByEmpresaId(empresa)
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDto> {
+        // TODO devuelve 34 querrys
+        //return agendaService.getAllEventosForAgendaByEmpresaId(
+        //  empresaService.findEmpresaById(id).listaEvento.toList()
+        //)
+
+        // TODO devuelve 18 querrys
+        // TODO y usando @EntityGraph(attributePaths = ["capacidad", "encargado", "cliente", "tipoEvento.capacidad"])
+        // TODO en el findAllByEmpresa devuelve 2 querrys
+        return agendaService.getAllEventosForAgendaByEmpresaId(
+            eventoService.findAllByEmpresa(
+                empresaService.get(id)!!
+        ).toList())
     }
 }

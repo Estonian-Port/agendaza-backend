@@ -1,20 +1,15 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
-import jakarta.persistence.PrimaryKeyJoinColumn
-import java.sql.Date
 import java.time.LocalDate
 
 @Entity
@@ -34,31 +29,34 @@ data class Usuario(
     val celular: Long,
 
     @Column
-    val email: String,
-
-    @PrimaryKeyJoinColumn
-    @Enumerated(EnumType.STRING)
-    val sexo: Sexo,
+    val email: String) {
 
     @Column
-    val username: String,
+    val username: String = ""
 
     @Column
-    var password: String,
+    var password: String = ""
 
-    @Column(name = "fecha_nacimiento")
-    val fechaNacimiento: LocalDate) {
+    @Column
+    val fechaNacimiento: LocalDate = LocalDate.now()
+
+    @Column
+    val fechaAlta : LocalDate = LocalDate.now()
+
+    @Column
+    var fechaBaja : LocalDate? = null
 
     @JsonIgnore
-    @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "cliente", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaEventosContratados : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
-    @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL))
+    @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
-    @Column
-    var habilitado : Boolean = true
+    fun toUsuarioAbmDto(): UsuarioAbmDto {
+        return UsuarioAbmDto(id, nombre, apellido, username)
+    }
 }
 
 

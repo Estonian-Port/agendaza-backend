@@ -3,13 +3,14 @@ package com.estonianport.agendaza.common.emailService
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoExtra
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
+import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -21,12 +22,20 @@ class EmailService {
     @Autowired
     lateinit var sender: JavaMailSender
 
+    fun isEmailValid(target: String): Boolean {
+        return target.isNotEmpty() && EmailValidator.getInstance().isValid(target)
+    }
+
     fun sendEmail(emailBody: Email) {
-        sendEmailTool(emailBody.content, emailBody.email, emailBody.subject)
+        if(isEmailValid(emailBody.email)){
+            sendEmailTool(emailBody.content, emailBody.email, emailBody.subject)
+        }else{
+            throw BusinessException("Email Invalido")
+        }
     }
 
     private fun sendEmailTool(textMessage: String, email: String, subject: String) {
-        val message: MimeMessage = sender!!.createMimeMessage()
+        val message: MimeMessage = sender.createMimeMessage()
         val helper = MimeMessageHelper(message)
         try {
             helper.setTo(email)
@@ -1135,8 +1144,8 @@ class EmailService {
                     "Monto total abonado hasta la fecha: $" + totalPago + "<br>" +
                     "Monto faltante: $" + Math.abs(evento.getPresupuesto() - totalPago) + "<br>" +
                     "El precio total del evento: $" + evento.getPresupuesto() + "<br>" +
-                    "Acercate cuando quieras al salon: " + evento.listaEmpresa.first()
-                .nombre + " en calle " + ""/*evento.getSalon().getCalle()*/ + " " + ""/*evento.getSalon()*/
+                    "Acercate cuando quieras al salon: " + evento.empresa.nombre +
+                    " en calle " + ""/*evento.getSalon().getCalle()*/ + " " + ""/*evento.getSalon()*/
         /*.getNumero() */ "" + ", " + "" /*evento.getSalon().getMunicipio()*/ + "." + "<br>" +
                 "Te recordamos que tu evento se realizara el dia " + dia + " de " + horaInicio + " a " + horaFin + "." + "<br>"
         // TODO salon calle y eso
@@ -1155,7 +1164,7 @@ class EmailService {
             "El evento: " + evento.nombre + " ha sido cancelado exitosamente." + "<br>" +
                     "tu evento se iba a realizar el dia " + dia + " de " + horaInicio + " a " + horaFin + "." + "<br>" +
                     "Ante cualquier consulta" + "<br>" +
-                    "Acercate al salon: " + evento.listaEmpresa.first().nombre + " en calle " + ""/*evento.getSalon()
+                    "Acercate al salon: " + evento.empresa.nombre + " en calle " + ""/*evento.getSalon()
                 .getCalle() */ + " " + ""/*evento.getSalon().getNumero()*/ + ", " + /*evento.getSalon()*/
                     /*.getMunicipio()*/ "" + "." + "<br>"
 

@@ -17,21 +17,15 @@ data class EventoExtraVariable(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val extra: Extra,
 
     @Column
     val cantidad : Int) {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     lateinit var evento: Evento
-
-    companion object {
-        fun getPrecioByFechaOfListaExtraVariable(listaExtra: List<EventoExtraVariable>, fecha: LocalDateTime): Double {
-            return listaExtra.sumOf { it.extra.getPrecioByFecha(fecha) * it.cantidad }
-        }
-    }
 
 }

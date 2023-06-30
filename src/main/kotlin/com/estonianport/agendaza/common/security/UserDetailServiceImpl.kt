@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.common.security
 
-import com.estonianport.agendaza.dao.UsuarioDao
+import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service
 class UserDetailServiceImpl : UserDetailsService {
 
     @Autowired
-    lateinit var usuarioDao : UsuarioDao
+    lateinit var usuarioRepository : UsuarioRepository
 
     override fun loadUserByUsername(username: String): UserDetails{
 
-        val usuario : Usuario = usuarioDao.findOneByUsername(username)
+        val usuario : Usuario = usuarioRepository.findOneByUsername(username)
             ?: throw UsernameNotFoundException("No se encontró el usuario")
 
         return UserDetailImpl(usuario)

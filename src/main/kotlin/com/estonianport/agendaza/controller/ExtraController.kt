@@ -1,12 +1,9 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.ExtraDto
+import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDto
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
-import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
-import com.estonianport.agendaza.model.Servicio
-import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -46,36 +44,37 @@ class ExtraController {
     }
 
     @GetMapping("/getExtra/{id}")
-    fun showSave(@PathVariable("id") id: Long): ExtraDto {
+    fun showSave(@PathVariable("id") id: Long): ExtraDTO {
         val extra = extraService.get(id)!!
-        val extraDto = ExtraDto(extra.id, extra.nombre, extra.tipoExtra, extra.empresa.id,0.0)
-        extraDto.listaTipoEventoId = extra.listaTipoEvento.map { it.id }.toMutableSet()
+        val extraDto = extra.toDTO()
+
+        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extra)!!.map { it.id }
         return extraDto
     }
 
-    @GetMapping("/getExtraListaTipoEvento/{id}")
-    fun getListaTipoEvento(@PathVariable("id") id: Long):MutableSet<TipoEvento> {
-        return extraService.get(id)!!.listaTipoEvento
-    }
-
     @PostMapping("/saveExtra")
-    fun save(@RequestBody extraDto: ExtraDto): Extra {
-        val listaTipoEvento : MutableSet<TipoEvento> = mutableSetOf()
+    fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
+        var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra, empresaService.get(extraDTO.empresaId)!!)
 
-        extraDto.listaTipoEventoId.forEach {
-            tipoEventoService.get(it)?.let { it1 -> listaTipoEvento.add(it1) }
+        extra = extraService.save(extra)
+
+        extraDTO.listaTipoEventoId.forEach {
+            val tipoEvento = tipoEventoService.get(it)!!
+            tipoEvento.listaExtra.add(extra)
+            tipoEventoService.save(tipoEvento)
         }
 
-        val extra = Extra(extraDto.id, extraDto.nombre, extraDto.tipoExtra, empresaService.get(extraDto.empresaId)!!)
-        extra.listaTipoEvento = listaTipoEvento
-
-        return extraService.save(extra)
+        return extra.toDTO()
     }
 
     @DeleteMapping("/deleteExtra/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Extra> {
-        extraService.delete(id)
-        return ResponseEntity<Extra>(HttpStatus.OK)
+    fun delete(@PathVariable("id") id: Long): ExtraDTO {
+        val extraEliminar =  extraService.get(id)!!
+        extraEliminar.fechaBaja = LocalDate.now()
+        extraService.save(extraEliminar)
+        // Deja los precios con fecha del extra eliminado sin fecha baja
+
+        return extraEliminar.toDTO()
     }
 
     @GetMapping("/getAllEventoTipoExtra")
@@ -89,39 +88,32 @@ class ExtraController {
     }
 
     @GetMapping("/getAllPrecioConFechaByExtraId/{id}")
-    fun getAllDuracion(@PathVariable("id") id: Long): MutableSet<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByExtraId(@PathVariable("id") id: Long): List<PrecioConFechaDto> {
         val extra = extraService.get(id)!!
 
         // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
-        val listaPrecioSinYearAnterior = extra.listaPrecioConFecha.filter { it.desde.year >= LocalDateTime.now().year }
-
-        val listaPrecioConFechaDto : MutableSet<PrecioConFechaDto> = mutableSetOf()
-
-
-        listaPrecioSinYearAnterior.forEach{
-            listaPrecioConFechaDto.add(
-                PrecioConFechaDto(
-                it.id,
-                it.desde,
-                it.hasta,
-                it.precio,
-                it.empresa.id,
-                it.extra.id
-            )
-            )
+        val listaPrecioSinYearAnterior = extra.empresa.listaPrecioConFechaExtra.filter {
+             it.extra.id == extra.id &&
+             it.extra.fechaBaja == null &&
+             it.desde.year >= LocalDateTime.now().year &&
+             it.fechaBaja == null
         }
 
-        return listaPrecioConFechaDto
+        return listaPrecioSinYearAnterior.map { it.toDTO() }
     }
 
-    @PostMapping("/saveExtraPrecio")
-    fun saveTipoEventoPrecio(@RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
-        val extra = extraService.get(listaPrecioConFechaDto.first().itemId)!!
-        val empresa = empresaService.get(listaPrecioConFechaDto.first().empresaId)!!
+    @PostMapping("/saveExtraPrecio/{id}")
+    fun saveTipoEventoPrecio(@PathVariable("id") id: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+        val extra = extraService.get(id)!!
+        val empresa = empresaService.get(extra.empresa.id)!!
 
-        extra.listaPrecioConFecha.forEach{
-            if(!listaPrecioConFechaDto.any { it2 -> it2.id == it.id  }){
-                precioConFechaExtraService.delete(it.id)
+        val listaPrecio = empresa.listaPrecioConFechaExtra.filter { it.extra.id == extra.id }
+
+        listaPrecio.forEach{
+            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
+                val precioViejo = precioConFechaExtraService.get(it.id)!!
+                precioViejo.fechaBaja = LocalDate.now()
+                precioConFechaExtraService.save(precioViejo)
             }
         }
 
@@ -134,7 +126,7 @@ class ExtraController {
                 PrecioConFechaExtra(
                 it.id,
                 it.precio,
-                it.desde,
+                it.desde.minusHours(3),
                 fechaHasta,
                 empresa,
                 extra

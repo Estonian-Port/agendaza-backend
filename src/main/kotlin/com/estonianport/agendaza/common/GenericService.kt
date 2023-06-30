@@ -5,7 +5,7 @@ interface GenericService<T, ID : Serializable?> {
 
     fun delete(id: ID)
 
-    operator fun get(id: ID): T?
+    fun get(id: ID): T?
 
     fun getAll() : MutableList<T>?
 }

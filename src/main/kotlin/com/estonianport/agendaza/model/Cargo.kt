@@ -17,11 +17,11 @@ data class Cargo(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val usuario: Usuario,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val empresa: Empresa,
 

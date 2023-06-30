@@ -2,11 +2,10 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.dao.EmpresaDao
+import com.estonianport.agendaza.repository.EmpresaRepository
 import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.UsuarioAbmDto
-import com.estonianport.agendaza.model.Pago
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -15,44 +14,42 @@ import org.springframework.stereotype.Service
 class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     @Autowired
-    lateinit var EmpresaDao: EmpresaDao
+    lateinit var empresaRepository: EmpresaRepository
 
     override val dao: CrudRepository<Empresa, Long>
-        get() = EmpresaDao
+        get() = empresaRepository
 
-    fun getAllEventoByEmpresaId(empresa : Empresa): MutableSet<EventoDto> {
-
-        val listaAgendaEventoDto : MutableSet<EventoDto> = mutableSetOf()
-
-        empresa.listaEvento.forEach {
-            listaAgendaEventoDto.add(EventoDto(it.id, it.nombre, it.codigo, it.inicio, it.fin, it.tipoEvento.nombre))
-        }
-
-        return listaAgendaEventoDto
+    fun findById(id : Long): Empresa {
+        return empresaRepository.findById(id).get()
     }
 
-    fun getAllPagoByEmpresaId(empresa : Empresa): MutableSet<PagoDto> {
+    fun findEmpresaById(id : Long): Empresa {
+        return empresaRepository.findEmpresaById(id).get()
+    }
 
-        val listaPago : MutableSet<PagoDto> = mutableSetOf()
+    fun getEmpresaListaPagoById(id : Long): Empresa{
+        return empresaRepository.getEmpresaListaPagoById(id).get()
+    }
 
-        empresa.listaEvento.forEach {
-            it.listaPago.forEach {
-                listaPago.add(PagoDto(it.id, it.monto,it.evento.codigo, it.medioDePago,
-                    it.evento.nombre, it.fecha))
+    fun getAllEventoByEmpresaId(empresa : Empresa): List<EventoDto> {
+        return empresa.listaEvento.filter{ it.fechaBaja == null }
+            .map { evento ->
+            evento.toDto()
+        }.sortedByDescending { it.inicio }
+    }
+
+    fun getAllPagoByEmpresaId(empresa : Empresa): List<PagoDto> {
+        return empresa.listaEvento.flatMap { evento ->
+            evento.listaPago.filter {
+                it.fechaBaja == null }.map { pago ->
+                pago.toDTO()
             }
-        }
-
-        return listaPago
+        }.sortedByDescending { it.id }
     }
 
-    fun getAllUsuariosByEmpresaId(empresa: Empresa): MutableSet<UsuarioAbmDto> {
-        val listaUsuarioAbmDto : MutableSet<UsuarioAbmDto> = mutableSetOf()
-
-        empresa.listaEmpleados.forEach {
-            listaUsuarioAbmDto.add(UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username))
+    fun getAllUsuariosByEmpresaId(empresa: Empresa): List<UsuarioAbmDto> {
+        return empresa.listaEmpleados.map {
+            UsuarioAbmDto(it.usuario.id, it.usuario.nombre, it.usuario.apellido, it.usuario.username)
         }
-
-        return listaUsuarioAbmDto
     }
-
 }

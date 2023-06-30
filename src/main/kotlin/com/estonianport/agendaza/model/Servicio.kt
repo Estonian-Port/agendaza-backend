@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.ServicioDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -13,6 +15,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 
 @Entity
 data class Servicio(
@@ -24,17 +27,14 @@ data class Servicio(
     @Column
     var nombre: String,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST])
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "tipo_evento_servicio",
-        joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
-    )
-    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+    @Column
+    var fechaBaja : LocalDate? = null
 
+    fun toDTO(): ServicioDTO {
+        return ServicioDTO(id, nombre, empresa.id)
+    }
 }

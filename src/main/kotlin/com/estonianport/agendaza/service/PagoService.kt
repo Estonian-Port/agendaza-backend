@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dao.PagoDao
+import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service
 class PagoService : GenericServiceImpl<Pago, Long>(){
 
     @Autowired
-    lateinit var pagoDao: PagoDao
+    lateinit var pagoRepository: PagoRepository
 
     override val dao: CrudRepository<Pago, Long>
-        get() = pagoDao
+        get() = pagoRepository
 
     fun getEventoForPago(codigo : String, empresa : Empresa) : PagoDto {
         val evento = empresa.listaEvento.find { it.codigo == codigo }

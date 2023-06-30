@@ -8,4 +8,5 @@ class PagoDto(val id: Long, val monto : Int, val codigo : String, val medioDePag
               val nombreEvento: String, val fecha: LocalDateTime) {}
 
 class CodigoEmpresaId(val codigo : String, val empresaId: Long) {}
+
 class PagoEmpresaEncargado(val pago : PagoDto, val empresaId : Long, val usuarioId : Long) {}

@@ -14,7 +14,7 @@ data class Capacidad(
     val id: Long,
 
     @Column(name = "capacidad_adultos")
-    val capacidadAdultos : Int,
+    var capacidadAdultos : Int,
 
     @Column(name = "capacidad_ninos")
-    val capacidadNinos : Int){}
+    var capacidadNinos : Int){}

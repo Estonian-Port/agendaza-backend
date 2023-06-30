@@ -1,8 +1,8 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dao.ExtraDao
-import com.estonianport.agendaza.dto.ExtraDto
+import com.estonianport.agendaza.repository.ExtraRepository
+import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,24 +14,22 @@ import java.time.LocalDateTime
 class ExtraService : GenericServiceImpl<Extra, Long>(){
 
     @Autowired
-    lateinit var extraDao: ExtraDao
+    lateinit var extraRepository: ExtraRepository
 
     override val dao: CrudRepository<Extra, Long>
-        get() = extraDao
+        get() = extraRepository
 
-    fun fromListaExtraDtoToListaExtra(listaExtraDto : List<ExtraDto>) : List<Extra>{
-        return listaExtraDto.map { extra -> this.get(extra.id)!! }
+    fun fromListaExtraDtoToListaExtra(listaExtraDTO : List<ExtraDTO>) : List<Extra>{
+        return listaExtraDTO.map { extra -> this.get(extra.id)!! }
     }
 
-    fun fromListaExtraToListaExtraDto(listaExtra: List<Extra>, fechaEvento : LocalDateTime): List<ExtraDto>{
+    fun fromListaExtraToListaExtraDto(listaExtra: List<Extra>, fechaEvento : LocalDateTime): List<ExtraDTO>{
         return listaExtra.map{
-            ExtraDto(it.id, it.nombre, it.tipoExtra, it.empresa.id, it.getPrecioByFecha(fechaEvento))
+            it.toExtraPrecioDTO(fechaEvento)
         }
     }
 
-    fun fromListaExtraToListaExtraDtoByFilter(listaExtra: MutableSet<Extra>, fechaEvento : LocalDateTime, tipoExtra : TipoExtra) : List<ExtraDto>{
+    fun fromListaExtraToListaExtraDtoByFilter(listaExtra: MutableSet<Extra>, fechaEvento : LocalDateTime, tipoExtra : TipoExtra) : List<ExtraDTO>{
         return this.fromListaExtraToListaExtraDto(listaExtra.filter { it.tipoExtra == tipoExtra }, fechaEvento)
     }
-
-
 }

@@ -2,7 +2,8 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
-import com.estonianport.agendaza.dao.EventoDao
+import com.estonianport.agendaza.dto.EventoDto
+import com.estonianport.agendaza.repository.EventoRepository
 import com.estonianport.agendaza.dto.EventoReservaDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
@@ -12,22 +13,33 @@ import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
 import java.util.stream.Collectors
 import java.util.stream.IntStream
+import kotlin.collections.ArrayList
 
 @Service
 class EventoService : GenericServiceImpl<Evento, Long>() {
 
     @Autowired
-    lateinit var eventoDao: EventoDao
+    lateinit var eventoRepository: EventoRepository
 
     override val dao: CrudRepository<Evento, Long>
-        get() = eventoDao
+        get() = eventoRepository
+
+    fun findAllByEmpresa(empresa : Empresa) : List<Evento>{
+       return eventoRepository.findAllByEmpresa(empresa)
+    }
+
+    fun findById(id : Long): Evento {
+        return eventoRepository.findById(id).get()
+    }
+
+    fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDto>?{
+        return listaEvento!!.map { it.toDto() }
+    }
 
     fun generateCodigoForEventoOfEmpresa(empresa : Empresa) : String{
         var codigo : String = CodeGeneratorUtil.base26Only4Letters
@@ -53,7 +65,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         val inicio: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 0,0 )
         val fin: LocalDateTime = LocalDateTime.of(desde.year, desde.month, desde.dayOfMonth, 23,59 )
 
-        return eventoDao.findAllByInicioBetweenAndListaEmpresa(inicio, fin, empresa)
+        return eventoRepository.findAllByInicioBetweenAndEmpresa(inicio, fin, empresa)
     }
 
     fun getHorarioDisponible(listaEvento: List<Evento>, desde : LocalDateTime, hasta : LocalDateTime) : Boolean{
@@ -132,7 +144,8 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
                                      tipoEvento : TipoEvento,
                                      listaExtra : MutableSet<Extra>,
                                      listaEventoExtraVariable : MutableSet<EventoExtraVariable>,
-                                     encargado : Usuario): Evento {
+                                     encargado : Usuario,
+                                     empresa : Empresa): Evento {
         return Evento(
             eventoReservaDto.id,
             eventoReservaDto.nombre,
@@ -149,6 +162,8 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             encargado,
             eventoReservaDto.cliente,
             eventoReservaDto.codigo,
-            eventoReservaDto.estado)
+            eventoReservaDto.estado,
+            eventoReservaDto.anotaciones,
+            empresa)
     }
 }

@@ -29,8 +29,8 @@ class PanelAdminController {
 
     @PutMapping("/getAllCantidadesForPanelAdminByUsuarioIdAndEmpresaId")
     fun getAllCantidadesConfiguracionByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDto): ConfiguracionDto {
-        val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)!!
-        val empresa = empresaService.get(usuarioEmpresaDto.empresaId)!!
+        val usuario = usuarioService.findById(usuarioEmpresaDto.usuarioId)!!
+        val empresa = empresaService.findById(usuarioEmpresaDto.empresaId)
 
         return agendaService.getAllCantidadesConfiguracionByUsuarioAndEmpresa(usuario, empresa)
     }

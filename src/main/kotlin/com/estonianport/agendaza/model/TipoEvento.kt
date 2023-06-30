@@ -1,9 +1,7 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.PagoDto
-import com.estonianport.agendaza.dto.TimeDto
-import com.estonianport.agendaza.dto.TipoEventoDto
-import com.estonianport.agendaza.dto.TipoEventoExtraDto
+import com.estonianport.agendaza.dto.TipoEventoDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import java.time.LocalTime
@@ -11,14 +9,16 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -42,36 +42,37 @@ data class TipoEvento(
     @Column
     val cantidadDuracion: LocalTime,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST])
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "tipoEvento")
-    val listaPrecioConFecha: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
+    @Column
+    var fechaBaja : LocalDate? = null
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaTipoEvento")
-    val listaServicio: MutableSet<Servicio> = mutableSetOf()
+    @ManyToMany
+    @JoinTable(
+        name = "tipo_evento_extra",
+        joinColumns = arrayOf(JoinColumn(name = "tipo_evento_id") ),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+    )
+    var listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "listaTipoEvento")
-    val listaExtra: MutableSet<Extra> = mutableSetOf()
+    @ManyToMany
+    @JoinTable(
+        name = "tipo_evento_servicio",
+        joinColumns = arrayOf(JoinColumn(name = "tipo_evento_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
+    )
+    var listaServicio: MutableSet<Servicio> = mutableSetOf()
 
-    fun toDTO() : TipoEventoDto {
-        return TipoEventoDto(id, nombre, TimeDto(cantidadDuracion.hour, cantidadDuracion.minute),
+    fun toDTO() : TipoEventoDTO {
+        return TipoEventoDTO(id, nombre, LocalTime.of(cantidadDuracion.hour, cantidadDuracion.minute),
             duracion, capacidad, empresa.id)
     }
 
-    fun getPrecioByFecha(fecha : LocalDateTime): Double {
-        if(listaPrecioConFecha.isNotEmpty() && listaPrecioConFecha.any { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) } ) {
-            return listaPrecioConFecha.find { it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha) }!!.precio
-        }else{
-            return 0.0
-        }
-    }
-
-    fun toTipoEventoExtraDto(fecha : LocalDateTime): TipoEventoExtraDto {
-        return TipoEventoExtraDto(id, nombre, this.getPrecioByFecha(fecha))
+    fun toTipoEventoPrecioDTO(fecha : LocalDateTime): TipoEventoPrecioDTO {
+        return TipoEventoPrecioDTO(id, nombre, this.empresa.getPrecioOfTipoEvento(this, fecha))
     }
 }

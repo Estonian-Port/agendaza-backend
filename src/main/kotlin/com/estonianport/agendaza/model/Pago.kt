@@ -8,9 +8,9 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -36,7 +36,10 @@ data class Pago (
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val encargado: Usuario){
+    val encargado: Usuario,
+
+    @Column
+    var fechaBaja : LocalDate? = null){
 
     fun toDTO() : PagoDto{
         return PagoDto(

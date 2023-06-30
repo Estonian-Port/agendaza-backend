@@ -27,7 +27,7 @@ class CargoController {
 
     @GetMapping("/getCargo/{id}")
     fun get(@PathVariable("id") id: Long): Cargo? {
-        return cargoService.get(id)
+        return cargoService.findById(id)
     }
 
     @PostMapping("/saveCargo")

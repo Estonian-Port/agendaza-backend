@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dao.PrecioConFechaTipoEventoDao
+import com.estonianport.agendaza.repository.PrecioConFechaTipoEventoRepository
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service
 class PrecioConFechaTipoEventoService : GenericServiceImpl<PrecioConFechaTipoEvento, Long>(){
 
     @Autowired
-    lateinit var precioConFechaTipoEventoDao: PrecioConFechaTipoEventoDao
+    lateinit var precioConFechaTipoEventoRepository: PrecioConFechaTipoEventoRepository
 
     override val dao: CrudRepository<PrecioConFechaTipoEvento, Long>
-        get() = precioConFechaTipoEventoDao
+        get() = precioConFechaTipoEventoRepository
 
 }
