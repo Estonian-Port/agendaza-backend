@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.CodigoEmpresaId
+import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.PagoEmpresaEncargado
 import com.estonianport.agendaza.errors.NotFoundException
@@ -67,7 +68,25 @@ class PagoController {
     @PutMapping("/getEventoForPago")
     fun getEventoForPago(@RequestBody codigoEmpresaId: CodigoEmpresaId): PagoDto {
         val empresa = empresaService.get(codigoEmpresaId.empresaId)!!
-        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)
-    }
+        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)}
+
+        @GetMapping("/getAllPagos/{id}/{pageNumber}")
+        fun getAllPagos(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<PagoDto> {
+            return pagoService.pagos(id,pageNumber)
+
+        }
+        @GetMapping("/getAllPagosFilter/{id}/{pageNumber}/{buscar}")
+        fun getAllPagosFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<PagoDto> {
+            return pagoService.pagosFiltrados(id, pageNumber, buscar)
+
+        }
+        @GetMapping("/cantPagos/{id}")
+        fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
+
+
+        @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
+        fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = pagoService.contadorDePagosFiltrados(id,buscar)
+
+
 
 }

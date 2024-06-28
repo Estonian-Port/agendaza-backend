@@ -1,14 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.EventoCateringDto
-import com.estonianport.agendaza.dto.EventoDto
-import com.estonianport.agendaza.dto.EventoExtraDto
-import com.estonianport.agendaza.dto.EventoExtraVariableDTO
-import com.estonianport.agendaza.dto.EventoHoraDto
-import com.estonianport.agendaza.dto.EventoPagoDto
-import com.estonianport.agendaza.dto.EventoVerDto
-import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.*
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -170,5 +162,9 @@ data class Evento(
 
     fun toEventoPagoDto(listaPago: List<PagoDto>): EventoPagoDto {
         return EventoPagoDto(id, nombre, codigo, getPresupuestoTotal(), listaPago)
+    }
+
+    fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDto {
+        return EventoUsuarioDto(evento.id, evento.nombre, evento.codigo, evento.cliente.toUsuarioAbmDto())
     }
 }

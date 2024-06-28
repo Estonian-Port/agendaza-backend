@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.dto
 
-class AgendaDto(var id: Long, var nombre: String, var rol : String) {
+import com.estonianport.agendaza.model.TipoCargo
+
+class AgendaDto(var id: Long, var nombre: String, var rol : TipoCargo) {
 
 }

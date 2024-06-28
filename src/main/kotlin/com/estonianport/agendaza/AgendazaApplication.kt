@@ -9,6 +9,6 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @EnableEncryptableProperties
 class AgendazaApplication : SpringBootServletInitializer()
 
-fun main(args: Array<String>) {
-    runApplication<AgendazaApplication>(*args)
+     fun main(args: Array<String>) {
+        runApplication<AgendazaApplication>(*args)
 }

@@ -4,12 +4,12 @@ import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.dto.PagoDto
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.UsuarioAbmDto
-import com.estonianport.agendaza.model.Duracion
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,6 +27,9 @@ class EmpresaController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
+    @Autowired
+    lateinit var usuarioService: UsuarioService
+
     @GetMapping("/getAllEmpresa")
     fun getAll(): MutableList<Empresa>? {
         return empresaService.getAll()
@@ -42,14 +45,27 @@ class EmpresaController {
         return empresaService.save(empresa)
     }
 
-    @GetMapping("/getAllEventoByEmpresaId/{id}")
-    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long): List<EventoDto> {
-        return empresaService.getAllEventoByEmpresaId(empresaService.findEmpresaById(id))
+    @GetMapping("/getAllEventoByEmpresaId/{id}/{pageNumber}")
+    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<EventoDto> {
+        return empresaService.getAllEventoByEmpresaId(id, pageNumber)
     }
+    @GetMapping("/getAllEventoByFilterName/{id}/{pageNumber}/{buscar}")
+    fun getAllEventoByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<EventoDto> {
+        return empresaService.getAllEventoByFilterName(id, pageNumber, buscar)
+    }
+    @GetMapping("/getAllUsersByFilterName/{id}/{pageNumber}/{buscar}")
+    fun getAllUsersByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<UsuarioAbmDto> {
+        return usuarioService.getAllUsersByFilterName(id, pageNumber, buscar)
+    }
+    @GetMapping("/getAllUsuariosByEmpresaId/{id}/{pageNumber}")
+    fun getAllUsuarios(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<UsuarioAbmDto> {
+        return usuarioService.getAllUsuariosByEmpresaId(id,pageNumber)
+    }
+
 
     @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
     fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): MutableSet<EventoDto> {
-        val listaEventos = empresaService.getAllEventoByEmpresaId(empresaService.findEmpresaById(id))
+        val listaEventos = empresaService.getAllEventosByEmpresaId(empresaService.findEmpresaById(id))
         return listaEventos.filter { it.inicio.toLocalDate() == fechaFiltro }.toMutableSet()
     }
 
@@ -62,7 +78,8 @@ class EmpresaController {
     @GetMapping("/getAllExtraTipoEventoByEmpresaId/{id}")
     fun getAllExtraTipoEventoByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
         return empresaService.get(id)!!.
-            listaExtra.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.toMutableSet()
+            listaExtra.filter{ (it.tipoExtra == TipoExtra.EVENTO ||
+                it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.toMutableSet()
     }
 
     //TODO refactor con service getAllExtraCatering
@@ -93,5 +110,6 @@ class EmpresaController {
     fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDto> {
         return empresaService.getAllPagoByEmpresaId(empresaService.getEmpresaListaPagoById(id))
     }
+
 
 }

@@ -1,14 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.emailService.EmailService
-import com.estonianport.agendaza.dto.EventoBuscarFechaDto
-import com.estonianport.agendaza.dto.EventoCateringDto
-import com.estonianport.agendaza.dto.EventoDto
-import com.estonianport.agendaza.dto.EventoExtraDto
-import com.estonianport.agendaza.dto.EventoHoraDto
-import com.estonianport.agendaza.dto.EventoPagoDto
-import com.estonianport.agendaza.dto.EventoReservaDto
-import com.estonianport.agendaza.dto.EventoVerDto
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Estado
@@ -78,6 +71,11 @@ class EventoController {
         return eventoService.findById(id)
     }
 
+    @GetMapping("/cantEventos/{id}")
+    fun cantEventos(@PathVariable("id") id: Long) =  eventoService.contadorDeEventos(id)
+
+    @GetMapping("/cantEventosFiltrados/{id}/{buscar}")
+    fun cantEventosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) =  eventoService.contadorDeEventosFiltrados(id,buscar)
     @PostMapping("/saveEvento")
     fun save(@RequestBody eventoReservaDto: EventoReservaDto): Long {
 
@@ -454,4 +452,15 @@ class EventoController {
     fun editEventoCantidadNombre(@PathVariable("id") id: Long): Double {
         return eventoService.findById(id).getPresupuestoTotal()
     }
+
+    @PutMapping("/getEventosByUsuarioAndEmpresa")
+    fun getEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDto): List<EventoUsuarioDto> {
+        return eventoService.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto).map { it.toEventoUsuarioDto(it) }
+    }
+
+    @PutMapping("/getCantEventosByUsuarioAndEmpresa")
+    fun getCantEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDto): Int {
+        return eventoService.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto)
+    }
+
 }

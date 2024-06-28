@@ -8,6 +8,7 @@ import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 
@@ -30,6 +31,18 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     }
 
     fun fromListaPagoToListaPagoDto(listaPago : MutableSet<Pago>) : List<PagoDto>{
-        return listaPago.map{ pago -> pago.toDTO() }
-    }
+        return listaPago.map{ pago -> pago.toDTO() }}
+
+        fun contadorDePagos(id : Long) = pagoRepository.cantidadPagos(id)
+
+        fun pagos(id: Long, pageNumber : Int) = pagoRepository.findAll(id, PageRequest.of(pageNumber,10)).content
+            .map { pago -> pago.toDTO()}
+
+        fun pagosFiltrados(id : Long, pageNumber : Int, buscar: String)=
+            pagoRepository.pagosByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
+                .map { pago -> pago.toDTO()}
+
+
+        fun contadorDePagosFiltrados(id : Long,buscar : String) = pagoRepository.cantidadPagosFiltrados(id,buscar)
+
 }

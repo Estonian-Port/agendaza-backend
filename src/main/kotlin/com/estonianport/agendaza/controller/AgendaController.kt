@@ -2,10 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.dto.EventoAgendaDto
-import com.estonianport.agendaza.service.AgendaService
-import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.UsuarioService
+import com.estonianport.agendaza.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,9 +25,12 @@ class AgendaController {
     @Autowired
     lateinit var eventoService: EventoService
 
+    @Autowired
+    lateinit var cargoService: CargoService
+
     @GetMapping("/getListaAgendaByUsuarioId/{id}")
-    fun getListaAgendaByUsuarioId(@PathVariable("id") id: Long): List<AgendaDto> {
-        return agendaService.getListaAgendasByUsuario(usuarioService.findById(id)!!.listaCargo.toList())
+    fun getListaAgendaByUsuarioId(@PathVariable("id") usuarioId: Long): List<AgendaDto> {
+        return cargoService.getListaCargosByUsuarioId(usuarioId)
     }
 
     @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
