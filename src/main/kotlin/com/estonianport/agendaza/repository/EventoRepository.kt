@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.EventoAgendaDto
+import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import org.springframework.data.domain.Page
@@ -44,8 +45,12 @@ interface EventoRepository : CrudRepository<Evento, Long>{
     fun getAllEventosForAgendaByEmpresaId(empresaId : Long) : List<EventoAgendaDto>
 
     @Query("SELECT e FROM Evento e WHERE e.cliente.id = ?1 AND e.empresa.id = ?2 AND e.fechaBaja IS NULL ORDER BY e.id DESC LIMIT 10")
-    fun getEventosByUsuarioIdAndEmpresaId(usuarioId: Long, empresaId : Long ): List<Evento>
+    fun getEventosByUsuarioIdAndEmpresaId(usuarioId: Long, empresaId : Long): List<Evento>
 
     @Query("SELECT COUNT(e) FROM Evento e WHERE e.cliente.id = ?1 AND e.empresa.id = ?2 AND e.fechaBaja IS NULL")
-    fun getCantEventosByUsuarioIdAndEmpresaId(usuarioId: Long, empresaId : Long ): Int
+    fun getCantEventosByUsuarioIdAndEmpresaId(usuarioId: Long, empresaId : Long): Int
+
+    @Query("SELECT new com.estonianport.agendaza.dto.EventoDto(e.id, e.nombre, e.codigo, e.inicio, e.fin, e.tipoEvento.nombre) FROM Evento e WHERE e.empresa.id = :empresaId AND e.inicio BETWEEN :fechaInicio AND :fechaFin AND e.fechaBaja IS NULL")
+    fun getAllEventosForAgendaByFecha(fechaInicio: LocalDateTime, fechaFin : LocalDateTime, empresaId : Long): List<EventoDto>
+
 }

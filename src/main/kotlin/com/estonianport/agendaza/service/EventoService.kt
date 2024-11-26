@@ -18,6 +18,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.stream.Collectors
 import java.util.stream.IntStream
 import kotlin.collections.ArrayList
@@ -41,6 +42,12 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     fun getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDto): Int {
         return eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto.usuarioId, usuarioEmpresaDto.empresaId)
+    }
+
+    fun getAllEventosForAgendaByFecha(fecha: String, empresaId : Long): List<EventoDto> {
+        val fechaInicio : LocalDateTime = LocalDateTime.parse(fecha + "T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val fechaFin : LocalDateTime = LocalDateTime.parse(fecha + "T23:59:59", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        return eventoRepository.getAllEventosForAgendaByFecha(fechaInicio, fechaFin, empresaId)
     }
 
     fun findById(id : Long): Evento {

@@ -2,12 +2,12 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.AgendaDto
 import com.estonianport.agendaza.dto.EventoAgendaDto
+import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.service.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RestController
 @CrossOrigin("*")
@@ -31,4 +31,11 @@ class AgendaController {
     fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDto> {
         return eventoService.getAllEventosForAgendaByEmpresaId(id)
     }
+
+    //TODO pasar a eventoController
+    @GetMapping("/getAllEventosForAgendaByFecha")
+    fun getAllEventosForAgendaByFecha(@RequestParam("fecha") fecha : String, @RequestParam("empresaId") empresaId : Long): List<EventoDto> {
+        return eventoService.getAllEventosForAgendaByFecha(fecha, empresaId)
+    }
+
 }

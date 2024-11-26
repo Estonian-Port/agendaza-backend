@@ -63,6 +63,7 @@ class EmpresaController {
     }
 
 
+    //TODO refactor, borrar se esta creando uno nuevo en evento service
     @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
     fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): MutableSet<EventoDto> {
         val listaEventos = empresaService.getAllEventosByEmpresaId(empresaService.findEmpresaById(id))
