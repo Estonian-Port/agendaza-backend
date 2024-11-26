@@ -2,6 +2,7 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
+import com.estonianport.agendaza.dto.EventoAgendaDto
 import com.estonianport.agendaza.dto.EventoDto
 import com.estonianport.agendaza.repository.EventoRepository
 import com.estonianport.agendaza.dto.EventoReservaDto
@@ -30,8 +31,8 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
 
-    fun findAllByEmpresa(empresa : Empresa) : List<Evento>{
-       return eventoRepository.findAllByEmpresa(empresa)
+    fun getAllEventosForAgendaByEmpresaId(id : Long) : List<EventoAgendaDto>{
+        return eventoRepository.getAllEventosForAgendaByEmpresaId(id)
     }
 
     fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDto): List<Evento> {
