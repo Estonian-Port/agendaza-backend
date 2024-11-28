@@ -1,9 +1,9 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.EventoDto
-import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.EventoDTO
+import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDto
+import com.estonianport.agendaza.dto.UsuarioAbmDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 
 @RestController
 @CrossOrigin("*")
@@ -46,32 +45,27 @@ class EmpresaController {
     }
 
     @GetMapping("/getAllEventoByEmpresaId/{id}/{pageNumber}")
-    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<EventoDto> {
+    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int): List<EventoDTO> {
         return empresaService.getAllEventoByEmpresaId(id, pageNumber)
     }
+
     @GetMapping("/getAllEventoByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllEventoByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<EventoDto> {
+    fun getAllEventoByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<EventoDTO> {
         return empresaService.getAllEventoByFilterName(id, pageNumber, buscar)
     }
+
     @GetMapping("/getAllUsersByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllUsersByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<UsuarioAbmDto> {
+    fun getAllUsersByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
         return usuarioService.getAllUsersByFilterName(id, pageNumber, buscar)
     }
+
     @GetMapping("/getAllUsuariosByEmpresaId/{id}/{pageNumber}")
-    fun getAllUsuarios(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<UsuarioAbmDto> {
-        return usuarioService.getAllUsuariosByEmpresaId(id,pageNumber)
-    }
-
-
-    //TODO refactor, borrar se esta creando uno nuevo en evento service
-    @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
-    fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): MutableSet<EventoDto> {
-        val listaEventos = empresaService.getAllEventosByEmpresaId(empresaService.findEmpresaById(id))
-        return listaEventos.filter { it.inicio.toLocalDate() == fechaFiltro }.toMutableSet()
+    fun getAllUsuarios(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
+        return usuarioService.getAllUsuariosByEmpresaId(id, pageNumber)
     }
 
     @GetMapping("/getAllUsuarioByEmpresaId/{id}")
-    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): List<UsuarioAbmDto> {
+    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): List<UsuarioAbmDTO> {
         return empresaService.getAllUsuariosByEmpresaId(empresaService.get(id)!!)
     }
 
@@ -108,9 +102,8 @@ class EmpresaController {
     }
 
     @GetMapping("/getAllPagoByEmpresaId/{id}")
-    fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDto> {
+    fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDTO> {
         return empresaService.getAllPagoByEmpresaId(empresaService.getEmpresaListaPagoById(id))
     }
-
 
 }

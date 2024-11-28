@@ -1,13 +1,11 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.AgendaDto
-import com.estonianport.agendaza.dto.EventoAgendaDto
-import com.estonianport.agendaza.dto.EventoDto
+import com.estonianport.agendaza.dto.AgendaDTO
+import com.estonianport.agendaza.dto.EventoAgendaDTO
+import com.estonianport.agendaza.dto.EventoDTO
 import com.estonianport.agendaza.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RestController
 @CrossOrigin("*")
@@ -23,18 +21,18 @@ class AgendaController {
     lateinit var cargoService: CargoService
 
     @GetMapping("/getListaAgendaByUsuarioId/{id}")
-    fun getListaAgendaByUsuarioId(@PathVariable("id") usuarioId: Long): List<AgendaDto> {
+    fun getListaAgendaByUsuarioId(@PathVariable("id") usuarioId: Long): List<AgendaDTO> {
         return cargoService.getListaCargosByUsuarioId(usuarioId)
     }
 
     @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
-    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDto> {
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDTO> {
         return eventoService.getAllEventosForAgendaByEmpresaId(id)
     }
 
     //TODO pasar a eventoController
     @GetMapping("/getAllEventosForAgendaByFecha")
-    fun getAllEventosForAgendaByFecha(@RequestParam("fecha") fecha : String, @RequestParam("empresaId") empresaId : Long): List<EventoDto> {
+    fun getAllEventosForAgendaByFecha(@RequestParam("fecha") fecha : String, @RequestParam("empresaId") empresaId : Long): List<EventoDTO> {
         return eventoService.getAllEventosForAgendaByFecha(fecha, empresaId)
     }
 

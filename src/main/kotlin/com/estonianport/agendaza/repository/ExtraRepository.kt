@@ -1,9 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.Usuario
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository

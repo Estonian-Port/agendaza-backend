@@ -2,11 +2,11 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
-import com.estonianport.agendaza.dto.EventoAgendaDto
-import com.estonianport.agendaza.dto.EventoDto
+import com.estonianport.agendaza.dto.EventoAgendaDTO
+import com.estonianport.agendaza.dto.EventoDTO
 import com.estonianport.agendaza.repository.EventoRepository
-import com.estonianport.agendaza.dto.EventoReservaDto
-import com.estonianport.agendaza.dto.UsuarioEmpresaDto
+import com.estonianport.agendaza.dto.EventoReservaDTO
+import com.estonianport.agendaza.dto.UsuarioEmpresaDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.EventoExtraVariable
@@ -32,19 +32,19 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
 
-    fun getAllEventosForAgendaByEmpresaId(id : Long) : List<EventoAgendaDto>{
+    fun getAllEventosForAgendaByEmpresaId(id : Long) : List<EventoAgendaDTO>{
         return eventoRepository.getAllEventosForAgendaByEmpresaId(id)
     }
 
-    fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDto): List<Evento> {
+    fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): List<Evento> {
         return eventoRepository.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto.usuarioId, usuarioEmpresaDto.empresaId)
     }
 
-    fun getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDto): Int {
+    fun getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): Int {
         return eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto.usuarioId, usuarioEmpresaDto.empresaId)
     }
 
-    fun getAllEventosForAgendaByFecha(fecha: String, empresaId : Long): List<EventoDto> {
+    fun getAllEventosForAgendaByFecha(fecha: String, empresaId : Long): List<EventoDTO> {
         val fechaInicio : LocalDateTime = LocalDateTime.parse(fecha + "T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         val fechaFin : LocalDateTime = LocalDateTime.parse(fecha + "T23:59:59", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         return eventoRepository.getAllEventosForAgendaByFecha(fechaInicio, fechaFin, empresaId)
@@ -61,7 +61,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         return eventoRepository.cantidadDeEventosFiltrados(id,buscar)
     }
 
-    fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDto>?{
+    fun listaEventoToListaEventoDto(listaEvento : MutableList<Evento>?) : List<EventoDTO>?{
         return listaEvento!!.map { it.toDto() }
     }
 
@@ -164,7 +164,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         return "$horaFin:$minutosFin"
     }
 
-    fun fromEventoReservaDtoToEvento(eventoReservaDto : EventoReservaDto,
+    fun fromEventoReservaDtoToEvento(eventoReservaDto : EventoReservaDTO,
                                      tipoEvento : TipoEvento,
                                      listaExtra : MutableSet<Extra>,
                                      listaEventoExtraVariable : MutableSet<EventoExtraVariable>,

@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.UsuarioAbmDto
+import com.estonianport.agendaza.dto.UsuarioAbmDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -54,8 +54,8 @@ data class Usuario(
     @OneToMany(mappedBy = "usuario", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
-    fun toUsuarioAbmDto(): UsuarioAbmDto {
-        return UsuarioAbmDto(id, nombre, apellido, username)
+    fun toUsuarioAbmDto(): UsuarioAbmDTO {
+        return UsuarioAbmDTO(id, nombre, apellido, username)
     }
 }
 

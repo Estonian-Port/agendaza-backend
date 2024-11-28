@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.PagoDTO
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -41,8 +41,8 @@ data class Pago (
     @Column
     var fechaBaja : LocalDate? = null){
 
-    fun toDTO() : PagoDto{
-        return PagoDto(
+    fun toDTO() : PagoDTO{
+        return PagoDTO(
             id = id,
             monto = monto,
             codigo = evento.codigo,

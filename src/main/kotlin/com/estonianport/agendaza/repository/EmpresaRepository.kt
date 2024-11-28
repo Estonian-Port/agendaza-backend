@@ -47,7 +47,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "( \n" +
             "SELECT COUNT(c) \n" +
             "FROM Cargo c \n" +
-            "WHERE c.empresa.id = ?1), \n" +
+            "WHERE c.empresa.id = ?1" +
+            "AND c.fechaBaja is null), \n" +
             "( \n" +
             "SELECT COUNT(te) \n" +
             "FROM TipoEvento te \n" +

@@ -1,14 +1,12 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.GenericItemDto
+import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ServicioService
 import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -47,7 +45,7 @@ class ServicioController {
     }
 
     @PostMapping("/saveServicio")
-    fun save(@RequestBody servicioDTO: GenericItemDto): ServicioDTO {
+    fun save(@RequestBody servicioDTO: GenericItemDTO): ServicioDTO {
         var servicio = Servicio(servicioDTO.id, servicioDTO.nombre, empresaService.get(servicioDTO.empresaId)!!)
 
         servicio = servicioService.save(servicio)

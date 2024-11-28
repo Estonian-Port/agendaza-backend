@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.dto
 
-class GenericItemDto(var id: Long, var nombre: String) {
+class GenericItemDTO(var id: Long, var nombre: String) {
 
     var empresaId : Long = 0
 
