@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.repository
 
-import com.estonianport.agendaza.dto.UsuarioDTO
+import com.estonianport.agendaza.dto.UsuarioAbmDTO
 import com.estonianport.agendaza.dto.UsuarioEditCargoDTO
 import com.estonianport.agendaza.dto.UsuarioPerfilDTO
 import com.estonianport.agendaza.model.Usuario
@@ -15,23 +15,26 @@ import java.util.*
 @Repository
 interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
-    //@EntityGraph(attributePaths = ["listaEventosContratados", "listaCargo"])
-    override fun findAll() : List<Usuario>
 
-    //@EntityGraph(attributePaths = ["listaCargo"])
     fun getByUsername(username: String): Usuario
 
-    @Query("SELECT c.usuario FROM Cargo c where c.empresa.id = ?1 AND c.fechaBaja IS NULL")
-    fun findAll(id: Long, pageable: PageRequest) : Page<Usuario>
+    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(c.usuario.id, c.usuario.nombre, " +
+            "c.usuario.apellido, c.usuario.username) FROM Cargo c WHERE c.empresa.id = :empresaId AND " +
+            "c.fechaBaja IS NULL")
+    fun getAllUsuario(empresaId: Long, pageable: PageRequest) : Page<UsuarioAbmDTO>
 
-    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = ?1 AND c.fechaBaja IS NULL")
-    fun cantidadDeUsuarios(id : Long) : Int
+    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(c.usuario.id, c.usuario.nombre, " +
+            "c.usuario.apellido, c.usuario.username) FROM Cargo c WHERE c.empresa.id = :empresaId " +
+            "AND (c.usuario.nombre ILIKE %:buscar% OR c.usuario.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
+    fun getAllUsuarioByFilterName(empresaId : Long, buscar : String, pageable : Pageable) : Page<UsuarioAbmDTO>
 
-    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = ?1 AND (c.usuario.nombre ILIKE %?2% OR c.usuario.apellido ILIKE %?2%) AND c.fechaBaja IS NULL")
-    fun cantidadDeUsuariosFiltrados(id : Long, buscar: String) : Int
+    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :empresaId AND c.fechaBaja IS NULL")
+    fun cantidadUsuario(empresaId : Long) : Int
 
-    @Query("SELECT c.usuario FROM Cargo c WHERE c.empresa.id = ?1 AND (c.usuario.nombre ILIKE %?2% OR c.usuario.apellido ILIKE %?2%) AND c.fechaBaja IS NULL")
-    fun usuariosByNombre(id : Long, buscar : String, pageable : Pageable) : Page<Usuario>
+    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :empresaId AND " +
+            "(c.usuario.nombre ILIKE %:buscar% OR c.usuario.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
+    fun cantidadUsuarioFiltrados(empresaId : Long, buscar: String) : Int
+
 
     fun findOneByUsername(username: String): Usuario?
 

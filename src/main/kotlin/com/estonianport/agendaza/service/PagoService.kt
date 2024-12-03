@@ -44,7 +44,8 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         pagoRepository.pagosByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
             .map { pago -> pago.toDTO()}
 
-    fun contadorDePagosFiltrados(id : Long,buscar : String) = pagoRepository.cantidadPagosFiltrados(id,buscar)
+    fun contadorDePagosFiltrados(id : Long,buscar : String) =
+            pagoRepository.cantidadPagosFiltrados(id,buscar)
 
 
     override fun delete(id: Long) {

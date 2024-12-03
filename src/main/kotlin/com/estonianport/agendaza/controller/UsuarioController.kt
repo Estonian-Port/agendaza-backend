@@ -31,16 +31,6 @@ class UsuarioController {
     @Autowired
     lateinit var cargoService: CargoService
 
-    @GetMapping("/getAllUsuario")
-    fun abm(): MutableList<Usuario>? {
-        return usuarioService.getAll()
-    }
-    @GetMapping("/cantUsuarios/{id}")
-    fun cantUsuarios(@PathVariable("id") id: Long) =  usuarioService.contadorDeUsuarios(id)
-
-    @GetMapping("/cantUsuariosFiltrados/{id}/{buscar}")
-    fun cantUsuariosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) =  usuarioService.contadorDeUsuariosFiltrados(id,buscar)
-
     @PutMapping("/getUsuarioByEmail")
     fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
         try {
@@ -84,21 +74,24 @@ class UsuarioController {
         // para cambiar contraseña se debe usar editPassword
         if (usuarioDto.usuario.id == 0L) {
             usuarioDto.usuario.password = BCryptPasswordEncoder().encode(usuarioDto.usuario.password)
+        }else{
+            usuarioDto.usuario.password = usuarioService.findById(usuarioDto.usuario.id)!!.password
         }
 
         val usuario = usuarioService.save(usuarioDto.usuario)
 
-        val empresa = empresaService.get(usuarioDto.empresaId)
+        if(usuarioDto.empresaId != 0L && usuarioDto.cargo != null) {
+            val empresa = empresaService.get(usuarioDto.empresaId)
+            if (empresa != null) {
 
-        if(empresa != null) {
-
-            val cargoOld = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
-
-            if (cargoOld != null){
-                cargoOld.tipoCargo = usuarioDto.cargo
-                cargoService.save(cargoOld)
-            }else{
-                cargoService.save(Cargo(0, usuario, empresa, usuarioDto.cargo))
+                val cargoOld = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
+                // Si tenia un cargo y se cambio, se le modifica
+                if (cargoOld != null) {
+                    cargoOld.tipoCargo = usuarioDto.cargo!!
+                    cargoService.save(cargoOld)
+                } else {
+                    cargoService.save(Cargo(0, usuario, empresa, usuarioDto.cargo!!))
+                }
             }
         }
         return usuario
@@ -127,5 +120,22 @@ class UsuarioController {
         cargo.tipoCargo = usuarioEditCargoDTO.cargo
         return cargoService.save(cargo).id
     }
+
+    @GetMapping("/getAllUsuariosByEmpresaId/{empresaId}/{pageNumber}")
+    fun getAllUsuarios(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
+        return usuarioService.getAllUsuariosByEmpresaId(empresaId, pageNumber)
+    }
+
+    @GetMapping("/getAllUsersByFilterName/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllUsuarioByFilterName(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
+        return usuarioService.getAllUsuarioByFilterName(empresaId, pageNumber, buscar)
+    }
+
+    @GetMapping("/cantUsuarios/{empresaId}")
+    fun cantidadUsuario(@PathVariable("empresaId") empresaId: Long) =  usuarioService.cantidadUsuario(empresaId)
+
+    @GetMapping("/cantUsuariosFiltrados/{empresaId}/{buscar}")
+    fun cantidadUsuarioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) =  usuarioService.cantidadUsuarioFiltrados(empresaId,buscar)
+
 
 }

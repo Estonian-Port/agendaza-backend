@@ -22,23 +22,21 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return usuarioRepository.getByUsername(username).id
     }
     fun getAllUsuariosByEmpresaId(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
-        return usuarioRepository.findAll(id, PageRequest.of(pageNumber,10)).content
-            .map {
-                UsuarioAbmDTO(it.id, it.nombre, it.apellido , it.username)
-            }
+        return usuarioRepository.getAllUsuario(id, PageRequest.of(pageNumber,10)).content
     }
-    fun getAllUsersByFilterName(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
-        return usuarioRepository.usuariosByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
-            .map {
-                UsuarioAbmDTO(it.id, it.nombre, it.apellido , it.username)
-            }
+
+    fun getAllUsuarioByFilterName(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
+        return usuarioRepository.getAllUsuarioByFilterName(id, buscar, PageRequest.of(pageNumber,10)).content
     }
-    fun contadorDeUsuarios(id : Long): Int {
-        return usuarioRepository.cantidadDeUsuarios(id)
+
+    fun cantidadUsuario(id : Long): Int {
+        return usuarioRepository.cantidadUsuario(id)
     }
-    fun contadorDeUsuariosFiltrados(id : Long, buscar : String): Int {
-        return usuarioRepository.cantidadDeUsuariosFiltrados(id,buscar)
+
+    fun cantidadUsuarioFiltrados(id : Long, buscar : String): Int {
+        return usuarioRepository.cantidadUsuarioFiltrados(id,buscar)
     }
+
     fun getAllEmpresaByUsuario(usuario : Usuario) : List<GenericItemDTO>{
         return usuario.listaCargo.map { GenericItemDTO(it.empresa.id, it.empresa.nombre) }
     }

@@ -5,17 +5,8 @@ import com.estonianport.agendaza.service.ExtraVariableService
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Inheritance
-import jakarta.persistence.InheritanceType
-import jakarta.persistence.OneToMany
+import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -63,10 +54,6 @@ abstract class Empresa(
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaServicio: MutableSet<Servicio> = mutableSetOf()
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     open val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
@@ -81,13 +68,17 @@ abstract class Empresa(
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     open val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "empresa_servicio",
+            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
+            inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
+    )
+    open var listaServicio: MutableSet<Servicio> = mutableSetOf()
+
     @Column
     open var fechaBaja : LocalDate? = null
-
-    fun getCargoOfUsuario(usuario: Usuario) : TipoCargo {
-        return listaEmpleados.find { cargo -> cargo.usuario == usuario }
-            ?.tipoCargo ?: throw BusinessException("El usuario no cuenta con un cargo en esta empresa")
-    }
 
     abstract fun getContacto() : ArrayList<String>
 
@@ -127,7 +118,7 @@ abstract class Empresa(
 }
 
 @Entity
-class Salon(
+open class Salon(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -142,7 +133,7 @@ class Salon(
 }
 
 @Entity
-class Catering(
+open class Catering(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -157,7 +148,7 @@ class Catering(
 }
 
 @Entity
-class Prestador(
+open class Prestador(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -168,7 +159,7 @@ class Prestador(
 
     @Column
     @Enumerated(EnumType.STRING)
-    var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
+    open var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
     override fun getContacto(): ArrayList<String> {
         return arrayListOf(telefono.toString(), email)

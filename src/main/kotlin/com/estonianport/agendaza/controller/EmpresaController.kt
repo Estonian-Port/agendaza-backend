@@ -49,61 +49,16 @@ class EmpresaController {
         return empresaService.getAllEventoByEmpresaId(id, pageNumber)
     }
 
-    @GetMapping("/getAllEventoByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllEventoByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<EventoDTO> {
-        return empresaService.getAllEventoByFilterName(id, pageNumber, buscar)
+    @GetMapping("/getAllEventoByFilterName/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllEventoByFilterName(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<EventoDTO> {
+        return empresaService.getAllEventoByFilterName(empresaId, pageNumber, buscar)
     }
 
-    @GetMapping("/getAllUsersByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllUsersByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsersByFilterName(id, pageNumber, buscar)
-    }
-
-    @GetMapping("/getAllUsuariosByEmpresaId/{id}/{pageNumber}")
-    fun getAllUsuarios(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsuariosByEmpresaId(id, pageNumber)
-    }
-
-    @GetMapping("/getAllUsuarioByEmpresaId/{id}")
-    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): List<UsuarioAbmDTO> {
-        return empresaService.getAllUsuariosByEmpresaId(empresaService.get(id)!!)
-    }
-
-    //TODO refactor con service getAllExtraTipoEvento
-    @GetMapping("/getAllExtraTipoEventoByEmpresaId/{id}")
-    fun getAllExtraTipoEventoByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
-        return empresaService.get(id)!!.
-            listaExtra.filter{ (it.tipoExtra == TipoExtra.EVENTO ||
-                it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.toMutableSet()
-    }
-
-    //TODO refactor con service getAllExtraCatering
-    @GetMapping("/getAllExtraCateringByEmpresaId/{id}")
-    fun getAllExtraCateringByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
-        return empresaService.get(id)!!.
-        listaExtra.filter{ (it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING)  && it.fechaBaja == null }.toMutableSet()
-    }
-
-    @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
-    fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return empresaService.get(id)!!.listaTipoEvento.filter {
-            it.fechaBaja == null }.map { it.toDTO() }
-    }
 
     @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
     fun getAllTipoEventoByEmpresaIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): List<TipoEventoDTO> {
         return empresaService.get(id)!!.listaTipoEvento.filter {
             it.fechaBaja == null && it.duracion.name == duracion }.map { it.toDTO() }
-    }
-
-    @GetMapping("/getAllServicioByEmpresaId/{id}")
-    fun getAllServicioByEmpresaId(@PathVariable("id") id: Long): List<Servicio> {
-        return empresaService.get(id)!!.listaServicio.filter { it.fechaBaja == null }
-    }
-
-    @GetMapping("/getAllPagoByEmpresaId/{id}")
-    fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDTO> {
-        return empresaService.getAllPagoByEmpresaId(empresaService.getEmpresaListaPagoById(id))
     }
 
 }

@@ -3,7 +3,10 @@ import org.springframework.stereotype.Service
 import java.io.Serializable
 
 @Service
-abstract class GenericServiceImpl<T, ID : Serializable?> : GenericService<T, ID> {
+abstract class GenericServiceImpl<T : Any, ID : Serializable> : GenericService<T, ID> {
+
+    abstract val dao : CrudRepository<T, ID>
+
     override fun save(entity: T): T {
         return dao.save(entity)
     }
@@ -29,5 +32,4 @@ abstract class GenericServiceImpl<T, ID : Serializable?> : GenericService<T, ID>
         return dao.count()
     }
 
-    abstract val dao : CrudRepository<T, ID>
 }

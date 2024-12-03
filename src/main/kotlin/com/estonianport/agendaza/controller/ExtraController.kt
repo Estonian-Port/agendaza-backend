@@ -48,7 +48,7 @@ class ExtraController {
         val extra = extraService.get(id)!!
         val extraDto = extra.toDTO()
 
-        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extra)!!.map { it.id }
+        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extraDto.id).map { it.id }
         return extraDto
     }
 
@@ -139,8 +139,8 @@ class ExtraController {
     @GetMapping("/getAllExtra/{id}/{pageNumber}")
     fun getAllExtra(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
         return extraService.extras(id,pageNumber)
-        //.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO)}
     }
+
     @GetMapping("/getAllExtraFilter/{id}/{pageNumber}/{buscar}")
     fun getAllExtraFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
         return extraService.extrasFiltrados(id, pageNumber, buscar)
@@ -154,16 +154,17 @@ class ExtraController {
 
     @GetMapping("/getAllExtraCAT/{id}/{pageNumber}")
     fun getAllExtraCAT(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
-        return extraService.extrasCAT(id,pageNumber)
+        return extraService.extrasCatering(id,pageNumber)
     }
     @GetMapping("/getAllExtraCATFilter/{id}/{pageNumber}/{buscar}")
     fun getAllExtraCATFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
-        return extraService.extrasCATFiltrados(id, pageNumber, buscar)
-
+        return extraService.extrasCateringFiltrados(id, pageNumber, buscar)
     }
+
     @GetMapping("/cantExtrasCAT/{id}")
-    fun cantExtrasCAT(@PathVariable("id") id: Long) =  extraService.contadorDeExtrasCAT(id)
+    fun cantExtrasCAT(@PathVariable("id") id: Long) =  extraService.contadorDeExtrasCatering(id)
+
     @GetMapping("/cantExtrasCATFiltrados/{id}/{buscar}")
-    fun cantExtrasCATFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasCATFiltrados(id,buscar)
+    fun cantExtrasCATFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasCateringFiltrados(id,buscar)
 
 }

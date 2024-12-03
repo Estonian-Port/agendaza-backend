@@ -66,25 +66,26 @@ class PagoController {
     @PutMapping("/getEventoForPago")
     fun getEventoForPago(@RequestBody codigoEmpresaId: CodigoEmpresaId): PagoDTO {
         val empresa = empresaService.get(codigoEmpresaId.empresaId)!!
-        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)}
+        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)
+    }
 
-        @GetMapping("/getAllPagos/{id}/{pageNumber}")
-        fun getAllPagos(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<PagoDTO> {
-            return pagoService.pagos(id,pageNumber)
+    @GetMapping("/getAllPagos/{id}/{pageNumber}")
+    fun getAllPagos(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<PagoDTO> {
+        return pagoService.pagos(id,pageNumber)
 
-        }
-        @GetMapping("/getAllPagosFilter/{id}/{pageNumber}/{buscar}")
-        fun getAllPagosFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<PagoDTO> {
-            return pagoService.pagosFiltrados(id, pageNumber, buscar)
+    }
+    @GetMapping("/getAllPagosFilter/{id}/{pageNumber}/{buscar}")
+    fun getAllPagosFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<PagoDTO> {
+        return pagoService.pagosFiltrados(id, pageNumber, buscar)
 
-        }
-        @GetMapping("/cantPagos/{id}")
-        fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
-
-
-        @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
-        fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = pagoService.contadorDePagosFiltrados(id,buscar)
+    }
+    @GetMapping("/cantPagos/{id}")
+    fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
 
 
+    @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
+    fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
+        return pagoService.contadorDePagosFiltrados(id,buscar)
+    }
 
 }

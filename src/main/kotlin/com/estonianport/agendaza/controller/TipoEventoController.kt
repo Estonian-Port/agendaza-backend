@@ -104,18 +104,14 @@ class TipoEventoController {
         return Duracion.values().toMutableSet()
     }
 
-    @GetMapping("/getListaTipoEventoOfExtra/{id}")
-    fun getListaTipoEventoByExtra(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
-            tipoEventoService.getAllByExtra(extraService.get(id)!!)!!
-        )
+    @GetMapping("/getListaTipoEventoOfExtra/{extraId}")
+    fun getListaTipoEventoByExtra(@PathVariable("extraId") extraId: Long): List<TipoEventoDTO> {
+        return tipoEventoService.getAllByExtra(extraId)
     }
 
-    @GetMapping("/getListaTipoEventoByServicio/{id}")
-    fun getListaTipoEventoByServicio(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
-            tipoEventoService.getAllByServicio(servicioService.get(id)!!)!!
-        )
+    @GetMapping("/getListaTipoEventoByServicio/{servicioId}")
+    fun getListaTipoEventoByServicio(@PathVariable("servicioId") servicioId: Long): MutableList<TipoEventoDTO>{
+        return tipoEventoService.getAllByServicio(servicioId)
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")

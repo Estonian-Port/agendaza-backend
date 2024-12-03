@@ -29,19 +29,8 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.findById(id).get()
     }
 
-    fun findEmpresaById(id : Long): Empresa {
-        return empresaRepository.findEmpresaById(id).get()
-    }
-
-    fun getEmpresaListaPagoById(id : Long): Empresa{
-        return empresaRepository.getEmpresaListaPagoById(id).get()
-    }
-
-    fun getAllEventosByEmpresaId(empresa : Empresa): List<EventoDTO> {
-        return empresa.listaEvento.filter{ it.fechaBaja == null }
-            .map { evento ->
-            evento.toDto()
-        }.sortedByDescending { it.inicio }
+    fun getEmpresaListaPagoById(id : Long): List<PagoDTO>{
+        return empresaRepository.getEmpresaListaPagoById(id)
     }
 
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
@@ -51,14 +40,6 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     fun getAllEventoByFilterName(id : Long, pageNumber : Int, buscar: String): List<EventoDTO>{
         return eventoRepository.eventosByNombre(id, buscar, PageRequest.of(pageNumber,10))
             .map { evento -> evento.toDto() }.toList()
-    }
-    fun getAllPagoByEmpresaId(empresa : Empresa): List<PagoDTO> {
-        return empresa.listaEvento.flatMap { evento ->
-            evento.listaPago.filter {
-                it.fechaBaja == null }.map { pago ->
-                pago.toDTO()
-            }
-        }.sortedByDescending { it.id }
     }
 
     fun getAllUsuariosByEmpresaId(empresa: Empresa): List<UsuarioAbmDTO> {

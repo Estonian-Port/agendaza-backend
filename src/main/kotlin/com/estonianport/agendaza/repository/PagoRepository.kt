@@ -18,6 +18,6 @@ interface PagoRepository : CrudRepository<Pago, Long>{
     @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
     fun findAll(id: Long,  pageable : Pageable) : Page<Pago>
 
-    @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND (p.evento.codigo ILIKE %?2% OR p.evento.cliente.nombre ILIKE %?2%) ORDER BY p.fecha DESC")
+    @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND (p.evento.codigo ILIKE %?2% OR p.evento.cliente.nombre ILIKE %?2%) AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
     fun pagosByNombre(id : Long, buscar : String, pageable : Pageable) : Page<Pago>
 }

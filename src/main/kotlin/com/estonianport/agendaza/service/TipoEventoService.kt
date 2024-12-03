@@ -19,12 +19,12 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
     override val dao: CrudRepository<TipoEvento, Long>
         get() = tipoEventoRepository
 
-    fun getAllByExtra(extra : Extra): MutableList<TipoEvento>? {
-        return tipoEventoRepository.getAllByListaExtra(extra)
+    fun getAllByExtra(extraId : Long): MutableList<TipoEventoDTO>{
+        return tipoEventoRepository.getAllByExtra(extraId)
     }
 
-    fun getAllByServicio(servicio: Servicio): MutableList<TipoEvento>? {
-        return tipoEventoRepository.getAllByListaServicio(servicio)
+    fun getAllByServicio(servicioId: Long): MutableList<TipoEventoDTO> {
+        return tipoEventoRepository.getAllByServicio(servicioId)
     }
 
     fun listaTipoEventoToListaTipoEventoDTO(listaTipoEvento: MutableList<TipoEvento>): List<TipoEventoDTO> {

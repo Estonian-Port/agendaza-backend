@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.CantidadesPanelAdmin
+import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.model.Empresa
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.Query
@@ -9,39 +10,13 @@ import java.util.*
 
 interface EmpresaRepository : CrudRepository<Empresa, Long>{
 
-/*    @EntityGraph(attributePaths = [
-        "listaEmpleados",
-        "listaEvento",
-        "listaServicio",
-        "listaExtra",
-        "listaTipoEvento"
-    ])*/
-    override fun findAll() : List<Empresa>
+    @Query("SELECT e FROM Empresa e WHERE e.id = :empresaId")
+    override fun findById(empresaId: Long) : Optional<Empresa>
 
-    /*  @EntityGraph(attributePaths = [
-         "listaEmpleados",
-         "listaEvento",
-         "listaServicio",
-         "listaExtra",
-         "listaTipoEvento"
-     ])*/
-    override fun findById(id: Long) : Optional<Empresa>
-
-    /* @EntityGraph(attributePaths = [
-        "listaExtra",
-        "listaEvento.capacidad",
-        "listaEvento.tipoEvento.capacidad",
-        "listaEvento.encargado",
-        "listaEvento.cliente",
-        "listaEvento.listaExtra",
-        "listaEvento.listaEventoExtraVariable"
-    ])*/
-    //@EntityGraph(attributePaths = ["listaEvento"])
-    fun findEmpresaById(id: Long) : Optional<Empresa>
-
-    // TODO Revisar
-    @EntityGraph(attributePaths = ["listaEvento.listaPago"])
-    fun getEmpresaListaPagoById(id: Long) : Optional<Empresa>
+    @Query("SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, ev.codigo, p.medioDePago, " +
+            "ev.nombre, p.fecha) FROM Pago p LEFT JOIN p.evento ev LEFT JOIN ev.empresa em " +
+            "WHERE em.id = :empresaId")
+    fun getEmpresaListaPagoById(empresaId: Long) : List<PagoDTO>
 
     @Query("SELECT new com.estonianport.agendaza.dto.CantidadesPanelAdmin ( \n" +
             "( \n" +
@@ -93,7 +68,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "( \n" +
             "SELECT COUNT(s) \n" +
             "FROM Servicio s \n" +
-            "WHERE s.empresa.id = ?1 \n" +
+            "INNER JOIN s.listaEmpresa e \n" +
+            "WHERE e.id = ?1 \n" +
             "   AND s.fechaBaja is null )) \n" +
             "FROM Empresa e \n" +
             "WHERE e.id = ?1 ")
