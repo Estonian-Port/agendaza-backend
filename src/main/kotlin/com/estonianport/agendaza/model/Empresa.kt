@@ -1,12 +1,9 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.errors.BusinessException
-import com.estonianport.agendaza.service.ExtraVariableService
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.*
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -80,7 +77,7 @@ abstract class Empresa(
     @Column
     open var fechaBaja : LocalDate? = null
 
-    abstract fun getContacto() : ArrayList<String>
+    abstract fun getContacto() : List<String>
 
     fun getSumOfPrecioByListaExtra(listaExtra: List<Extra>, fecha : LocalDateTime): Double{
         return listaExtra.sumOf {
@@ -127,7 +124,8 @@ open class Salon(
     numero: Int,
     municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
+    @Transient
+    override fun getContacto(): List<String> {
         return arrayListOf(calle, numero.toString(), municipio)
     }
 }
@@ -142,8 +140,9 @@ open class Catering(
     numero: Int,
     municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
-        return arrayListOf(telefono.toString(), email)
+    @Transient
+    override fun getContacto(): List<String> {
+        return listOf(telefono.toString(), email)
     }
 }
 
@@ -161,7 +160,8 @@ open class Prestador(
     @Enumerated(EnumType.STRING)
     open var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
-        return arrayListOf(telefono.toString(), email)
+    @Transient
+    override fun getContacto(): List<String> {
+        return listOf(telefono.toString(), email)
     }
 }

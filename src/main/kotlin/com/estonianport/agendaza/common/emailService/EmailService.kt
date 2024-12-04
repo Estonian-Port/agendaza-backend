@@ -578,7 +578,7 @@ class EmailService {
 
     private fun createSalonConDireccion(
         salonNombre: String,
-        contacto : ArrayList<String>,
+        contacto: List<String>,
         imagenSalon: String
     ): StringBuilder {
         val contentMain = StringBuilder()
@@ -662,7 +662,7 @@ class EmailService {
 
     private fun createSalonSinDireccion(
         salonNombre: String,
-        contacto : ArrayList<String>,
+        contacto: List<String>,
         imagenSalon: String
     ): StringBuilder {
         val contentMain = StringBuilder()
