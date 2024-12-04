@@ -31,6 +31,13 @@ class ServicioService : GenericServiceImpl<Servicio, Long>(){
         }
     }
 
+    fun deleteService(id : Long){
+        val servicio = servicioRepository.findById(id)
+                .orElseThrow { NotFoundException("Servicio no encontrado") }
+        servicio.fechaBaja = LocalDate.now()
+        save(servicio)
+    }
+
     fun getAllServicioByEmpresaId(empresaId: Long, pageNumber: Int): List<ServicioDTO> {
         return servicioRepository.getAllServicioByEmpresaId(empresaId, PageRequest.of(pageNumber,10)).content
     }
@@ -45,13 +52,6 @@ class ServicioService : GenericServiceImpl<Servicio, Long>(){
 
     fun getCantidadServicioFiltrados(empresaId: Long, buscar: String): Int {
         return servicioRepository.getCantidadServicioFiltrados(empresaId, buscar)
-    }
-
-    fun deleteService(id : Long){
-        val servicio = servicioRepository.findById(id)
-                .orElseThrow { NotFoundException("Servicio no encontrado") }
-        servicio.fechaBaja = LocalDate.now()
-        save(servicio)
     }
 
 }

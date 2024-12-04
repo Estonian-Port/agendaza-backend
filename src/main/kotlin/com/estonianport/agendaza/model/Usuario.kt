@@ -13,7 +13,7 @@ import jakarta.persistence.OneToMany
 import java.time.LocalDate
 
 @Entity
-data class Usuario(
+open class Usuario(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

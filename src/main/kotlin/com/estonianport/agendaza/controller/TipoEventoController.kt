@@ -56,11 +56,6 @@ class TipoEventoController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
-    @GetMapping("/getAllTipoEvento")
-    fun getAll(): MutableList<TipoEvento>? {
-        return tipoEventoService.getAll()
-    }
-
     @GetMapping("/getTipoEvento/{id}")
     fun get(@PathVariable("id") id: Long): TipoEventoDTO {
         return tipoEventoService.get(id)!!.toDTO()
@@ -97,6 +92,26 @@ class TipoEventoController {
         }*/
 
         return tipoEventoEliminar.toDTO()
+    }
+
+    @GetMapping("/getAllTipoEvento/{empresaId}/{pageNumber}")
+    fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId, pageNumber)
+    }
+
+    @GetMapping("/getCantidadTipoEvento/{empresaId}")
+    fun getCantidadTipoEvento(@PathVariable("empresaId") empresaId: Long): Int {
+        return tipoEventoService.getCantidadTipoEvento(empresaId)
+    }
+
+    @GetMapping("/getAllTipoEventoFiltrados/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllTipoEventoFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoFilterNombre(empresaId, buscar, pageNumber)
+    }
+
+    @GetMapping("/getCantidadTipoEventoFiltrados/{empresaId}/{buscar}")
+    fun getCantidadTipoEventoFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar: String): Int {
+        return tipoEventoService.getCantidadTipoEventoFiltrados(empresaId, buscar)
     }
 
     @GetMapping("/getAllDuracion")

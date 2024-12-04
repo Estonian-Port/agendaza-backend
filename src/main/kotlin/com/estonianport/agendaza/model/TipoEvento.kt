@@ -22,7 +22,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class TipoEvento(
+open class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
