@@ -43,7 +43,7 @@ class ServicioController {
         return servicioService.getCantidadServicio(empresaId)
     }
 
-    @GetMapping("/getAllServicioFilterNombre/{empresaId}/{pageNumber}/{buscar}")
+    @GetMapping("/getAllServicioFiltrados/{empresaId}/{pageNumber}/{buscar}")
     fun getAllServicioFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<ServicioDTO> {
         return servicioService.getAllServicioFilterNombre(empresaId, buscar, pageNumber)
     }
