@@ -14,7 +14,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDate
 
 @Entity
-data class Servicio(
+open class Servicio(
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

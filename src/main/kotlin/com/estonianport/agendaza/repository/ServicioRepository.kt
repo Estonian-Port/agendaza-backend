@@ -8,23 +8,22 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 
-interface ServicioRepository : CrudRepository<Servicio, Long>{
+interface ServicioRepository : CrudRepository<Servicio, Long> {
 
     @Query("SELECT new com.estonianport.agendaza.dto.ServicioDTO(s.id, s.nombre) FROM Servicio s " +
             "INNER JOIN s.listaEmpresa e WHERE e.id = :empresaId AND s.fechaBaja IS NULL ORDER BY s.id DESC")
-    fun getAllServicioByEmpresaId(empresaId: Long, pageable : Pageable) : Page<ServicioDTO>
+    fun getAllServicioByEmpresaId(empresaId: Long, pageable: Pageable): Page<ServicioDTO>
 
     @Query("SELECT COUNT(s) FROM Servicio s INNER JOIN s.listaEmpresa e WHERE e.id = :empresaId " +
             "AND s.fechaBaja IS NULL")
-    fun getCantidadServicio(empresaId : Long) : Int
+    fun getCantidadServicio(empresaId: Long): Int
 
     @Query("SELECT new com.estonianport.agendaza.dto.ServicioDTO(s.id, s.nombre) FROM Servicio s " +
             "INNER JOIN s.listaEmpresa e WHERE e.id = :empresaId AND s.nombre ILIKE %:buscar% AND s.fechaBaja IS NULL ORDER BY s.id DESC")
-    fun getAllServicioFilterNombre(empresaId : Long, buscar : String, pageable : Pageable) : Page<ServicioDTO>
+    fun getAllServicioFilterNombre(empresaId: Long, buscar: String, pageable: Pageable): Page<ServicioDTO>
 
     @Query("SELECT COUNT(s) FROM Servicio s INNER JOIN s.listaEmpresa e WHERE e.id = :empresaId " +
             "AND s.nombre ILIKE %:buscar% AND s.fechaBaja IS NULL")
-    fun getCantidadServicioFiltrados(empresaId : Long, buscar: String) : Int
-
+    fun getCantidadServicioFiltrados(empresaId: Long, buscar: String): Int
 
 }

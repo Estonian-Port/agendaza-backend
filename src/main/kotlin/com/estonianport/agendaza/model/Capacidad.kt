@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
 @Entity
-data class Capacidad(
+open class Capacidad(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

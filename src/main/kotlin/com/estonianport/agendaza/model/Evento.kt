@@ -20,7 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class Evento(
+open class Evento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

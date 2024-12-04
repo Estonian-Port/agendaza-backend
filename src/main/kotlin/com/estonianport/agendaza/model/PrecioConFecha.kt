@@ -39,7 +39,7 @@ abstract class PrecioConFecha (
 }
 
 @Entity(name = "precio_con_fecha_extra")
-class PrecioConFechaExtra(
+open class PrecioConFechaExtra(
     id: Long,
     precio: Double,
     desde: LocalDateTime,
@@ -64,7 +64,7 @@ class PrecioConFechaExtra(
 }
 
 @Entity(name = "precio_con_fecha_tipo_evento")
-class PrecioConFechaTipoEvento(
+open class PrecioConFechaTipoEvento(
     id: Long,
     precio: Double,
     desde: LocalDateTime,

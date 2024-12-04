@@ -28,30 +28,10 @@ class ServicioController {
     lateinit var servicioService: ServicioService
 
     @Autowired
-    lateinit var tipoEventoService : TipoEventoService
+    lateinit var tipoEventoService: TipoEventoService
 
     @Autowired
     lateinit var empresaService: EmpresaService
-
-    @GetMapping("/getAllServicio/{empresaId}/{pageNumber}")
-    fun getAllServicioByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<ServicioDTO> {
-        return servicioService.getAllServicioByEmpresaId(empresaId, pageNumber)
-    }
-
-    @GetMapping("/getCantidadServicio/{empresaId}")
-    fun getCantidadServicio(@PathVariable("empresaId") empresaId: Long): Int {
-        return servicioService.getCantidadServicio(empresaId)
-    }
-
-    @GetMapping("/getAllServicioFiltrados/{empresaId}/{pageNumber}/{buscar}")
-    fun getAllServicioFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<ServicioDTO> {
-        return servicioService.getAllServicioFilterNombre(empresaId, buscar, pageNumber)
-    }
-
-    @GetMapping("/getCantidadServicioFiltrados/{empresaId}/{buscar}")
-    fun getCantidadServicioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar: String): Int {
-        return servicioService.getCantidadServicioFiltrados(empresaId, buscar)
-    }
 
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ServicioDTO {
@@ -83,8 +63,28 @@ class ServicioController {
     }
 
     @DeleteMapping("/deleteServicio/{id}")
-    fun delete(@PathVariable("id") id : Long):ResponseEntity<Servicio> {
+    fun delete(@PathVariable("id") id: Long): ResponseEntity<Servicio> {
         servicioService.deleteService(id)
         return ResponseEntity<Servicio>(HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllServicio/{empresaId}/{pageNumber}")
+    fun getAllServicioByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<ServicioDTO> {
+        return servicioService.getAllServicioByEmpresaId(empresaId, pageNumber)
+    }
+
+    @GetMapping("/getCantidadServicio/{empresaId}")
+    fun getCantidadServicio(@PathVariable("empresaId") empresaId: Long): Int {
+        return servicioService.getCantidadServicio(empresaId)
+    }
+
+    @GetMapping("/getAllServicioFiltrados/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllServicioFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<ServicioDTO> {
+        return servicioService.getAllServicioFilterNombre(empresaId, buscar, pageNumber)
+    }
+
+    @GetMapping("/getCantidadServicioFiltrados/{empresaId}/{buscar}")
+    fun getCantidadServicioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar: String): Int {
+        return servicioService.getCantidadServicioFiltrados(empresaId, buscar)
     }
 }

@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class Extra(
+open class Extra(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,

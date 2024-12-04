@@ -11,7 +11,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDateTime
 
 @Entity
-data class EventoExtraVariable(
+open class EventoExtraVariable(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

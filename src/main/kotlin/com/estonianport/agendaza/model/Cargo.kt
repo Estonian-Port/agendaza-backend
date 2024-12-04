@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
-data class Cargo(
+open class Cargo(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

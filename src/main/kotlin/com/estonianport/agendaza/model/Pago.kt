@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class Pago (
+open class Pago (
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
