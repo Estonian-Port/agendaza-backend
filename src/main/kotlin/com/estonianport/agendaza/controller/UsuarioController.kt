@@ -109,9 +109,9 @@ class UsuarioController {
         return usuarioService.getUsuarioIdByUsername(username)
     }
 
-    @GetMapping("/getAllEmpresaByUsuarioId/{id}")
-    fun getAllEmpresaByUsuarioId(@PathVariable("id") id: Long): List<GenericItemDTO> {
-        return usuarioService.getAllEmpresaByUsuario(usuarioService.get(id)!!)
+    @GetMapping("/getAllEmpresaByUsuarioId/{usuarioId}")
+    fun getAllEmpresaByUsuarioId(@PathVariable("usuarioId") usuarioId: Long): List<EmpresaDTO> {
+        return usuarioService.getAllEmpresaByUsuarioId(usuarioId)
     }
 
     @PostMapping("/saveUsuarioCargoOfEmpresa")
