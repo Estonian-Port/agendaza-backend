@@ -21,20 +21,37 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun getUsuarioIdByUsername(username: String): Long {
         return usuarioRepository.getByUsername(username).id
     }
-    fun getAllUsuariosByEmpresaId(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
+
+    fun getAllUsuario(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
         return usuarioRepository.getAllUsuario(id, PageRequest.of(pageNumber,10)).content
     }
 
-    fun getAllUsuarioByFilterName(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
-        return usuarioRepository.getAllUsuarioByFilterName(id, buscar, PageRequest.of(pageNumber,10)).content
+    fun getAllUsuarioFiltrados(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
+        return usuarioRepository.getAllUsuarioFiltrados(id, buscar, PageRequest.of(pageNumber,10)).content
     }
 
-    fun cantidadUsuario(id : Long): Int {
-        return usuarioRepository.cantidadUsuario(id)
+    fun getCantidadUsuario(id : Long): Int {
+        return usuarioRepository.getCantidadUsuario(id)
     }
 
-    fun cantidadUsuarioFiltrados(id : Long, buscar : String): Int {
-        return usuarioRepository.cantidadUsuarioFiltrados(id,buscar)
+    fun getCantidadUsuarioFiltrados(id : Long, buscar : String): Int {
+        return usuarioRepository.getCantidadUsuarioFiltrados(id,buscar)
+    }
+
+    fun getAllCliente(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
+        return usuarioRepository.getAllCliente(id, PageRequest.of(pageNumber,10)).content
+    }
+
+    fun getAllClienteFiltrados(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
+        return usuarioRepository.getAllClienteFiltrados(id, buscar, PageRequest.of(pageNumber,10)).content
+    }
+
+    fun getCantidadCliente(id : Long): Int {
+        return usuarioRepository.getCantidadCliente(id)
+    }
+
+    fun getCantidadClienteFiltrados(id : Long, buscar : String): Int {
+        return usuarioRepository.getCantidadClienteFiltrados(id,buscar)
     }
 
     fun getAllEmpresaByUsuario(usuario : Usuario) : List<GenericItemDTO>{

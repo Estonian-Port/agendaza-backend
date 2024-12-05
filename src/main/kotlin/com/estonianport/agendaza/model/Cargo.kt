@@ -1,9 +1,11 @@
 package com.estonianport.agendaza.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 
 @Entity
+@Proxy(lazy = false)
 open class Cargo(
 
     @Id

@@ -29,6 +29,10 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
         return tipoEventoRepository.getAllByServicio(servicioId)
     }
 
+    fun getAllTipoEventoByEmpresaId(empresaId: Long): List<TipoEventoDTO> {
+        return tipoEventoRepository.getAllTipoEventoByEmpresaId(empresaId)
+    }
+
     fun getAllTipoEventoByEmpresaId(empresaId: Long, pageNumber: Int): List<TipoEventoDTO> {
         return tipoEventoRepository.getAllTipoEventoByEmpresaId(empresaId, PageRequest.of(pageNumber,10)).content
     }

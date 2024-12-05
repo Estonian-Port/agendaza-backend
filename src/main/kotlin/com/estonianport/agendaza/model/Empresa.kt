@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -16,54 +17,55 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = Catering::class, name ="CATERING"),
     JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
+@Proxy(lazy = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Empresa(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long,
+    val id: Long,
 
     @Column
-    open val nombre: String,
+    val nombre: String,
 
     @Column
-    open val telefono : Long,
+    val telefono : Long,
 
     @Column
-    open val email : String,
+    val email : String,
 
     @Column
-    open val calle: String,
+    val calle: String,
 
     @Column
-    open val numero: Int,
+    val numero: Int,
 
     @Column
-    open val municipio: String){
+    val municipio: String){
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaEvento : MutableSet<Evento> = mutableSetOf()
+    val listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
+    val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaExtra: MutableSet<Extra> = mutableSetOf()
+    val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+    val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
+    val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @ManyToMany
@@ -72,10 +74,10 @@ abstract class Empresa(
             joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
             inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
     )
-    open var listaServicio: MutableSet<Servicio> = mutableSetOf()
+    var listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @Column
-    open var fechaBaja : LocalDate? = null
+    var fechaBaja : LocalDate? = null
 
     abstract fun getContacto() : List<String>
 
@@ -115,6 +117,7 @@ abstract class Empresa(
 }
 
 @Entity
+@Proxy(lazy = false)
 open class Salon(
     id : Long,
     nombre : String,
@@ -131,6 +134,7 @@ open class Salon(
 }
 
 @Entity
+@Proxy(lazy = false)
 open class Catering(
     id : Long,
     nombre : String,
@@ -147,6 +151,7 @@ open class Catering(
 }
 
 @Entity
+@Proxy(lazy = false)
 open class Prestador(
     id : Long,
     nombre : String,

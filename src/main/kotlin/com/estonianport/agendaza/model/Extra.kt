@@ -15,10 +15,12 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
+@Proxy(lazy = false)
 open class Extra(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

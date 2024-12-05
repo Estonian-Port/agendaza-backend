@@ -121,21 +121,44 @@ class UsuarioController {
         return cargoService.save(cargo).id
     }
 
-    @GetMapping("/getAllUsuariosByEmpresaId/{empresaId}/{pageNumber}")
-    fun getAllUsuarios(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsuariosByEmpresaId(empresaId, pageNumber)
+    @GetMapping("/getAllUsuario/{empresaId}/{pageNumber}")
+    fun getAllUsuario(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
+        return usuarioService.getAllUsuario(empresaId, pageNumber)
     }
 
-    @GetMapping("/getAllUsersByFilterName/{empresaId}/{pageNumber}/{buscar}")
+    @GetMapping("/getCantidadUsuario/{empresaId}")
+    fun getCantidadUsuario(@PathVariable("empresaId") empresaId: Long) : Int{
+        return usuarioService.getCantidadUsuario(empresaId)
+    }
+
+    @GetMapping("/getAllUsuarioFiltrados/{empresaId}/{pageNumber}/{buscar}")
     fun getAllUsuarioByFilterName(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsuarioByFilterName(empresaId, pageNumber, buscar)
+        return usuarioService.getAllUsuarioFiltrados(empresaId, pageNumber, buscar)
     }
 
-    @GetMapping("/cantUsuarios/{empresaId}")
-    fun cantidadUsuario(@PathVariable("empresaId") empresaId: Long) =  usuarioService.cantidadUsuario(empresaId)
+    @GetMapping("/getCantidadUsuarioFiltrados/{empresaId}/{buscar}")
+    fun getCantidadUsuarioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) : Int {
+        return usuarioService.getCantidadUsuarioFiltrados(empresaId,buscar)
+    }
 
-    @GetMapping("/cantUsuariosFiltrados/{empresaId}/{buscar}")
-    fun cantidadUsuarioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) =  usuarioService.cantidadUsuarioFiltrados(empresaId,buscar)
+    @GetMapping("/getAllCliente/{empresaId}/{pageNumber}")
+    fun getAllCliente(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
+        return usuarioService.getAllCliente(empresaId, pageNumber)
+    }
 
+    @GetMapping("/getCantidadCliente/{empresaId}")
+    fun getCantidadCliente(@PathVariable("empresaId") empresaId: Long) : Int{
+        return usuarioService.getCantidadCliente(empresaId)
+    }
+
+    @GetMapping("/getAllClienteFiltrados/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllClienteFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
+        return usuarioService.getAllClienteFiltrados(empresaId, pageNumber, buscar)
+    }
+
+    @GetMapping("/getCantidadClienteFiltrados/{empresaId}/{buscar}")
+    fun getCantidadClienteFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) : Int {
+        return usuarioService.getCantidadClienteFiltrados(empresaId,buscar)
+    }
 
 }

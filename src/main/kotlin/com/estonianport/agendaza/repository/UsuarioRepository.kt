@@ -26,15 +26,34 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     @Query("SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(c.usuario.id, c.usuario.nombre, " +
             "c.usuario.apellido, c.usuario.username) FROM Cargo c WHERE c.empresa.id = :empresaId " +
             "AND (c.usuario.nombre ILIKE %:buscar% OR c.usuario.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
-    fun getAllUsuarioByFilterName(empresaId : Long, buscar : String, pageable : Pageable) : Page<UsuarioAbmDTO>
+    fun getAllUsuarioFiltrados(empresaId : Long, buscar : String, pageable : Pageable) : Page<UsuarioAbmDTO>
 
     @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :empresaId AND c.fechaBaja IS NULL")
-    fun cantidadUsuario(empresaId : Long) : Int
+    fun getCantidadUsuario(empresaId : Long) : Int
 
     @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :empresaId AND " +
             "(c.usuario.nombre ILIKE %:buscar% OR c.usuario.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
-    fun cantidadUsuarioFiltrados(empresaId : Long, buscar: String) : Int
+    fun getCantidadUsuarioFiltrados(empresaId : Long, buscar: String) : Int
 
+    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(c.id, c.nombre, " +
+            "c.apellido, c.username) FROM Evento ev INNER JOIN ev.empresa em INNER JOIN ev.cliente c " +
+            "WHERE ev.empresa.id = :empresaId AND c.fechaBaja IS NULL")
+    fun getAllCliente(empresaId: Long, pageable: PageRequest) : Page<UsuarioAbmDTO>
+
+    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(c.id, c.nombre, " +
+            "c.apellido, c.username) FROM Evento ev INNER JOIN ev.empresa em INNER JOIN ev.cliente c " +
+            "WHERE ev.empresa.id = :empresaId AND (c.nombre ILIKE %:buscar% OR " +
+            "c.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
+    fun getAllClienteFiltrados(empresaId : Long, buscar : String, pageable : Pageable) : Page<UsuarioAbmDTO>
+
+    @Query("SELECT COUNT(c) FROM Evento ev INNER JOIN ev.empresa em INNER JOIN ev.cliente c " +
+            "WHERE ev.empresa.id = :empresaId AND c.fechaBaja IS NULL")
+    fun getCantidadCliente(empresaId : Long) : Int
+
+    @Query("SELECT COUNT(c) FROM Evento ev INNER JOIN ev.empresa em INNER JOIN ev.cliente c " +
+            "WHERE ev.empresa.id = :empresaId AND (c.nombre ILIKE %:buscar% " +
+            "OR c.apellido ILIKE %:buscar%) AND c.fechaBaja IS NULL")
+    fun getCantidadClienteFiltrados(empresaId : Long, buscar: String) : Int
 
     fun findOneByUsername(username: String): Usuario?
 

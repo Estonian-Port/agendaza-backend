@@ -10,9 +10,11 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 
 @Entity
+@Proxy(lazy = false)
 open class Usuario(
 
     @Id
