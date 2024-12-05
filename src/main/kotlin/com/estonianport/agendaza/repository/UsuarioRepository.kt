@@ -67,14 +67,17 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
 
     @Query("SELECT new com.estonianport.agendaza.dto.UsuarioEditCargoDTO(" +
-            "c.usuario.id, c.empresa.id, c.tipoCargo) FROM Cargo c WHERE c.empresa.id = :empresaId AND c.usuario.id = :usuarioId AND c.fechaBaja IS NULL")
+            "c.usuario.id, c.empresa.id, c.tipoCargo) FROM Cargo c WHERE c.empresa.id = :empresaId " +
+            "AND c.usuario.id = :usuarioId AND c.fechaBaja IS NULL")
     fun getUsuarioOfEmpresa(usuarioId: Long, empresaId: Long): UsuarioEditCargoDTO
 
-    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioPerfilDTO(u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento) FROM Usuario u WHERE u.id = :usuarioId ")
+    @Query("SELECT new com.estonianport.agendaza.dto.UsuarioPerfilDTO(u.id, u.nombre, u.apellido, " +
+            "u.username, u.email, u.celular, u.fechaNacimiento) FROM Usuario u WHERE u.id = :usuarioId ")
     fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO
 
     @Query("SELECT new com.estonianport.agendaza.dto.EmpresaDTO" +
             "(e.id, e.nombre, c.tipoCargo, e.email, e.telefono, e.calle, e.numero, e.municipio) " +
-            "FROM Usuario u INNER JOIN u.listaCargo c INNER JOIN c.empresa e WHERE u.id = :usuarioId ")
+            "FROM Usuario u INNER JOIN u.listaCargo c INNER JOIN c.empresa e WHERE u.id = :usuarioId " +
+            "AND c.fechaBaja IS NULL")
     fun getAllEmpresaByUsuarioId(usuarioId: Long): List<EmpresaDTO>
 }
