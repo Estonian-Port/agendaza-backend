@@ -1,9 +1,6 @@
 package com.estonianport.agendaza.repository
 
-import com.estonianport.agendaza.dto.EmpresaDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDTO
-import com.estonianport.agendaza.dto.UsuarioEditCargoDTO
-import com.estonianport.agendaza.dto.UsuarioPerfilDTO
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -75,9 +72,9 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
             "u.username, u.email, u.celular, u.fechaNacimiento) FROM Usuario u WHERE u.id = :usuarioId ")
     fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO
 
-    @Query("SELECT new com.estonianport.agendaza.dto.EmpresaDTO" +
+    @Query("SELECT new com.estonianport.agendaza.dto.EmpresaAbmDTO" +
             "(e.id, e.nombre, c.tipoCargo, e.email, e.telefono, e.calle, e.numero, e.municipio) " +
             "FROM Usuario u INNER JOIN u.listaCargo c INNER JOIN c.empresa e WHERE u.id = :usuarioId " +
             "AND c.fechaBaja IS NULL")
-    fun getAllEmpresaByUsuarioId(usuarioId: Long): List<EmpresaDTO>
+    fun getAllEmpresaByUsuarioId(usuarioId: Long): List<EmpresaAbmDTO>
 }

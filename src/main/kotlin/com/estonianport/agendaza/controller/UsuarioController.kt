@@ -110,7 +110,7 @@ class UsuarioController {
     }
 
     @GetMapping("/getAllEmpresaByUsuarioId/{usuarioId}")
-    fun getAllEmpresaByUsuarioId(@PathVariable("usuarioId") usuarioId: Long): List<EmpresaDTO> {
+    fun getAllEmpresaByUsuarioId(@PathVariable("usuarioId") usuarioId: Long): List<EmpresaAbmDTO> {
         return usuarioService.getAllEmpresaByUsuarioId(usuarioId)
     }
 

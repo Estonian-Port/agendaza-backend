@@ -54,7 +54,7 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return usuarioRepository.getCantidadClienteFiltrados(id,buscar)
     }
 
-    fun getAllEmpresaByUsuarioId(usuarioId : Long) : List<EmpresaDTO>{
+    fun getAllEmpresaByUsuarioId(usuarioId : Long) : List<EmpresaAbmDTO>{
         return usuarioRepository.getAllEmpresaByUsuarioId(usuarioId)
     }
 

@@ -1,9 +1,6 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.EventoDTO
-import com.estonianport.agendaza.dto.PagoDTO
-import com.estonianport.agendaza.dto.TipoEventoDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDTO
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
@@ -11,6 +8,7 @@ import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -40,8 +38,8 @@ class EmpresaController {
     }
 
     @PostMapping("/saveEmpresa")
-    fun save(@RequestBody empresa: Empresa): Empresa {
-        return empresaService.save(empresa)
+    fun save(@RequestBody empresaDTO: EmpresaDTO): ResponseEntity<GenericItemDTO> {
+        return ResponseEntity.ok(empresaService.save(empresaDTO))
     }
 
     @GetMapping("/getAllEventoByEmpresaId/{id}/{pageNumber}")

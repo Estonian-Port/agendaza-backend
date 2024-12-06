@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.GenericItemDTO
+import com.estonianport.agendaza.errors.BusinessException
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -112,6 +114,20 @@ abstract class Empresa(
             it.fechaBaja == null &&
             it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
         }?.precio ?: return 0.0
+    }
+
+    fun copy(nombre: String, telefono: Long, email: String, calle: String, numero: Int, municipio: String
+    ): Empresa {
+        return when (this) {
+            is Salon -> Salon(id, nombre, telefono, email, calle, numero, municipio)
+            is Catering -> Catering(id, nombre, telefono, email, calle, numero, municipio)
+            is Prestador -> Prestador(id, nombre, telefono, email, calle, numero, municipio, tipoPrestador)
+            else -> throw BusinessException("Tipo de empresa no soportado")
+        }
+    }
+
+    fun toGenericItemDTO(): GenericItemDTO {
+        return GenericItemDTO(id, nombre)
     }
 
 }
