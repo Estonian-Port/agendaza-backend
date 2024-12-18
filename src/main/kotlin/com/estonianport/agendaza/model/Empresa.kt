@@ -43,7 +43,8 @@ abstract class Empresa(
     val numero: Int,
 
     @Column
-    val municipio: String){
+    val municipio: String) {
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
@@ -80,6 +81,15 @@ abstract class Empresa(
 
     @Column
     var fechaBaja : LocalDate? = null
+
+    @Transient
+    val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
+
+    fun recorrerEspecificaciones(evento: Evento) {
+        listaEspecificacion.forEach { especificacion ->
+            especificacion.aplicar(evento)
+        }
+    }
 
     abstract fun getContacto() : List<String>
 

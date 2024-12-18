@@ -46,7 +46,7 @@ open class Evento(
     var capacidad: Capacidad,
 
     @Column
-    var extraOtro: Long,
+    var extraOtro: Double,
 
     @Column
     var descuento : Long,
