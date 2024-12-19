@@ -146,6 +146,19 @@ open class Evento(
             listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
     }
 
+    fun toEventoReservaDto(
+            listaExtraEvento: List<ExtraDTO>,
+            listaExtraVariableEvento: List<EventoExtraVariableDTO>,
+            listaExtraCatering: List<ExtraDTO>,
+            listaExtraVariableCatering: List<EventoExtraVariableDTO>
+    ): EventoReservaDTO {
+        return EventoReservaDTO(id, nombre, capacidad, codigo, inicio, fin, tipoEvento.id,
+                empresa.id, extraOtro, descuento, listaExtraEvento, listaExtraVariableEvento,
+                cateringOtro, cateringOtroDescripcion, listaExtraCatering, listaExtraVariableCatering,
+                cliente, encargado.id, estado, anotaciones
+        )
+    }
+
     fun toEventoHoraDto(): EventoHoraDTO {
      return EventoHoraDTO(id, nombre, codigo, inicio, fin)
     }

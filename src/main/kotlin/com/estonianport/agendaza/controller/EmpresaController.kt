@@ -6,6 +6,7 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -23,9 +24,6 @@ class EmpresaController {
 
     @Autowired
     lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var usuarioService: UsuarioService
 
     @GetMapping("/getAllEmpresa")
     fun getAll(): MutableList<Empresa>? {
@@ -52,11 +50,15 @@ class EmpresaController {
         return empresaService.getAllEventoByFilterName(empresaId, pageNumber, buscar)
     }
 
-
     @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
     fun getAllTipoEventoByEmpresaIdAndDuracion(@PathVariable("id") id : Long, @RequestBody duracion : String): List<TipoEventoDTO> {
         return empresaService.get(id)!!.listaTipoEvento.filter {
             it.fechaBaja == null && it.duracion.name == duracion }.map { it.toDTO() }
+    }
+
+    @GetMapping("/getEspecificaciones/{id}")
+    fun getEspecificaciones(@PathVariable("id") empresaId : Long): List<EspecificacionDTO> {
+        return empresaService.getEspecificaciones(empresaId)
     }
 
 }

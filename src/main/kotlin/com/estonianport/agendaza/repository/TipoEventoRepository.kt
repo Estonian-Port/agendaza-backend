@@ -2,7 +2,9 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
+import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
@@ -43,4 +45,9 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     @Query("SELECT COUNT(t) FROM TipoEvento t WHERE t.empresa.id = :empresaId " +
             "AND t.nombre ILIKE %:buscar% AND t.fechaBaja IS NULL")
     fun getCantidadTipoEventoFiltrados(empresaId : Long, buscar: String) : Int
+
+    @Query("SELECT tee FROM TipoEvento te INNER JOIN te.listaExtra tee WHERE te.id = :tipoEventoId " +
+            "AND tee.tipoExtra = :tipoExtra AND tee.fechaBaja IS NULL")
+    fun getAllExtraByTipoExtra(tipoEventoId: Long, tipoExtra: TipoExtra): List<Extra>
+
 }

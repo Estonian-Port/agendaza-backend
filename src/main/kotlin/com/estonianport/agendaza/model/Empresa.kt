@@ -71,6 +71,10 @@ abstract class Empresa(
     val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
+    val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
+
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "empresa_servicio",
@@ -82,8 +86,6 @@ abstract class Empresa(
     @Column
     var fechaBaja : LocalDate? = null
 
-    @Transient
-    val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
 
     fun recorrerEspecificaciones(evento: Evento) {
         listaEspecificacion.forEach { especificacion ->

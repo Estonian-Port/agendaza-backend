@@ -4,6 +4,7 @@ import com.estonianport.agendaza.model.*
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -14,8 +15,8 @@ class EspecificacionSpec: DescribeSpec({
     // =================== Extras ========================
 
     val extraNino = Extra(1, "Niños", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraCorto = Extra(1, "Camarera Corto", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraLargo = Extra(1, "Camarera Largo", TipoExtra.VARIABLE_EVENTO, empresa)
+    val extraCamareraCorto = Extra(2, "Camarera Corto", TipoExtra.VARIABLE_EVENTO, empresa)
+    val extraCamareraLargo = Extra(3, "Camarera Largo", TipoExtra.VARIABLE_EVENTO, empresa)
 
     // ===================================================
 
@@ -23,16 +24,16 @@ class EspecificacionSpec: DescribeSpec({
 
     val porcentajePrecioPlatoNinos = 60
 
-    val precioDePlatoNinos = PrecioDePlatoNinos(porcentajePrecioPlatoNinos)
+    val precioDePlatoNinos = PrecioDePlatoNinos(0, empresa, porcentajePrecioPlatoNinos)
     empresa.listaEspecificacion.add(precioDePlatoNinos)
 
-    val agregarExtraNinoSiSuperaCapacidad = AgregarExtraNinoSiSuperaCapacidad(extraNino)
+    val agregarExtraNinoSiSuperaCapacidad = AgregarExtraNinoSiSuperaCapacidad(0, empresa, extraNino)
     empresa.listaEspecificacion.add(agregarExtraNinoSiSuperaCapacidad)
 
-    val agregarExtraCamareraSiSuperaCapacidadCorto = AgregarExtraCamareraSiSuperaCapacidad(extraCamareraCorto, Duracion.CORTO)
+    val agregarExtraCamareraSiSuperaCapacidadCorto = AgregarExtraCamareraSiSuperaCapacidad(0, empresa, extraCamareraCorto, Duracion.CORTO)
     empresa.listaEspecificacion.add(agregarExtraCamareraSiSuperaCapacidadCorto)
 
-    val agregarExtraCamareraSiSuperaCapacidadLargo = AgregarExtraCamareraSiSuperaCapacidad(extraCamareraLargo, Duracion.LARGO)
+    val agregarExtraCamareraSiSuperaCapacidadLargo = AgregarExtraCamareraSiSuperaCapacidad(0, empresa, extraCamareraLargo, Duracion.LARGO)
     empresa.listaEspecificacion.add(agregarExtraCamareraSiSuperaCapacidadLargo)
 
     // ===================================================
@@ -69,22 +70,22 @@ class EspecificacionSpec: DescribeSpec({
 
     // =================== Evento ========================
 
-    val eventoCorto = Evento(1,"Cumpleaños Juan",tipoEventoCorto, LocalDateTime.now(), LocalDateTime.now(),
-            capacidadEventoSuperaNinoYAdultos,0.0,0, mutableSetOf(), mutableSetOf(),0.0,"",
-            encargado,cliente,"AAAA",Estado.RESERVADO,"",empresa)
+    val eventoCorto = Evento(1, "Cumpleaños Juan", tipoEventoCorto, LocalDateTime.now(), LocalDateTime.now(),
+            capacidadEventoSuperaNinoYAdultos, 0.0, 0, mutableSetOf(), mutableSetOf(), 0.0, "",
+            encargado, cliente, "AAAA", Estado.RESERVADO, "", empresa)
 
-    val eventoLargo = Evento(1,"Casamiento Juana",tipoEventoLargo, LocalDateTime.now(), LocalDateTime.now(),
-            capacidadEventoSuperaNinoYAdultos,0.0,0, mutableSetOf(), mutableSetOf(),0.0,"",
-            encargado,cliente,"BBBB",Estado.RESERVADO,"",empresa)
+    val eventoLargo = Evento(1, "Casamiento Juana", tipoEventoLargo, LocalDateTime.now(), LocalDateTime.now(),
+            capacidadEventoSuperaNinoYAdultos, 0.0, 0, mutableSetOf(), mutableSetOf(), 0.0, "",
+            encargado, cliente, "BBBB", Estado.RESERVADO, "", empresa)
 
     // ===================================================
 
-    describe("Dado una empresa con especificaciones") {
+    describe("Dado una empresa con especificaciones extra nino y extra camarera") {
 
         beforeEach {
             // Limpiar las listas de extras de cada evento entre cada test
-            eventoCorto.listaExtra.clear()
-            eventoLargo.listaExtra.clear()
+            eventoCorto.listaEventoExtraVariable.clear()
+            eventoLargo.listaEventoExtraVariable.clear()
         }
 
         it(name = "Agregar extra de niños si supera la capacidad de niños en tipo evento corto") {
@@ -98,11 +99,17 @@ class EspecificacionSpec: DescribeSpec({
 
             // Debe agregar el extra de niños y extra camarera corto
             // porque el evento cuenta con capacidadEventoSuperaNinoYAdultos
-            eventoCorto.listaExtra.size.shouldBe(2)
+            eventoCorto.listaEventoExtraVariable.size.shouldBe(2)
 
             // La lista de extras debe contener extraNino y extraCamareraCorto
-            eventoCorto.listaExtra.contains(extraNino)
-            eventoCorto.listaExtra.contains(extraCamareraCorto)
+
+            eventoCorto.listaEventoExtraVariable.any { it.extra == extraNino }
+            val extraVariableNino = eventoCorto.listaEventoExtraVariable.find { it.extra == extraNino }!!
+            extraVariableNino.cantidad.shouldBe(10)
+
+            eventoCorto.listaEventoExtraVariable.any { it.extra == extraCamareraCorto }
+            val extraVariableCamarera = eventoCorto.listaEventoExtraVariable.find { it.extra == extraCamareraCorto }!!
+            extraVariableCamarera.cantidad.shouldBe(1)
 
             // ================================
 
@@ -123,7 +130,7 @@ class EspecificacionSpec: DescribeSpec({
             // ============ Assert ============
 
             // No debería agregar el extra de niños
-            eventoCorto.listaExtra.shouldBeEmpty()
+            eventoCorto.listaEventoExtraVariable.shouldBeEmpty()
 
             // ================================
 
@@ -140,14 +147,13 @@ class EspecificacionSpec: DescribeSpec({
 
             // ================================
 
-
             // ============ Assert ============
 
             // Debe agregar el extra de camarera corto
-            eventoCorto.listaExtra.size.shouldBe(1)
+            eventoCorto.listaEventoExtraVariable.size.shouldBe(1)
 
             // El extra debe ser el extraCamareraCorto
-            eventoCorto.listaExtra.contains(extraCamareraCorto)
+            eventoCorto.listaEventoExtraVariable.any { it.extra == extraCamareraCorto }
 
 
             // ================================
@@ -166,14 +172,13 @@ class EspecificacionSpec: DescribeSpec({
 
             // ================================
 
-
             // ============ Assert ============
 
             // Solo debería agregar el extra de niños
-            eventoCorto.listaExtra.size.shouldBe(1)
+            eventoCorto.listaEventoExtraVariable.size.shouldBe(1)
 
             // El único extra debería ser el extraNino
-            eventoCorto.listaExtra.contains(extraNino)
+            eventoCorto.listaEventoExtraVariable.any { it.extra == extraNino }
 
             // ================================
 
@@ -191,14 +196,13 @@ class EspecificacionSpec: DescribeSpec({
 
             // ================================
 
-
             // ============ Assert ============
 
             // Solo debería agregar el extra de niños
-            eventoLargo.listaExtra.size.shouldBe(1)
+            eventoLargo.listaEventoExtraVariable.size.shouldBe(1)
 
             // El único extra debería ser el extraNino
-            eventoLargo.listaExtra.contains(extraCamareraCorto)
+            eventoLargo.listaEventoExtraVariable.any { it.extra == extraCamareraCorto }
 
             // ================================
 
@@ -217,88 +221,89 @@ class EspecificacionSpec: DescribeSpec({
             // ============ Assert ============
 
             // Debería agregar el extra de camarera largo
-            eventoLargo.listaExtra.size.shouldBe(2)
+            eventoLargo.listaEventoExtraVariable.size.shouldBe(2)
 
             // El último extra debería ser el extraCamareraLargo
-            eventoLargo.listaExtra.contains(extraNino)
-            eventoLargo.listaExtra.contains(extraCamareraLargo)
+            eventoLargo.listaEventoExtraVariable.any { it.extra == extraNino }
+            eventoLargo.listaEventoExtraVariable.any { it.extra == extraCamareraLargo }
 
             // ================================
 
         }
     }
 
-    it(name = "No aplicar ningún valor cuando no hay cateringOtro ni extra de tipo TIPO_CATERING") {
-        // ============== Act =============
+    describe("Dado una empresa con especificaciones extra otro por cant de ninos por plato"){
+        it(name = "No aplicar ningún valor cuando no hay cateringOtro ni extra de tipo TIPO_CATERING") {
+            // ============== Act =============
 
-        // No asignar ni cateringOtro ni extra de tipo TIPO_CATERING
-        eventoLargo.cateringOtro = 0.0
+            // No asignar ni cateringOtro ni extra de tipo TIPO_CATERING
+            eventoLargo.cateringOtro = 0.0
 
-        // Recorrer las especificaciones para aplicar los ajustes
-        empresa.recorrerEspecificaciones(eventoLargo)
+            // Recorrer las especificaciones para aplicar los ajustes
+            empresa.recorrerEspecificaciones(eventoLargo)
 
-        // ================================
+            // ================================
 
-        // ============ Assert ============
+            // ============ Assert ============
 
-        // El valor de extraOtro debería ser 0, ya que no hay catering ni extra
-        eventoLargo.extraOtro.shouldBe(0.0)
+            // El valor de extraOtro debería ser 0, ya que no hay catering ni extra
+            eventoLargo.extraOtro.shouldBe(0.0)
 
-        // ================================
+            // ================================
 
+        }
+
+
+        it(name = "Aplicar cateringOtro en el evento y calcular el presupuesto") {
+            // ============== Act =============
+
+            // Asignar un valor específico para cateringOtro
+            val precioDePlato = 1000.0
+            eventoLargo.cateringOtro = precioDePlato
+
+            // Recorrer las especificaciones para aplicar los ajustes
+            empresa.recorrerEspecificaciones(eventoLargo)
+
+            // ================================
+
+            // ============ Assert ============
+
+            // Debería aplicarse el cálculo con el precio de cateringOtro
+            eventoLargo.extraOtro.shouldBe(precioDePlato * eventoLargo.capacidad.capacidadNinos * (porcentajePrecioPlatoNinos / 100))
+
+            // ================================
+
+        }
+
+        it(name = "Aplicar extra de tipo TIPO_CATERING y calcular el presupuesto") {
+            // ============== Act =============
+
+            // Crear un extra de tipo TIPO_CATERING con un precio
+
+            val precioDePlato = 1000.0
+
+            val extraCateringPizzaParty = Extra(1, "Pizza Party", TipoExtra.TIPO_CATERING, empresa)
+
+            // Crear precio con fecha para el extra
+            val extraCateringPizzaPartyPrecioConFecha = PrecioConFechaExtra(1, precioDePlato,
+                    LocalDateTime.now(), LocalDateTime.now(), empresa, extraCateringPizzaParty)
+
+            // Agregar el extra y su precio con fecha a la empresa
+            eventoLargo.listaExtra.add(extraCateringPizzaParty)
+            empresa.listaPrecioConFechaExtra.add(extraCateringPizzaPartyPrecioConFecha)
+
+            // Recorrer las especificaciones para aplicar los ajustes
+            empresa.recorrerEspecificaciones(eventoLargo)
+
+            // ================================
+
+            // ============ Assert ============
+
+            // Debería aplicarse el cálculo con el precio del extra de tipo catering
+            eventoLargo.extraOtro.shouldBe(eventoLargo.capacidad.capacidadNinos * precioDePlato * (porcentajePrecioPlatoNinos / 100))
+
+            // ================================
+
+        }
     }
-
-
-    it(name = "Aplicar cateringOtro en el evento y calcular el presupuesto") {
-        // ============== Act =============
-
-        // Asignar un valor específico para cateringOtro
-        val precioDePlato = 1000.0
-        eventoLargo.cateringOtro = precioDePlato
-
-        // Recorrer las especificaciones para aplicar los ajustes
-        empresa.recorrerEspecificaciones(eventoLargo)
-
-        // ================================
-
-        // ============ Assert ============
-
-        // Debería aplicarse el cálculo con el precio de cateringOtro
-        eventoLargo.extraOtro.shouldBe(precioDePlato * eventoLargo.capacidad.capacidadNinos *  (porcentajePrecioPlatoNinos /100))
-
-        // ================================
-
-    }
-
-    it(name = "Aplicar extra de tipo TIPO_CATERING y calcular el presupuesto") {
-        // ============== Act =============
-
-        // Crear un extra de tipo TIPO_CATERING con un precio
-
-        val precioDePlato = 1000.0
-
-        val extraCateringPizzaParty = Extra(1, "Pizza Party", TipoExtra.TIPO_CATERING, empresa)
-
-        // Crear precio con fecha para el extra
-        val extraCateringPizzaPartyPrecioConFecha = PrecioConFechaExtra(1,precioDePlato,
-                LocalDateTime.now(), LocalDateTime.now(),empresa, extraCateringPizzaParty)
-
-        // Agregar el extra y su precio con fecha a la empresa
-        eventoLargo.listaExtra.add(extraCateringPizzaParty)
-        empresa.listaPrecioConFechaExtra.add(extraCateringPizzaPartyPrecioConFecha)
-
-        // Recorrer las especificaciones para aplicar los ajustes
-        empresa.recorrerEspecificaciones(eventoLargo)
-
-        // ================================
-
-        // ============ Assert ============
-
-        // Debería aplicarse el cálculo con el precio del extra de tipo catering
-        eventoLargo.extraOtro.shouldBe(eventoLargo.capacidad.capacidadNinos * precioDePlato * (porcentajePrecioPlatoNinos /100))
-
-        // ================================
-
-    }
-
 })

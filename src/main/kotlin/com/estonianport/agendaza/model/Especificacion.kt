@@ -1,12 +1,36 @@
 package com.estonianport.agendaza.model
 
-abstract class Especificacion {
+import com.estonianport.agendaza.dto.EspecificacionDTO
+import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
+
+@Entity
+@Proxy(lazy = false)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+abstract class Especificacion(
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    open val id: Long,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    val empresa: Empresa){
 
     abstract fun aplicar(evento: Evento)
 
+    abstract fun toDTO(): EspecificacionDTO
+
 }
 
-class PrecioDePlatoNinos(val porcentaje: Int) : Especificacion() {
+@Entity
+open class PrecioDePlatoNinos(
+        id: Long,
+        empresa: Empresa,
+
+        @Column
+        open val porcentaje: Int) : Especificacion(id, empresa) {
+
     override fun aplicar(evento: Evento) {
         val capacidadNinos = evento.capacidad.capacidadNinos
         var precioPlato = 0.0
@@ -22,43 +46,79 @@ class PrecioDePlatoNinos(val porcentaje: Int) : Especificacion() {
             }
         }
 
-        evento.extraOtro = capacidadNinos * precioPlato * (porcentaje /100)
+        evento.extraOtro = capacidadNinos * precioPlato * (porcentaje.toDouble() /100)
+    }
+
+    override fun toDTO(): EspecificacionDTO{
+        return EspecificacionDTO(
+                nombre = "El precio del plato para niños representa un % del valor del plato",
+                detalle = "Porcentaje: $porcentaje%"
+        )
     }
 }
 
-class AgregarExtraNinoSiSuperaCapacidad(val extraNino: Extra) : Especificacion() {
+@Entity
+open class AgregarExtraNinoSiSuperaCapacidad(
+        id: Long,
+        empresa: Empresa,
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @PrimaryKeyJoinColumn
+        open val extraNino: Extra) : Especificacion(id, empresa) {
+
     override fun aplicar(evento: Evento) {
         val capacidadNinosEvento = evento.capacidad.capacidadNinos
         val capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
 
-        var ninosExtras = 0
-
         if (capacidadNinosEvento > capacidadNinosTipoEvento) {
-            ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
-        }
+            val ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
 
-        for (i in 0 until ninosExtras) {
-            evento.listaExtra.add(extraNino)
+            val extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
+            evento.listaEventoExtraVariable.add(extraEventoVariableNino)
         }
+    }
+
+    override fun toDTO(): EspecificacionDTO {
+        return EspecificacionDTO(
+                nombre = "Agregar un Niño por cada niño que supere lo establecido en tipo evento",
+                detalle = "Extra: " + extraNino.nombre + " / Tipo: " + extraNino.tipoExtra
+        )
     }
 }
 
-class AgregarExtraCamareraSiSuperaCapacidad(val extraCamarera: Extra, private val duracionEsperada: Duracion): Especificacion() {
+@Entity
+open class AgregarExtraCamareraSiSuperaCapacidad(
+        id: Long,
+        empresa: Empresa,
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @PrimaryKeyJoinColumn
+        open val extraCamarera: Extra,
+
+        @Column
+        @Enumerated(EnumType.STRING)
+        private val duracionEsperada: Duracion): Especificacion(id, empresa) {
+
     override fun aplicar(evento: Evento) {
         val capacidadAdultosEvento = evento.capacidad.capacidadAdultos
         val capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
 
-        var adultosExtras = 0
-
         // Verifica que la duración del evento coincida con la especificada
         if (evento.tipoEvento.duracion == duracionEsperada) {
             if (capacidadAdultosEvento > capacidadAdultosTipoEvento) {
-                adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
-            }
-        }
+                val adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
 
-        for (i in 0 until adultosExtras) {
-            evento.listaExtra.add(extraCamarera)
+                val extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
+                evento.listaEventoExtraVariable.add(extraEventoVariableNino)
+            }
+
         }
+    }
+
+    override fun toDTO(): EspecificacionDTO {
+        return EspecificacionDTO(
+                nombre = "Agregar una camarera cada 10 adultos que superen lo establecido en Tipo Evento",
+                detalle = "Extra: " + extraCamarera.nombre + " / Tipo: " + extraCamarera.tipoExtra
+        )
     }
 }

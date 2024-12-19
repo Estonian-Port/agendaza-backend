@@ -36,10 +36,9 @@ class ServicioController {
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ServicioDTO {
         val servicio = servicioService.get(id)!!
-
         val servicioDTO = servicio.toDTO()
-        servicioDTO.listaTipoEventoId = tipoEventoService.getAllByServicio(servicioDTO.id).map { it.id }
 
+        servicioDTO.listaTipoEventoId = tipoEventoService.getAllByServicio(servicioDTO.id).map { it.id }
         return servicioDTO
     }
 

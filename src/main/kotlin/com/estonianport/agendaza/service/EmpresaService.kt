@@ -57,5 +57,9 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.getAllCantidadesForPanelAdminByEmpresaId(id)
     }
 
+    fun getEspecificaciones(id: Long): List<EspecificacionDTO> {
+        return empresaRepository.getEspecificaciones(id).map { it.toDTO() }
+    }
+
 
 }

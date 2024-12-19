@@ -228,7 +228,11 @@ class EventoController {
         val evento = eventoService.findById(id)
 
         return evento.toEventoVerDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(evento.listaExtra, evento.inicio, TipoExtra.EVENTO),
+            extraService.fromListaExtraToListaExtraDtoByFilter(
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.EVENTO
+            ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
                 evento.listaEventoExtraVariable,
                 evento.inicio,
@@ -462,4 +466,51 @@ class EventoController {
         return eventoService.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto)
     }
 
+    @PutMapping("/recorrerEspecificaciones/{id}")
+    fun recorrerEspecificaciones(@PathVariable("id") empresaId : Long, @RequestBody eventoReservaDto : EventoReservaDTO): EventoReservaDTO {
+        val empresa =  empresaService.get(empresaId)!!
+        val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
+        val listaExtra = mutableSetOf<Extra>()
+
+        listaExtra.addAll(
+                extraService.fromListaExtraDtoToListaExtra(
+                        eventoReservaDto.listaExtraTipoCatering.toList()
+                )
+        )
+
+        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
+        listaEventoExtraVariable.addAll(
+                extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
+                        eventoReservaDto.listaExtraCateringVariable.toList()
+                )
+        )
+
+        val encargado =  usuarioService.findById(eventoReservaDto.encargadoId)!!
+
+        val evento = eventoService.fromEventoReservaDtoToEvento(eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado,  empresa)
+
+        empresa.recorrerEspecificaciones(evento)
+
+        return evento.toEventoReservaDto(
+                extraService.fromListaExtraToListaExtraDtoByFilter(
+                        evento.listaExtra,
+                        evento.inicio,
+                        TipoExtra.EVENTO
+                ),
+                extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        evento.listaEventoExtraVariable,
+                        evento.inicio,
+                        TipoExtra.VARIABLE_EVENTO
+                ),
+                extraService.fromListaExtraToListaExtraDtoByFilter(
+                        evento.listaExtra,
+                        evento.inicio,
+                        TipoExtra.TIPO_CATERING
+                ),
+                extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        evento.listaEventoExtraVariable,
+                        evento.inicio,
+                        TipoExtra.VARIABLE_CATERING
+                ))
+    }
 }

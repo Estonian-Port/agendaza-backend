@@ -25,4 +25,4 @@ open class Cargo(
     var tipoCargo : TipoCargo,
 
     @Column
-    var fechaBaja : LocalDate? = null){}
+    var fechaBaja : LocalDate? = null)

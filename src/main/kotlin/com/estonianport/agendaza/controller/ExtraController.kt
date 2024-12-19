@@ -44,7 +44,7 @@ class ExtraController {
     }
 
     @GetMapping("/getExtra/{id}")
-    fun showSave(@PathVariable("id") id: Long): ExtraDTO {
+    fun get(@PathVariable("id") id: Long): ExtraDTO {
         val extra = extraService.get(id)!!
         val extraDto = extra.toDTO()
 

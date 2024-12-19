@@ -7,6 +7,7 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.repository.TipoEventoRepository
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
@@ -47,6 +48,10 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
 
     fun getCantidadTipoEventoFiltrados(empresaId: Long, buscar: String): Int {
         return tipoEventoRepository.getCantidadTipoEventoFiltrados(empresaId, buscar)
+    }
+
+    fun getAllExtraByTipoExtra(id: Long, tipoExtra: TipoExtra) : List<Extra> {
+        return tipoEventoRepository.getAllExtraByTipoExtra(id, tipoExtra)
     }
 
 }
