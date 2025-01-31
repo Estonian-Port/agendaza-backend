@@ -48,26 +48,14 @@ open class TipoEvento(
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
-    @Column
-    var fechaBaja : LocalDate? = null
-
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-        name = "tipo_evento_extra",
-        joinColumns = arrayOf(JoinColumn(name = "tipo_evento_id") ),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
-    )
+    @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     var listaExtra: MutableSet<Extra> = mutableSetOf()
 
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-        name = "tipo_evento_servicio",
-        joinColumns = arrayOf(JoinColumn(name = "tipo_evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
-    )
+    @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     var listaServicio: MutableSet<Servicio> = mutableSetOf()
+
+    @Column
+    var fechaBaja : LocalDate? = null
 
     fun toDTO() : TipoEventoDTO {
         return TipoEventoDTO(id, nombre, LocalTime.of(cantidadDuracion.hour, cantidadDuracion.minute),

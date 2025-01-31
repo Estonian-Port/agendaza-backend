@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.TipoEvento
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
@@ -33,5 +34,9 @@ interface ExtraRepository : CrudRepository<Extra, Long>{
 
     @Query("SELECT e FROM Extra e WHERE e.empresa.id = ?1  AND e.fechaBaja IS NULL AND e.nombre ILIKE %?2% and (e.tipoExtra = TipoExtra.TIPO_CATERING OR e.tipoExtra = TipoExtra.VARIABLE_CATERING)")
     fun extrasCateringByNombre(id : Long, buscar : String, pageable : Pageable) : Page<Extra>
+
+    @Query("SELECT t FROM TipoEvento t LEFT JOIN t.listaExtra tee WHERE tee.id = :extraId")
+    fun getAllTipoEventoConExtra(extraId: Long) : List<TipoEvento>
+
 }
 

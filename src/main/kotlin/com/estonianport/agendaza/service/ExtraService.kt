@@ -4,6 +4,7 @@ import GenericServiceImpl
 import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -58,5 +59,9 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
 
     fun fromListaExtraToListaExtraDtoByFilter(listaExtra: MutableSet<Extra>, fechaEvento : LocalDateTime, tipoExtra : TipoExtra) : List<ExtraDTO>{
         return this.fromListaExtraToListaExtraDto(listaExtra.filter { it.tipoExtra == tipoExtra }, fechaEvento)
+    }
+
+    fun getAllTipoEventoConExtra(extraId : Long): List<TipoEvento> {
+        return extraRepository.getAllTipoEventoConExtra(extraId)
     }
 }
