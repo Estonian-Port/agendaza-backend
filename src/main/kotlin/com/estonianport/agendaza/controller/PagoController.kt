@@ -1,10 +1,8 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.CodigoEmpresaId
-import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.PagoDto
+import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PagoEmpresaEncargado
-import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.service.EmpresaService
@@ -38,12 +36,12 @@ class PagoController {
     lateinit var usuarioService: UsuarioService
 
     @GetMapping("/getPago/{id}")
-    fun get(@PathVariable("id") id: Long): PagoDto {
+    fun get(@PathVariable("id") id: Long): PagoDTO {
         return pagoService.get(id)!!.toDTO()
     }
 
     @PostMapping("/savePago")
-    fun save(@RequestBody pagoEmpresaEncargado: PagoEmpresaEncargado): PagoDto {
+    fun save(@RequestBody pagoEmpresaEncargado: PagoEmpresaEncargado): PagoDTO {
         val empresa = empresaService.get(pagoEmpresaEncargado.empresaId)!!
         val evento = empresa.listaEvento.find{it.codigo == pagoEmpresaEncargado.pago.codigo}!!
         val encargado = usuarioService.get(pagoEmpresaEncargado.usuarioId)!!
@@ -66,27 +64,28 @@ class PagoController {
     }
 
     @PutMapping("/getEventoForPago")
-    fun getEventoForPago(@RequestBody codigoEmpresaId: CodigoEmpresaId): PagoDto {
+    fun getEventoForPago(@RequestBody codigoEmpresaId: CodigoEmpresaId): PagoDTO {
         val empresa = empresaService.get(codigoEmpresaId.empresaId)!!
-        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)}
+        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)
+    }
 
-        @GetMapping("/getAllPagos/{id}/{pageNumber}")
-        fun getAllPagos(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<PagoDto> {
-            return pagoService.pagos(id,pageNumber)
+    @GetMapping("/getAllPagos/{id}/{pageNumber}")
+    fun getAllPagos(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<PagoDTO> {
+        return pagoService.pagos(id,pageNumber)
 
-        }
-        @GetMapping("/getAllPagosFilter/{id}/{pageNumber}/{buscar}")
-        fun getAllPagosFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<PagoDto> {
-            return pagoService.pagosFiltrados(id, pageNumber, buscar)
+    }
+    @GetMapping("/getAllPagosFilter/{id}/{pageNumber}/{buscar}")
+    fun getAllPagosFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<PagoDTO> {
+        return pagoService.pagosFiltrados(id, pageNumber, buscar)
 
-        }
-        @GetMapping("/cantPagos/{id}")
-        fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
-
-
-        @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
-        fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = pagoService.contadorDePagosFiltrados(id,buscar)
+    }
+    @GetMapping("/cantPagos/{id}")
+    fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
 
 
+    @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
+    fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
+        return pagoService.contadorDePagosFiltrados(id,buscar)
+    }
 
 }

@@ -1,17 +1,12 @@
 package com.estonianport.agendaza.model
 
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.PrimaryKeyJoinColumn
+import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
+import java.time.LocalDate
 
 @Entity
-data class Cargo(
+@Proxy(lazy = false)
+open class Cargo(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +22,7 @@ data class Cargo(
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)
-    var tipoCargo : TipoCargo){}
+    var tipoCargo : TipoCargo,
+
+    @Column
+    var fechaBaja : LocalDate? = null)

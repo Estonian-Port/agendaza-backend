@@ -8,10 +8,12 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import org.hibernate.annotations.Proxy
 import java.time.LocalDateTime
 
 @Entity
-data class EventoExtraVariable(
+@Proxy(lazy = false)
+open class EventoExtraVariable(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,21 +1,12 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.errors.BusinessException
-import com.estonianport.agendaza.service.ExtraVariableService
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Inheritance
-import jakarta.persistence.InheritanceType
-import jakarta.persistence.OneToMany
+import jakarta.persistence.*
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -28,68 +19,81 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = Catering::class, name ="CATERING"),
     JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
+@Proxy(lazy = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Empresa(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long,
+    val id: Long,
 
     @Column
-    open val nombre: String,
+    val nombre: String,
 
     @Column
-    open val telefono : Long,
+    val telefono : Long,
 
     @Column
-    open val email : String,
+    val email : String,
 
     @Column
-    open val calle: String,
+    val calle: String,
 
     @Column
-    open val numero: Int,
+    val numero: Int,
 
     @Column
-    open val municipio: String){
+    val municipio: String) {
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaEvento : MutableSet<Evento> = mutableSetOf()
+    val listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
+    val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaServicio: MutableSet<Servicio> = mutableSetOf()
+    val listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaExtra: MutableSet<Extra> = mutableSetOf()
+    val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+    val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    open val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
+    val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "empresa_servicio",
+            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
+            inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
+    )
+    var listaServicio: MutableSet<Servicio> = mutableSetOf()
 
     @Column
-    open var fechaBaja : LocalDate? = null
+    var fechaBaja : LocalDate? = null
 
-    fun getCargoOfUsuario(usuario: Usuario) : TipoCargo {
-        return listaEmpleados.find { cargo -> cargo.usuario == usuario }
-            ?.tipoCargo ?: throw BusinessException("El usuario no cuenta con un cargo en esta empresa")
+
+    fun recorrerEspecificaciones(evento: Evento) {
+        listaEspecificacion.forEach { especificacion ->
+            especificacion.aplicar(evento)
+        }
     }
 
-    abstract fun getContacto() : ArrayList<String>
+    abstract fun getContacto() : List<String>
 
     fun getSumOfPrecioByListaExtra(listaExtra: List<Extra>, fecha : LocalDateTime): Double{
         return listaExtra.sumOf {
@@ -124,10 +128,25 @@ abstract class Empresa(
         }?.precio ?: return 0.0
     }
 
+    fun copy(nombre: String, telefono: Long, email: String, calle: String, numero: Int, municipio: String
+    ): Empresa {
+        return when (this) {
+            is Salon -> Salon(id, nombre, telefono, email, calle, numero, municipio)
+            is Catering -> Catering(id, nombre, telefono, email, calle, numero, municipio)
+            is Prestador -> Prestador(id, nombre, telefono, email, calle, numero, municipio, tipoPrestador)
+            else -> throw BusinessException("Tipo de empresa no soportado")
+        }
+    }
+
+    fun toGenericItemDTO(): GenericItemDTO {
+        return GenericItemDTO(id, nombre)
+    }
+
 }
 
 @Entity
-class Salon(
+@Proxy(lazy = false)
+open class Salon(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -136,13 +155,15 @@ class Salon(
     numero: Int,
     municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
+    @Transient
+    override fun getContacto(): List<String> {
         return arrayListOf(calle, numero.toString(), municipio)
     }
 }
 
 @Entity
-class Catering(
+@Proxy(lazy = false)
+open class Catering(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -151,13 +172,15 @@ class Catering(
     numero: Int,
     municipio: String) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
-        return arrayListOf(telefono.toString(), email)
+    @Transient
+    override fun getContacto(): List<String> {
+        return listOf(telefono.toString(), email)
     }
 }
 
 @Entity
-class Prestador(
+@Proxy(lazy = false)
+open class Prestador(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -168,9 +191,10 @@ class Prestador(
 
     @Column
     @Enumerated(EnumType.STRING)
-    var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
+    open var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
-    override fun getContacto(): ArrayList<String> {
-        return arrayListOf(telefono.toString(), email)
+    @Transient
+    override fun getContacto(): List<String> {
+        return listOf(telefono.toString(), email)
     }
 }

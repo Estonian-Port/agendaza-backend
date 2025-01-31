@@ -1,17 +1,13 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.model.Cargo
+import com.estonianport.agendaza.model.TipoCargo
 import com.estonianport.agendaza.service.CargoService
+import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin("*")
@@ -20,9 +16,17 @@ class CargoController {
     @Autowired
     lateinit var cargoService: CargoService
 
+    @Autowired
+    lateinit var usuarioService: UsuarioService
+
+    @GetMapping("/getCargoByEmpresaAndUsuario/{empresaId}/{usuarioId}")
+    fun getCargoByEmpresaIdAndUsuarioId(@PathVariable("empresaId") empresaId: Long, @PathVariable("usuarioId") usuarioId: Long): TipoCargo {
+        return cargoService.getTipoCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
+    }
+
     @GetMapping("/getAllCargo")
-    fun getAll(): MutableList<Cargo>? {
-        return cargoService.getAll()
+    fun getAllCargo(): MutableSet<TipoCargo> {
+        return TipoCargo.values().toMutableSet()
     }
 
     @GetMapping("/getCargo/{id}")
@@ -35,9 +39,9 @@ class CargoController {
         return cargoService.save(cargo)
     }
 
-    @DeleteMapping("/deleteCargo/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Cargo> {
-        cargoService.delete(id)
+    @DeleteMapping("/deleteCargo/{empresaId}/{usuarioId}")
+    fun delete(@PathVariable("empresaId") empresaId: Long, @PathVariable("usuarioId") usuarioId: Long): ResponseEntity<Cargo> {
+        cargoService.delete(empresaId, usuarioId)
         return ResponseEntity<Cargo>(HttpStatus.OK)
     }
 }

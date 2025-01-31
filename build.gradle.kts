@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.estonianport.agendaza"
-version = "0.2.0"
+version = "0.3.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -33,8 +33,10 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("io.kotest:kotest-runner-junit5:5.7.0")
+	testImplementation("io.kotest:kotest-assertions-core:5.7.0")
+	testImplementation("io.kotest:kotest-property:5.7.0")
+
 }
 
 tasks.withType<KotlinCompile> {
@@ -44,6 +46,6 @@ tasks.withType<KotlinCompile> {
 	}
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
 	useJUnitPlatform()
 }

@@ -10,10 +10,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.PrimaryKeyJoinColumn
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @MappedSuperclass
+@Proxy(lazy = false)
 abstract class PrecioConFecha (
 
     @Id
@@ -39,7 +41,8 @@ abstract class PrecioConFecha (
 }
 
 @Entity(name = "precio_con_fecha_extra")
-class PrecioConFechaExtra(
+@Proxy(lazy = false)
+open class PrecioConFechaExtra(
     id: Long,
     precio: Double,
     desde: LocalDateTime,
@@ -64,7 +67,8 @@ class PrecioConFechaExtra(
 }
 
 @Entity(name = "precio_con_fecha_tipo_evento")
-class PrecioConFechaTipoEvento(
+@Proxy(lazy = false)
+open class PrecioConFechaTipoEvento(
     id: Long,
     precio: Double,
     desde: LocalDateTime,

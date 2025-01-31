@@ -16,11 +16,13 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class Evento(
+@Proxy(lazy = false)
+open class Evento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +46,7 @@ data class Evento(
     var capacidad: Capacidad,
 
     @Column
-    var extraOtro: Long,
+    var extraOtro: Double,
 
     @Column
     var descuento : Long,
@@ -131,40 +133,53 @@ data class Evento(
         return this.getPresupuesto() + this.getPresupuestoCatering()
     }
 
-    fun toDto() : EventoDto{
-        return EventoDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre)
+    fun toDto() : EventoDTO{
+        return EventoDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre)
     }
 
     fun toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
                        listaExtraVariableEvento : List<EventoExtraVariableDTO>,
                        listaExtraCatering : List<ExtraDTO>,
-                       listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDto{
-        return EventoVerDto(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
+                       listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDTO{
+        return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
             descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
             listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
     }
 
-    fun toEventoHoraDto(): EventoHoraDto {
-     return EventoHoraDto(id, nombre, codigo, inicio, fin)
+    fun toEventoReservaDto(
+            listaExtraEvento: List<ExtraDTO>,
+            listaExtraVariableEvento: List<EventoExtraVariableDTO>,
+            listaExtraCatering: List<ExtraDTO>,
+            listaExtraVariableCatering: List<EventoExtraVariableDTO>
+    ): EventoReservaDTO {
+        return EventoReservaDTO(id, nombre, capacidad, codigo, inicio, fin, tipoEvento.id,
+                empresa.id, extraOtro, descuento, listaExtraEvento, listaExtraVariableEvento,
+                cateringOtro, cateringOtroDescripcion, listaExtraCatering, listaExtraVariableCatering,
+                cliente, encargado.id, estado, anotaciones
+        )
+    }
+
+    fun toEventoHoraDto(): EventoHoraDTO {
+     return EventoHoraDTO(id, nombre, codigo, inicio, fin)
     }
 
     fun toEventoCateringDto(listaExtra: List<ExtraDTO>,
-                            listaExtraVariable: List<EventoExtraVariableDTO>): EventoCateringDto {
-    return EventoCateringDto(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
+                            listaExtraVariable: List<EventoExtraVariableDTO>): EventoCateringDTO {
+    return EventoCateringDTO(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
         listaExtraVariable, tipoEvento.id, inicio, capacidad)
     }
 
     fun toEventoExtraDto(listaExtra: List<ExtraDTO>,
-                         listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDto {
-        return EventoExtraDto(id, nombre, codigo, extraOtro, descuento, listaExtra,
+                         listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDTO {
+        return EventoExtraDTO(id, nombre, codigo, extraOtro, descuento, listaExtra,
             listaExtraVariable, tipoEvento.toTipoEventoPrecioDTO(inicio), inicio)
     }
 
-    fun toEventoPagoDto(listaPago: List<PagoDto>): EventoPagoDto {
-        return EventoPagoDto(id, nombre, codigo, getPresupuestoTotal(), listaPago)
+    fun toEventoPagoDto(listaPago: List<PagoDTO>): EventoPagoDTO {
+        return EventoPagoDTO(id, nombre, codigo, getPresupuestoTotal(), listaPago)
     }
 
-    fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDto {
-        return EventoUsuarioDto(evento.id, evento.nombre, evento.codigo, evento.cliente.toUsuarioAbmDto())
+    fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDTO {
+        return EventoUsuarioDTO(evento.id, evento.nombre, evento.codigo, evento.cliente.toUsuarioAbmDto())
     }
 }

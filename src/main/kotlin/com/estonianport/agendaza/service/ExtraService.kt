@@ -3,11 +3,9 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -37,15 +35,15 @@ class ExtraService : GenericServiceImpl<Extra, Long>(){
             .map { extra -> extra.toDTO()}
 
 
-    fun contadorDeExtrasCATFiltrados(id : Long,buscar : String) = extraRepository.cantidadExtrasCATFiltrados(id,buscar)
+    fun contadorDeExtrasCateringFiltrados(id : Long, buscar : String) = extraRepository.cantidadExtrasCateringFiltrados(id,buscar)
 
-    fun contadorDeExtrasCAT(id : Long) = extraRepository.cantidadExtrasCAT(id)
+    fun contadorDeExtrasCatering(id : Long) = extraRepository.cantidadExtrasCatering(id)
 
-    fun extrasCAT(id: Long, pageNumber : Int) = extraRepository.findAllCAT(id, PageRequest.of(pageNumber,10)).content
+    fun extrasCatering(id: Long, pageNumber : Int) = extraRepository.findAllCatering(id, PageRequest.of(pageNumber,10)).content
         .map { extra -> extra.toDTO()}
 
-    fun extrasCATFiltrados(id : Long, pageNumber : Int, buscar: String)=
-        extraRepository.extrasCATByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
+    fun extrasCateringFiltrados(id : Long, pageNumber : Int, buscar: String)=
+        extraRepository.extrasCateringByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
             .map { extra -> extra.toDTO()}
 
 

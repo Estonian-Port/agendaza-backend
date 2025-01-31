@@ -5,9 +5,11 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import org.hibernate.annotations.Proxy
 
 @Entity
-data class Capacidad(
+@Proxy(lazy = false)
+open class Capacidad(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

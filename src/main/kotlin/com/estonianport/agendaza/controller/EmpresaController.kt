@@ -1,16 +1,15 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.EventoDto
-import com.estonianport.agendaza.dto.PagoDto
-import com.estonianport.agendaza.dto.TipoEventoDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDto
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 
 @RestController
 @CrossOrigin("*")
@@ -26,9 +24,6 @@ class EmpresaController {
 
     @Autowired
     lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var usuarioService: UsuarioService
 
     @GetMapping("/getAllEmpresa")
     fun getAll(): MutableList<Empresa>? {
@@ -41,58 +36,18 @@ class EmpresaController {
     }
 
     @PostMapping("/saveEmpresa")
-    fun save(@RequestBody empresa: Empresa): Empresa {
-        return empresaService.save(empresa)
+    fun save(@RequestBody empresaDTO: EmpresaDTO): ResponseEntity<GenericItemDTO> {
+        return ResponseEntity.ok(empresaService.save(empresaDTO))
     }
 
     @GetMapping("/getAllEventoByEmpresaId/{id}/{pageNumber}")
-    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<EventoDto> {
+    fun getAllEventoByEmpresaId(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber: Int): List<EventoDTO> {
         return empresaService.getAllEventoByEmpresaId(id, pageNumber)
     }
-    @GetMapping("/getAllEventoByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllEventoByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<EventoDto> {
-        return empresaService.getAllEventoByFilterName(id, pageNumber, buscar)
-    }
-    @GetMapping("/getAllUsersByFilterName/{id}/{pageNumber}/{buscar}")
-    fun getAllUsersByFilterName(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<UsuarioAbmDto> {
-        return usuarioService.getAllUsersByFilterName(id, pageNumber, buscar)
-    }
-    @GetMapping("/getAllUsuariosByEmpresaId/{id}/{pageNumber}")
-    fun getAllUsuarios(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<UsuarioAbmDto> {
-        return usuarioService.getAllUsuariosByEmpresaId(id,pageNumber)
-    }
 
-
-    @PutMapping("/getAllEventoByEmpresaIdAndFechaFiltro/{id}")
-    fun getAllEventoByEmpresaIdAndFechaFiltro(@PathVariable("id") id: Long, @RequestBody fechaFiltro : LocalDate): MutableSet<EventoDto> {
-        val listaEventos = empresaService.getAllEventosByEmpresaId(empresaService.findEmpresaById(id))
-        return listaEventos.filter { it.inicio.toLocalDate() == fechaFiltro }.toMutableSet()
-    }
-
-    @GetMapping("/getAllUsuarioByEmpresaId/{id}")
-    fun getAllUsuariosByEmpresaId(@PathVariable("id") id: Long): List<UsuarioAbmDto> {
-        return empresaService.getAllUsuariosByEmpresaId(empresaService.get(id)!!)
-    }
-
-    //TODO refactor con service getAllExtraTipoEvento
-    @GetMapping("/getAllExtraTipoEventoByEmpresaId/{id}")
-    fun getAllExtraTipoEventoByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
-        return empresaService.get(id)!!.
-            listaExtra.filter{ (it.tipoExtra == TipoExtra.EVENTO ||
-                it.tipoExtra == TipoExtra.VARIABLE_EVENTO) && it.fechaBaja == null }.toMutableSet()
-    }
-
-    //TODO refactor con service getAllExtraCatering
-    @GetMapping("/getAllExtraCateringByEmpresaId/{id}")
-    fun getAllExtraCateringByEmpresaId(@PathVariable("id") id: Long): MutableSet<Extra> {
-        return empresaService.get(id)!!.
-        listaExtra.filter{ (it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING)  && it.fechaBaja == null }.toMutableSet()
-    }
-
-    @GetMapping("/getAllTipoEventoByEmpresaId/{id}")
-    fun getAllTipoEventoByEmpresaId(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return empresaService.get(id)!!.listaTipoEvento.filter {
-            it.fechaBaja == null }.map { it.toDTO() }
+    @GetMapping("/getAllEventoByFilterName/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllEventoByFilterName(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<EventoDTO> {
+        return empresaService.getAllEventoByFilterName(empresaId, pageNumber, buscar)
     }
 
     @PutMapping("/getAllTipoEventoByEmpresaIdAndDuracion/{id}")
@@ -101,15 +56,9 @@ class EmpresaController {
             it.fechaBaja == null && it.duracion.name == duracion }.map { it.toDTO() }
     }
 
-    @GetMapping("/getAllServicioByEmpresaId/{id}")
-    fun getAllServicioByEmpresaId(@PathVariable("id") id: Long): List<Servicio> {
-        return empresaService.get(id)!!.listaServicio.filter { it.fechaBaja == null }
+    @GetMapping("/getEspecificaciones/{id}")
+    fun getEspecificaciones(@PathVariable("id") empresaId : Long): List<EspecificacionDTO> {
+        return empresaService.getEspecificaciones(empresaId)
     }
-
-    @GetMapping("/getAllPagoByEmpresaId/{id}")
-    fun getAllPagoByEmpresaId(@PathVariable("id") id: Long): List<PagoDto> {
-        return empresaService.getAllPagoByEmpresaId(empresaService.getEmpresaListaPagoById(id))
-    }
-
 
 }

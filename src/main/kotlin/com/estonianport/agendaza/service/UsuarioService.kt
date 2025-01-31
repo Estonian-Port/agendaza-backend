@@ -1,10 +1,8 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
-import com.estonianport.agendaza.dto.EventoDto
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.repository.UsuarioRepository
-import com.estonianport.agendaza.dto.GenericItemDto
-import com.estonianport.agendaza.dto.UsuarioAbmDto
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -23,26 +21,41 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun getUsuarioIdByUsername(username: String): Long {
         return usuarioRepository.getByUsername(username).id
     }
-    fun getAllUsuariosByEmpresaId(id : Long, pageNumber : Int): List<UsuarioAbmDto> {
-        return usuarioRepository.findAll(id, PageRequest.of(pageNumber,10)).content
-            .map {
-                UsuarioAbmDto(it.id, it.nombre, it.apellido , it.username)
-            }
+
+    fun getAllUsuario(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
+        return usuarioRepository.getAllUsuario(id, PageRequest.of(pageNumber,10)).content
     }
-    fun getAllUsersByFilterName(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDto>{
-        return usuarioRepository.usuariosByNombre(id, buscar, PageRequest.of(pageNumber,10)).content
-            .map {
-                UsuarioAbmDto(it.id, it.nombre, it.apellido , it.username)
-            }
+
+    fun getAllUsuarioFiltrados(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
+        return usuarioRepository.getAllUsuarioFiltrados(id, buscar, PageRequest.of(pageNumber,10)).content
     }
-    fun contadorDeUsuarios(id : Long): Int {
-        return usuarioRepository.cantidadDeUsuarios(id)
+
+    fun getCantidadUsuario(id : Long): Int {
+        return usuarioRepository.getCantidadUsuario(id)
     }
-    fun contadorDeUsuariosFiltrados(id : Long, buscar : String): Int {
-        return usuarioRepository.cantidadDeUsuariosFiltrados(id,buscar)
+
+    fun getCantidadUsuarioFiltrados(id : Long, buscar : String): Int {
+        return usuarioRepository.getCantidadUsuarioFiltrados(id,buscar)
     }
-    fun getAllEmpresaByUsuario(usuario : Usuario) : List<GenericItemDto>{
-        return usuario.listaCargo.map { GenericItemDto(it.empresa.id, it.empresa.nombre) }
+
+    fun getAllCliente(id : Long, pageNumber : Int): List<UsuarioAbmDTO> {
+        return usuarioRepository.getAllCliente(id, PageRequest.of(pageNumber,10)).content
+    }
+
+    fun getAllClienteFiltrados(id : Long, pageNumber : Int, buscar: String): List<UsuarioAbmDTO>{
+        return usuarioRepository.getAllClienteFiltrados(id, buscar, PageRequest.of(pageNumber,10)).content
+    }
+
+    fun getCantidadCliente(id : Long): Int {
+        return usuarioRepository.getCantidadCliente(id)
+    }
+
+    fun getCantidadClienteFiltrados(id : Long, buscar : String): Int {
+        return usuarioRepository.getCantidadClienteFiltrados(id,buscar)
+    }
+
+    fun getAllEmpresaByUsuarioId(usuarioId : Long) : List<EmpresaAbmDTO>{
+        return usuarioRepository.getAllEmpresaByUsuarioId(usuarioId)
     }
 
     fun getUsuarioByEmail(email : String) : Usuario?{
@@ -55,5 +68,13 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
 
     fun findById(id : Long) : Usuario? {
         return usuarioRepository.findById(id).get()
+    }
+
+    fun getUsuarioOfEmpresa(usuarioId: Long, empresaId: Long): UsuarioEditCargoDTO {
+        return usuarioRepository.getUsuarioOfEmpresa(usuarioId, empresaId)
+    }
+
+    fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO {
+        return usuarioRepository.getUsuarioPerfil(usuarioId)
     }
 }

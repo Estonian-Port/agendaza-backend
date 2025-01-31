@@ -1,6 +1,6 @@
 import java.io.Serializable
 
-interface GenericService<T, ID : Serializable?> {
+interface GenericService<T : Any, ID : Serializable> {
     fun save(entity: T): T
 
     fun delete(id: ID)

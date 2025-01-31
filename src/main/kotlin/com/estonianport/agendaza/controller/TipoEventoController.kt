@@ -56,11 +56,6 @@ class TipoEventoController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
-    @GetMapping("/getAllTipoEvento")
-    fun getAll(): MutableList<TipoEvento>? {
-        return tipoEventoService.getAll()
-    }
-
     @GetMapping("/getTipoEvento/{id}")
     fun get(@PathVariable("id") id: Long): TipoEventoDTO {
         return tipoEventoService.get(id)!!.toDTO()
@@ -99,23 +94,44 @@ class TipoEventoController {
         return tipoEventoEliminar.toDTO()
     }
 
+    @GetMapping("/getAllTipoEvento/{empresaId}")
+    fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId)
+    }
+
+    @GetMapping("/getAllTipoEvento/{empresaId}/{pageNumber}")
+    fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId, pageNumber)
+    }
+
+    @GetMapping("/getCantidadTipoEvento/{empresaId}")
+    fun getCantidadTipoEvento(@PathVariable("empresaId") empresaId: Long): Int {
+        return tipoEventoService.getCantidadTipoEvento(empresaId)
+    }
+
+    @GetMapping("/getAllTipoEventoFiltrados/{empresaId}/{pageNumber}/{buscar}")
+    fun getAllTipoEventoFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoFilterNombre(empresaId, buscar, pageNumber)
+    }
+
+    @GetMapping("/getCantidadTipoEventoFiltrados/{empresaId}/{buscar}")
+    fun getCantidadTipoEventoFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar: String): Int {
+        return tipoEventoService.getCantidadTipoEventoFiltrados(empresaId, buscar)
+    }
+
     @GetMapping("/getAllDuracion")
     fun getAllDuracion(): MutableSet<Duracion> {
         return Duracion.values().toMutableSet()
     }
 
-    @GetMapping("/getListaTipoEventoOfExtra/{id}")
-    fun getListaTipoEventoByExtra(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
-            tipoEventoService.getAllByExtra(extraService.get(id)!!)!!
-        )
+    @GetMapping("/getListaTipoEventoOfExtra/{extraId}")
+    fun getListaTipoEventoByExtra(@PathVariable("extraId") extraId: Long): List<TipoEventoDTO> {
+        return tipoEventoService.getAllByExtra(extraId)
     }
 
-    @GetMapping("/getListaTipoEventoByServicio/{id}")
-    fun getListaTipoEventoByServicio(@PathVariable("id") id: Long): List<TipoEventoDTO> {
-        return tipoEventoService.listaTipoEventoToListaTipoEventoDTO(
-            tipoEventoService.getAllByServicio(servicioService.get(id)!!)!!
-        )
+    @GetMapping("/getListaTipoEventoByServicio/{servicioId}")
+    fun getListaTipoEventoByServicio(@PathVariable("servicioId") servicioId: Long): MutableList<TipoEventoDTO>{
+        return tipoEventoService.getAllByServicio(servicioId)
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
@@ -173,29 +189,28 @@ class TipoEventoController {
         )
     }
 
+    // TODO revisar aca ====================================
     @PutMapping("/getAllExtraEventoByTipoEventoIdAndFecha/{id}")
     fun getAllExtraEventoByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDtoByFilter(
-            tipoEventoService.get(id)!!.listaExtra.filter { it.fechaBaja == null }.toMutableSet(), fechaEvento, TipoExtra.EVENTO)
+        return extraService.fromListaExtraToListaExtraDto(tipoEventoService.getAllExtraByTipoExtra(id, TipoExtra.EVENTO), fechaEvento)
     }
 
     @PutMapping("/getAllExtraEventoVariableByTipoEventoIdAndFecha/{id}")
     fun getAllExtraEventoVariableByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDtoByFilter(
-            tipoEventoService.get(id)!!.listaExtra.filter { it.fechaBaja == null }.toMutableSet(), fechaEvento, TipoExtra.VARIABLE_EVENTO)
+        return extraService.fromListaExtraToListaExtraDto(tipoEventoService.getAllExtraByTipoExtra(id, TipoExtra.VARIABLE_EVENTO), fechaEvento)
     }
 
     @PutMapping("/getAllTipoCateringByTipoEventoIdAndFecha/{id}")
     fun getAllTipoCateringByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDtoByFilter(
-            tipoEventoService.get(id)!!.listaExtra.filter { it.fechaBaja == null }.toMutableSet(), fechaEvento, TipoExtra.TIPO_CATERING)
+        return extraService.fromListaExtraToListaExtraDto(tipoEventoService.getAllExtraByTipoExtra(id, TipoExtra.TIPO_CATERING), fechaEvento)
     }
 
     @PutMapping("/getAllCateringExtraByTipoEventoIdAndFecha/{id}")
     fun getAllCateringExtraByTipoEventoId(@PathVariable("id") id: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDtoByFilter(
-            tipoEventoService.get(id)!!.listaExtra.filter { it.fechaBaja == null }.toMutableSet(), fechaEvento, TipoExtra.VARIABLE_CATERING)
+        return extraService.fromListaExtraToListaExtraDto(tipoEventoService.getAllExtraByTipoExtra(id, TipoExtra.VARIABLE_CATERING), fechaEvento)
     }
+
+    // ====================================
 
     @GetMapping("/getDuracionByTipoEventoId/{id}")
     fun getDuracionByTipoEventoId(@PathVariable("id") id: Long): LocalTime {

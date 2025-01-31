@@ -18,11 +18,13 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
+import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-data class TipoEvento(
+@Proxy(lazy = false)
+open class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
