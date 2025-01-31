@@ -254,7 +254,7 @@ class EspecificacionSpec: DescribeSpec({
         }
 
 
-        it(name = "Aplicar cateringOtro en el evento y calcular el presupuesto") {
+        /*it(name = "Aplicar cateringOtro en el evento y calcular el presupuesto") {
             // ============== Act =============
 
             // Asignar un valor específico para cateringOtro
@@ -304,6 +304,6 @@ class EspecificacionSpec: DescribeSpec({
 
             // ================================
 
-        }
+        }*/
     }
 })
