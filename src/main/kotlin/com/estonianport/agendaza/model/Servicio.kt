@@ -1,16 +1,8 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.ServicioDTO
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.PrimaryKeyJoinColumn
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.*
 import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 
@@ -27,6 +19,15 @@ open class Servicio(
 
     @ManyToMany(mappedBy = "listaServicio", fetch = FetchType.LAZY)
     val listaEmpresa: MutableSet<Empresa> = mutableSetOf()){
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "tipo_evento_servicio",
+            joinColumns = arrayOf(JoinColumn(name = "servicio_id")),
+            inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
+    )
+    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @Column
     var fechaBaja : LocalDate? = null

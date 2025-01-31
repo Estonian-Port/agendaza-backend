@@ -56,13 +56,9 @@ class ExtraController {
     fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
         var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra, empresaService.get(extraDTO.empresaId)!!)
 
-        extra = extraService.save(extra)
+        extra.listaTipoEvento = extraDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
 
-        extraDTO.listaTipoEventoId.forEach {
-            val tipoEvento = tipoEventoService.get(it)!!
-            tipoEvento.listaExtra.add(extra)
-            tipoEventoService.save(tipoEvento)
-        }
+        extra = extraService.save(extra)
 
         return extra.toDTO()
     }
