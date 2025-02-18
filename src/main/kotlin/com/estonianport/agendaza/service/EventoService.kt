@@ -158,9 +158,15 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     private fun suma24Horas(fechaFin: LocalDateTime): String {
         var horaFin: String = fechaFin.toLocalTime().hour.toString()
-        val minutosFin: String = fechaFin.toLocalTime().minute.toString()
         val finHoraEventos = horaFin.toInt() + 24
         horaFin = Integer.toString(finHoraEventos)
+
+        var minutosFin: String = fechaFin.toLocalTime().minute.toString()
+
+        if(minutosFin.length == 1){
+            minutosFin = "00"
+        }
+
         return "$horaFin:$minutosFin"
     }
 
