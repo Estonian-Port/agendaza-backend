@@ -1130,10 +1130,8 @@ class EmailService {
         val dia: String = evento.inicio.toLocalDate().toString()
         val horaInicio: String = evento.inicio.toLocalTime().toString()
         val horaFin: String = evento.fin.toLocalTime().toString()
-        var totalPago = 0
-        for (pagos in listaPagos) {
-            totalPago += pagos.monto
-        }
+        var totalPago = evento.getTotalAbonado()
+        
         val emailBody =
             Email(evento.cliente.email, "Tu pago del evento  " + evento.nombre + ", codigo: " + evento.codigo)
 

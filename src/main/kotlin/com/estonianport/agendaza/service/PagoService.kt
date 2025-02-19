@@ -27,7 +27,7 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         val evento = empresa.listaEvento.find { it.codigo == codigo }
 
         if(evento != null){
-            return PagoDTO(0, 0, evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
+            return PagoDTO(0, 0.0, evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
         }
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }

@@ -130,7 +130,15 @@ open class Evento(
     }
 
     fun getPresupuestoTotal(): Double{
-        return this.getPresupuesto() + this.getPresupuestoCatering()
+        return getPresupuesto() + getPresupuestoCatering()
+    }
+
+    fun getTotalAbonado(): Double {
+        return listaPago.sumOf { it.monto }
+    }
+
+    fun getMontoFaltante(): Double {
+        return getPresupuestoTotal() - getTotalAbonado()
     }
 
     fun toDto() : EventoDTO{
@@ -182,4 +190,5 @@ open class Evento(
     fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDTO {
         return EventoUsuarioDTO(evento.id, evento.nombre, evento.codigo, evento.cliente.toUsuarioAbmDto())
     }
+
 }

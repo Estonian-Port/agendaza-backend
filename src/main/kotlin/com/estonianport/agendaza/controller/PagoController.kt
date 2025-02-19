@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.CodigoEmpresaId
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PagoEmpresaEncargado
@@ -9,7 +10,9 @@ import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -31,9 +34,11 @@ class PagoController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
-
     @Autowired
     lateinit var usuarioService: UsuarioService
+
+    @Autowired
+    lateinit var pdfService: PdfService
 
     @GetMapping("/getPago/{id}")
     fun get(@PathVariable("id") id: Long): PagoDTO {
@@ -86,6 +91,18 @@ class PagoController {
     @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
     fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
         return pagoService.contadorDePagosFiltrados(id,buscar)
+    }
+
+    @GetMapping("/generarComprobanteDePago/{id}")
+    fun generarComprobanteDePago(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = pagoService.get(id)!!
+        val pdfBytes = pdfService.generarComprobanteDePago(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "comprobante_de_pago.pdf")
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 
 }

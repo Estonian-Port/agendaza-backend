@@ -23,7 +23,7 @@ open class Pago (
     val id: Long,
 
     @Column
-    val monto : Int,
+    val monto : Double,
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)

@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
@@ -18,6 +19,10 @@ import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.TipoEventoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -58,6 +63,9 @@ class EventoController {
 
     @Autowired
     lateinit var pagoService: PagoService
+
+    @Autowired
+    lateinit var pdfService: PdfService
 
     // TODO Sacar, no se va a usar, ya que se accede desde empresa
     @GetMapping("/getAllEvento")
@@ -512,5 +520,29 @@ class EventoController {
                         evento.inicio,
                         TipoExtra.VARIABLE_CATERING
                 ))
+    }
+
+    @GetMapping("/generarEstadoDeCuenta/{id}")
+    fun generarEstadoDeCuenta(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = eventoService.get(id)!!
+        val pdfBytes = pdfService.generarEstadoDeCuenta(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "estado_de_cuenta.pdf")
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("/generarComprobanteEvento/{id}")
+    fun generarComprobanteEvento(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = eventoService.get(id)!!
+        val pdfBytes = pdfService.generarComprobanteEvento(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "comprobante_evento.pdf")
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 }
