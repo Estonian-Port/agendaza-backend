@@ -100,8 +100,6 @@ class PagoController {
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_PDF
-        headers.setContentDispositionFormData("attachment", "comprobante_de_pago.pdf")
-
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 

@@ -34,7 +34,7 @@ class PdfService {
         document.setPageSize(PageSize.A4)
 
         // Estilos de fuente
-        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16f)
+        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
         val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
         val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
 
@@ -69,7 +69,7 @@ class PdfService {
         val horaInicio: String = pago.evento.inicio.toLocalTime().toString()
 
         // Descripción del evento
-        document.add(Paragraph("\nDESCRIPCIÓN", fontTitulo))
+        document.add(Paragraph("\nDESCRIPCIÓN \n \n", fontTitulo))
         document.add(Paragraph("Evento ${pago.evento.nombre} a realizarse el ${diaEvento} desde las ${horaInicio} en ${pago.evento.empresa.nombre}", fontNormal))
         document.add(Paragraph("Descripcion: ${pago.evento.cateringOtroDescripcion}", fontNormal))
         document.add(Paragraph("Total invitados: ${pago.evento.capacidad.capacidadAdultos} adultos y ${pago.evento.capacidad.capacidadNinos} niños", fontNormal))
@@ -95,23 +95,18 @@ class PdfService {
         val content: PdfContentByte = writer.directContent
 
         // Dibuja un rectángulo para el recuadro
-        var x1 = 30f
-        var y1 = 570f
-        var x2 = 560f
-        val y2 = 450f
-
         cb.setColorStroke(Color.DARK_GRAY)
         content.setLineWidth(0.5f)
-        content.rectangle(x1, y1, x2 - x1, y2 - y1)
+        content.rectangle(30f, 565f, 530f, -140f)
         content.stroke()
 
-        x1 = 250f
-        x2 = 350f
-        y1 = 335f
+        // Dibuja la línea de descripcion
+        content.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
+        content.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
 
         // Dibuja la línea de la firma
-        content.moveTo(x1, y1) // Mueve a la posición donde comienza la línea
-        content.lineTo(x2, y1) // Dibuja la línea hasta el otro lado
+        content.moveTo(250f, 315f) // Mueve a la posición donde comienza la línea
+        content.lineTo(350f, 315f) // Dibuja la línea hasta el otro lado
         content.stroke()
 
         // Define el grosor y el color del borde
