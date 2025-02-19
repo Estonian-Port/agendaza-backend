@@ -161,4 +161,10 @@ class UsuarioController {
         return usuarioService.getCantidadClienteFiltrados(empresaId,buscar)
     }
 
+    @PostMapping("/saveCliente")
+    fun saveCliente(@RequestBody clienteDto: ClienteDTO): ClienteDTO {
+        var usuario = Usuario(clienteDto.id, clienteDto.nombre,clienteDto.apellido,clienteDto.celular,clienteDto.email)
+        return usuarioService.save(usuario).toClienteDto()
+    }
+
 }
