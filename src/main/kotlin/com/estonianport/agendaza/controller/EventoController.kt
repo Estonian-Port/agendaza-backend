@@ -180,15 +180,6 @@ class EventoController {
         return mutableSetOf(Estado.COTIZADO, Estado.RESERVADO)
     }
 
-    @GetMapping("/getEventoPago/{id}")
-    fun getEventoPago(@PathVariable("id") id: Long): EventoPagoDTO? {
-        val evento = eventoService.findById(id)
-
-        return evento.toEventoPagoDto(
-            pagoService.fromListaPagoToListaPagoDto(evento.listaPago)
-        )
-    }
-
     @GetMapping("/getEventoExtra/{id}")
     fun getEventoExtra(@PathVariable("id") id: Long): EventoExtraDTO? {
         val evento = eventoService.findById(id)

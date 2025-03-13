@@ -196,4 +196,5 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             eventoReservaDto.anotaciones,
             empresa)
     }
+
 }

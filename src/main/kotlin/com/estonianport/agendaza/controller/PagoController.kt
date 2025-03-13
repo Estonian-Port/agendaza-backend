@@ -2,11 +2,13 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.CodigoEmpresaId
+import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PagoEmpresaEncargado
 import com.estonianport.agendaza.model.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +41,10 @@ class PagoController {
 
     @Autowired
     lateinit var pdfService: PdfService
+
+    @Autowired
+    lateinit var eventoService: EventoService
+
 
     @GetMapping("/getPago/{id}")
     fun get(@PathVariable("id") id: Long): PagoDTO {
@@ -101,6 +107,11 @@ class PagoController {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_PDF
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("/getAllPagoFromEvento/{id}")
+    fun getAllPagoFromEvento(@PathVariable("id") id: Long): EventoPagoDTO {
+        return eventoService.get(id)!!.toEventoPagoDto(pagoService.getAllPagoFromEvento(id))
     }
 
 }

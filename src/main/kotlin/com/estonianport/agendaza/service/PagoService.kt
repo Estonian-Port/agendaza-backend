@@ -54,4 +54,8 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         pago.fechaBaja = LocalDate.now()
         pagoRepository.save(pago)
     }
+
+    fun getAllPagoFromEvento(idEvento: Long): List<PagoDTO> {
+        return pagoRepository.getAllPagoFromEvento(idEvento)
+    }
 }
