@@ -30,6 +30,8 @@ dependencies {
 	implementation("commons-validator:commons-validator:1.7")
 	implementation("com.github.librepdf:openpdf:1.3.30")
 	implementation("com.itextpdf.tool:xmlworker:5.5.13.2")
+	implementation("io.micrometer:micrometer-registry-prometheus")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
