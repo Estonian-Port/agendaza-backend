@@ -36,6 +36,8 @@ class SecurityConfig {
             .csrf()
             .disable()
             .authorizeHttpRequests()
+            .requestMatchers("/", "/index.html", "/styles.css", "/logo.png", "/favicon.ico")
+            .permitAll()
             .requestMatchers("/actuator/prometheus")
             .access(WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
             .anyRequest()
