@@ -56,10 +56,6 @@ abstract class Empresa(
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaExtra: MutableSet<Extra> = mutableSetOf()
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
 
     @JsonIgnore
@@ -77,6 +73,15 @@ abstract class Empresa(
     @JsonIgnore
     @ManyToMany
     @JoinTable(
+            name = "empresa_extra",
+            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
+            inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+    )
+    var listaExtra: MutableSet<Extra> = mutableSetOf()
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
             name = "empresa_servicio",
             joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
             inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
@@ -86,6 +91,8 @@ abstract class Empresa(
     @Column
     var fechaBaja : LocalDate? = null
 
+    @Column
+    var logo : String = "https://iili.io/3SVIGuj.png" //Agendaza Logo por defecto
 
     fun recorrerEspecificaciones(evento: Evento) {
         listaEspecificacion.forEach { especificacion ->

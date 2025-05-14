@@ -14,9 +14,9 @@ class EspecificacionSpec: DescribeSpec({
 
     // =================== Extras ========================
 
-    val extraNino = Extra(1, "Niños", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraCorto = Extra(2, "Camarera Corto", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraLargo = Extra(3, "Camarera Largo", TipoExtra.VARIABLE_EVENTO, empresa)
+    val extraNino = Extra(1, "Niños", TipoExtra.VARIABLE_EVENTO)
+    val extraCamareraCorto = Extra(2, "Camarera Corto", TipoExtra.VARIABLE_EVENTO)
+    val extraCamareraLargo = Extra(3, "Camarera Largo", TipoExtra.VARIABLE_EVENTO)
 
     // ===================================================
 

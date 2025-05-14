@@ -34,6 +34,11 @@ class ServicioController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
+    @GetMapping("/getAllServicio")
+    fun abm(): List<ServicioDTO> {
+        return servicioService.fromListaServicioToListaServicioDto(servicioService.getAll()!!)
+    }
+
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ServicioDTO {
         val servicio = servicioService.get(id)!!

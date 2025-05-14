@@ -21,9 +21,8 @@ open class Extra(
     @Enumerated(EnumType.STRING)
     val tipoExtra : TipoExtra,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    val empresa: Empresa){
+    @ManyToMany(mappedBy = "listaExtra", fetch = FetchType.LAZY)
+    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()){
 
     @Column
     var fechaBaja : LocalDate? = null
@@ -38,11 +37,11 @@ open class Extra(
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     fun toDTO(): ExtraDTO {
-        return ExtraDTO(id, nombre, tipoExtra, empresa.id)
+        return ExtraDTO(id, nombre, tipoExtra)
     }
 
-    fun toExtraPrecioDTO(fechaEvento: LocalDateTime): ExtraDTO {
-        val extraDTO = ExtraDTO(id, nombre, tipoExtra, empresa.id)
+    fun toExtraPrecioDTO(empresa: Empresa, fechaEvento: LocalDateTime): ExtraDTO {
+        val extraDTO = ExtraDTO(id, nombre, tipoExtra)
         extraDTO.precio = empresa.getPrecioOfExtraByFecha(this, fechaEvento)
         return extraDTO
     }

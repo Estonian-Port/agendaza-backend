@@ -2,6 +2,7 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.CantidadesPanelAdmin
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.dto.PrecioConFechaDto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Especificacion
 import org.springframework.data.jpa.repository.Query
@@ -31,7 +32,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "(" +
             "SELECT COUNT(ex) " +
             "FROM Extra ex " +
-            "WHERE ex.empresa.id = ?1 " +
+            "INNER JOIN ex.listaEmpresa e " +
+            "WHERE e.id = ?1 " +
             "   AND ex.fechaBaja IS NULL " +
             "   AND (ex.tipoExtra = 'EVENTO' " +
             "   OR ex.tipoExtra = 'VARIABLE_EVENTO')), " +
@@ -61,7 +63,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "(" +
             "SELECT COUNT(ex) " +
             "FROM Extra ex " +
-            "WHERE ex.empresa.id = ?1 " +
+            "INNER JOIN ex.listaEmpresa e " +
+            "WHERE e.id = ?1 " +
             "   AND ex.fechaBaja IS NULL " +
             "   AND (ex.tipoExtra = 'TIPO_CATERING' " +
             "   OR ex.tipoExtra = 'VARIABLE_CATERING')), " +
@@ -81,4 +84,13 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
 
     @Query("SELECT es FROM Empresa e INNER JOIN e.listaEspecificacion es WHERE e.id = :empresaId")
     fun getEspecificaciones(empresaId: Long): List<Especificacion>
+
+    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDto(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.extra.id) " +
+            "FROM Empresa e " +
+            "INNER JOIN e.listaPrecioConFechaExtra pf " +
+            "WHERE e.id = :empresaId AND pf.extra.id = :extraId " +
+            " AND pf.desde >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
+            " AND pf.fechaBaja IS NULL")
+    fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDto>
+
 }

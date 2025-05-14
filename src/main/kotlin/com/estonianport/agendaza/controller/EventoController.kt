@@ -183,17 +183,20 @@ class EventoController {
     @GetMapping("/getEventoExtra/{id}")
     fun getEventoExtra(@PathVariable("id") id: Long): EventoExtraDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoExtraDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.EVENTO
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.EVENTO
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_EVENTO
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_EVENTO
             )
         )
     }
@@ -201,17 +204,20 @@ class EventoController {
     @GetMapping("/getEventoCatering/{id}")
     fun getEventoCatering(@PathVariable("id") id: Long): EventoCateringDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoCateringDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.TIPO_CATERING
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.TIPO_CATERING
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_CATERING
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_CATERING
             )
         )
     }
@@ -225,27 +231,32 @@ class EventoController {
     @GetMapping("/getEventoVer/{id}")
     fun getEventoVer(@PathVariable("id") id: Long): EventoVerDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoVerDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
+                    empresa,
                     evento.listaExtra,
                     evento.inicio,
                     TipoExtra.EVENTO
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_EVENTO
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_EVENTO
             ),
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.TIPO_CATERING
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.TIPO_CATERING
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_CATERING
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_CATERING
             )
         )
     }
@@ -403,7 +414,6 @@ class EventoController {
         return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
     }
 
-    // TODO revisar el return true
     @PutMapping("/reenviarMail/{id}")
     fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
 
@@ -492,21 +502,25 @@ class EventoController {
 
         return evento.toEventoReservaDto(
                 extraService.fromListaExtraToListaExtraDtoByFilter(
+                        empresa,
                         evento.listaExtra,
                         evento.inicio,
                         TipoExtra.EVENTO
                 ),
                 extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        empresa,
                         evento.listaEventoExtraVariable,
                         evento.inicio,
                         TipoExtra.VARIABLE_EVENTO
                 ),
                 extraService.fromListaExtraToListaExtraDtoByFilter(
+                        empresa,
                         evento.listaExtra,
                         evento.inicio,
                         TipoExtra.TIPO_CATERING
                 ),
                 extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        empresa,
                         evento.listaEventoExtraVariable,
                         evento.inicio,
                         TipoExtra.VARIABLE_CATERING
@@ -525,14 +539,14 @@ class EventoController {
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 
-    @GetMapping("/generarComprobanteEvento/{id}")
-    fun generarComprobanteEvento(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+    @GetMapping("/descargarEvento/{id}")
+    fun descargarEvento(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
         val pago = eventoService.get(id)!!
         val pdfBytes = pdfService.generarComprobanteEvento(pago)
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_PDF
-        headers.setContentDispositionFormData("attachment", "comprobante_evento.pdf")
+        headers.setContentDispositionFormData("attachment", "comprobante_de_evento.pdf")
 
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }

@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDto
+import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
 import com.estonianport.agendaza.model.TipoExtra
@@ -38,11 +39,15 @@ class ExtraController {
     @Autowired
     lateinit var precioConFechaExtraService : PrecioConFechaExtraService
 
-    @GetMapping("/getAllExtra")
-    fun abm(): MutableList<Extra>? {
-        return extraService.getAll()
+    @GetMapping("/getAllExtraEvento")
+    fun getAllEvento(): List<ExtraDTO> {
+        return extraService.getAllEvento()
     }
 
+    @GetMapping("/getAllExtraCatering")
+    fun getAllCatering(): List<ExtraDTO> {
+        return extraService.getAllCatering()
+    }
     @GetMapping("/getExtra/{id}")
     fun get(@PathVariable("id") id: Long): ExtraDTO {
         val extra = extraService.get(id)!!
@@ -54,11 +59,16 @@ class ExtraController {
 
     @PostMapping("/saveExtra")
     fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
-        var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra, empresaService.get(extraDTO.empresaId)!!)
+        var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra)
 
         extra.listaTipoEvento = extraDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
 
         extra = extraService.save(extra)
+
+        val empresa = empresaService.get(extraDTO.empresaId)!!
+
+        empresa.listaExtra.add(extra)
+        empresaService.save(empresa)
 
         return extra.toDTO()
     }
@@ -83,25 +93,16 @@ class ExtraController {
         return mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
     }
 
-    @GetMapping("/getAllPrecioConFechaByExtraId/{id}")
-    fun getAllPrecioConFechaByExtraId(@PathVariable("id") id: Long): List<PrecioConFechaDto> {
-        val extra = extraService.get(id)!!
+    @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
+    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDto> {
 
-        // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
-        val listaPrecioSinYearAnterior = extra.empresa.listaPrecioConFechaExtra.filter {
-             it.extra.id == extra.id &&
-             it.extra.fechaBaja == null &&
-             it.desde.year >= LocalDateTime.now().year &&
-             it.fechaBaja == null
-        }
-
-        return listaPrecioSinYearAnterior.map { it.toDTO() }
+        return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
     }
 
-    @PostMapping("/saveExtraPrecio/{id}")
-    fun saveTipoEventoPrecio(@PathVariable("id") id: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
-        val extra = extraService.get(id)!!
-        val empresa = empresaService.get(extra.empresa.id)!!
+    @PostMapping("/saveExtraPrecio/{empresaId}/{extraId}")
+    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+        val extra = extraService.get(extraId)!!
+        val empresa = empresaService.get(empresaId)!!
 
         val listaPrecio = empresa.listaPrecioConFechaExtra.filter { it.extra.id == extra.id }
 
