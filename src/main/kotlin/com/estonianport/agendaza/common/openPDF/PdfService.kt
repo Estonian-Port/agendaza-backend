@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service
 import org.springframework.util.ResourceUtils
 import java.awt.Color
 import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalDate
 
 
@@ -21,6 +23,105 @@ class PdfService {
         val document = Document()
         val baos = ByteArrayOutputStream()
 
+        val writer = PdfWriter.getInstance(document, baos)
+        document.open()
+
+        document.setPageSize(PageSize.A4)
+
+        // Estilos de fuente
+        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
+        val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
+        val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
+
+        // Logo
+        val logo = Image.getInstance(URL(evento.empresa.logo))
+
+        logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
+        logo.alignment = Element.ALIGN_CENTER
+        document.add(logo)
+
+        // Datos de la empresa
+
+        val titulo = Paragraph()
+        titulo.alignment = Element.ALIGN_CENTER
+        titulo.add(Chunk("Mail: ${evento.empresa.email} \n", fontNormal))
+        titulo.add(Chunk("Teléfono: ${evento.empresa.telefono} \n", fontNormal))
+        titulo.add(Chunk("${evento.empresa.calle} ${evento.empresa.numero} - ${evento.empresa.municipio}", fontNormal))
+
+        document.add(titulo)
+
+        // Espacio en blanco
+        document.add(Paragraph(" "))
+
+        val hoy = LocalDate.now().dayOfMonth.toString() + "/" + LocalDate.now().monthValue.toString()  + "/" + LocalDate.now().year.toString()
+
+        // Datos del cliente
+        document.add(Paragraph("Nombre: ${evento.cliente.nombre}, ${evento.cliente.apellido}", fontSubtitulo) )
+
+        val diaEvento = evento.inicio.toLocalDate().dayOfMonth.toString() + "/" + evento.inicio.toLocalDate().monthValue.toString()  + "/" + evento.inicio.toLocalDate().year.toString()
+        val horaInicio: String = evento.inicio.toLocalTime().toString()
+
+        // Descripción del evento
+        document.add(Paragraph("\nDESCRIPCIÓN \n \n", fontTitulo))
+        document.add(Paragraph("Evento ${evento.nombre} a realizarse el ${diaEvento} desde las ${horaInicio} en ${evento.empresa.nombre}", fontNormal))
+        document.add(Paragraph("Descripcion: ${evento.cateringOtroDescripcion}", fontNormal))
+        document.add(Paragraph("Total invitados: ${evento.capacidad.capacidadAdultos} adultos y ${evento.capacidad.capacidadNinos} niños", fontNormal))
+
+        //TODO informacion del evento
+        document.add(Paragraph("Extras: ", fontNormal))
+        document.add(Paragraph("Catering: ", fontNormal))
+        document.add(Paragraph("Servicios:", fontNormal))
+
+
+        // Firma
+        val firma = Paragraph()
+        firma.alignment = Element.ALIGN_CENTER
+        firma.add(Chunk("\n\n\n\n\n\n ${evento.encargado.nombre} ${evento.encargado.apellido} \n", fontNormal))
+        firma.add(Chunk("${evento.empresa.nombre} \n", fontNormal))
+        firma.add(Chunk("Firma", fontNormal))
+        document.add(firma)
+
+
+        // -------------------------------------------------------
+
+        // Obtén el PdfContentByte para dibujar detrás del texto
+        val cb = writer.directContent
+
+        // Accede a la capa de contenido
+        val content: PdfContentByte = writer.directContent
+
+        // Dibuja un rectángulo para el recuadro
+        cb.setColorStroke(Color.DARK_GRAY)
+        content.setLineWidth(0.5f)
+        content.rectangle(30f, 565f, 530f, -140f)
+        content.stroke()
+
+        // Dibuja la línea de descripcion
+        content.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
+        content.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
+
+        // Dibuja la línea de la firma
+        content.moveTo(250f, 315f) // Mueve a la posición donde comienza la línea
+        content.lineTo(350f, 315f) // Dibuja la línea hasta el otro lado
+        content.stroke()
+
+        // Define el grosor y el color del borde
+        cb.setLineWidth(0.5f) // Usa setLineWidth() en lugar de lineWidth
+        cb.setColorStroke(Color.DARK_GRAY) // Usa Color.BLACK en lugar de BaseColor.BLACK
+
+        // ------------------------------------------------------------
+        // Obtén las dimensiones de la página
+        val pageSize = document.pageSize
+        val pageWidth = pageSize.width
+        val pageHeight = pageSize.height
+
+        cb.setLineWidth(2f)
+        cb.setColorStroke(Color.BLACK)
+
+        cb.rectangle(10f, 10f, pageWidth - 20f, pageHeight - 20f) // Coordenadas 0, 0 y dimensiones de la página
+        cb.stroke()
+
+        document.close()
         return baos.toByteArray()
     }
 
@@ -39,8 +140,8 @@ class PdfService {
         val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
 
         // Logo
-        val rutaImagen = ResourceUtils.getFile("classpath:static/saveur.png").absolutePath
-        val logo = Image.getInstance(rutaImagen) // Reemplaza con la ruta real
+        val logo = Image.getInstance(URL(pago.evento.empresa.logo))
+
         logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
         logo.alignment = Element.ALIGN_CENTER
         document.add(logo)
@@ -159,4 +260,5 @@ class PdfService {
 
         return baos.toByteArray()
     }
+
 }
