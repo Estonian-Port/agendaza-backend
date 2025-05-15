@@ -1,15 +1,13 @@
 package com.estonianport.agendaza.common.openPDF
 
-import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.Pago
+import com.estonianport.agendaza.model.*
 import com.lowagie.text.*
+import com.lowagie.text.pdf.ColumnText
 import com.lowagie.text.pdf.PdfContentByte
 import com.lowagie.text.pdf.PdfWriter
 import org.springframework.stereotype.Service
-import org.springframework.util.ResourceUtils
 import java.awt.Color
 import java.io.ByteArrayOutputStream
-import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
 
@@ -18,109 +16,218 @@ import java.time.LocalDate
 @Service
 class PdfService {
 
+    private fun setPageSize(document: Document) {
+        document.setPageSize(PageSize.A4)
+    }
+
+    private fun setLogo(document: Document, logoUrl: String) {
+        val logo = Image.getInstance(URL(logoUrl))
+
+        logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
+        logo.alignment = Element.ALIGN_CENTER
+        document.add(logo)
+    }
+
+    private fun setHeader(document: Document, empresa: Empresa, fontNormal : Font) {
+
+        val header = Paragraph()
+        header.alignment = Element.ALIGN_CENTER
+        header.add(Chunk("Mail: ${empresa.email} \n", fontNormal))
+        header.add(Chunk("Teléfono: ${empresa.telefono} \n", fontNormal))
+        header.add(Chunk("${empresa.calle} ${empresa.numero} - ${empresa.municipio}", fontNormal))
+
+        document.add(header)
+    }
+
+    private fun setDatosCliente(document: Document, cliente: Usuario, fontSubtitulo: Font) {
+        // Datos del cliente
+        document.add(Paragraph("Nombre: ${cliente.nombre}, ${cliente.apellido}", fontSubtitulo))
+
+    }
+
+    fun setPago(document: Document, pago: Pago, fontSubtitulo: Font){
+        val hoy = LocalDate.now().dayOfMonth.toString() + "/" + LocalDate.now().monthValue.toString() + "/" + LocalDate.now().year.toString()
+        document.add(Paragraph("Fecha: ${hoy}", fontSubtitulo))
+        document.add(Paragraph("Forma de pago: ${pago.medioDePago}", fontSubtitulo))
+    }
+
+    private fun setDescripcion(evento: Evento, document: Document, fontTitulo: Font?, fontNormal: Font?) {
+        val diaEvento = evento.inicio.toLocalDate().dayOfMonth.toString() + "/" + evento.inicio.toLocalDate().monthValue.toString() + "/" + evento.inicio.toLocalDate().year.toString()
+        val horaInicio: String = evento.inicio.toLocalTime().toString()
+
+        document.add(Paragraph("\nDESCRIPCIÓN \n \n", fontTitulo))
+        document.add(Paragraph("Evento: ${evento.nombre} a realizarse el ${diaEvento} desde las ${horaInicio} en ${evento.empresa.nombre}", fontNormal))
+        document.add(Paragraph("Descripcion catering: ${evento.cateringOtroDescripcion}", fontNormal))
+        document.add(Paragraph("Total invitados: ${evento.capacidad.capacidadAdultos} adultos y ${evento.capacidad.capacidadNinos} niños", fontNormal))
+    }
+
+    private fun setRecibo(document: Document, pago: Pago, fontSubtitulo: Font?) {
+        document.add(Paragraph("Recibimos $${pago.monto} en concepto de pago", fontSubtitulo))
+    }
+
+    private fun setFirma(document: Document, evento: Evento, fontNormal: Font, cb: PdfContentByte) {
+
+        // Coordenadas donde querés colocar el texto
+        val x = 300f
+        val y = 105f
+
+        // Nombre y apellido
+        ColumnText.showTextAligned(cb, Element.ALIGN_CENTER,
+                Phrase(evento.encargado.nombre + " " + evento.encargado.apellido, fontNormal), x, y + 30, 0f)
+
+        // Empresa
+        ColumnText.showTextAligned(cb, Element.ALIGN_CENTER,
+                Phrase(evento.empresa.nombre, fontNormal), x, y + 15, 0f)
+
+        // Firma
+        ColumnText.showTextAligned(cb, Element.ALIGN_CENTER,
+                Phrase("Firma", fontNormal), x, y, 0f)
+
+        // Dibuja la línea de la firma
+        cb.moveTo(250f, 115f) // Mueve a la posición donde comienza la línea
+        cb.lineTo(350f, 115f) // Dibuja la línea hasta el otro lado
+        cb.stroke()
+    }
+
+    private fun setCuadroDescripcion(document : Document, cb: PdfContentByte, cuadroGrande : Boolean) {
+
+        // Setea color y ancho del cuadro
+        cb.setColorStroke(Color.DARK_GRAY)
+        cb.setLineWidth(0.5f)
+
+        // Cambia la medida del cuadro de descripcion en base al tipo de comprobante
+        var cuadroAltura = -140f
+
+        if(cuadroGrande){
+            cuadroAltura = -400f
+
+            // Coloca una linea divisoria correspondiente al cuadro grande
+            cb.moveTo(30f, 455f) // Mueve a la posición donde comienza la línea
+            cb.lineTo(560f, 455f) // Dibuja la línea hasta el otro lado
+
+            // Coloca una linea divisoria correspondiente al cuadro grande
+            cb.moveTo(30f, 415f) // Mueve a la posición donde comienza la línea
+            cb.lineTo(560f, 415f) // Dibuja la línea hasta el otro lado
+            cb.stroke()
+        }
+
+        // Dibuja el cuadro de descripcion
+        cb.rectangle(30f, 565f, 530f, cuadroAltura)
+        cb.stroke()
+
+        // Dibuja la línea divisioria de descripcion
+        cb.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
+        cb.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
+        cb.stroke()
+    }
+
+    private fun setMargenes(document : Document, cb: PdfContentByte) {
+
+        // Obtén las dimensiones de la página
+        val pageSize = document.pageSize
+
+        // Setea grosor y color
+        cb.setLineWidth(2f)
+        cb.setColorStroke(Color.BLACK)
+
+        // Dibuja margenes
+        cb.rectangle(10f, 10f, pageSize.width - 20f, pageSize.height - 20f) // Coordenadas 0, 0 y dimensiones de la página
+        cb.stroke()
+    }
+
+    private fun setInicioDocumento(document: Document, evento: Evento, fontNormal: Font, fontSubtitulo: Font) {
+
+        // Abre el documento
+        document.open()
+
+        // Setea el page size
+        setPageSize(document)
+
+        // Logo
+        setLogo(document, evento.empresa.logo)
+
+        // Datos de la empresa
+        setHeader(document, evento.empresa, fontNormal)
+
+        // Espacio en blanco
+        document.add(Paragraph(" "))
+
+        // Datos del cliente
+        setDatosCliente(document, evento.cliente, fontSubtitulo)
+    }
+
     fun generarComprobanteEvento(evento : Evento): ByteArray {
 
         val document = Document()
         val baos = ByteArrayOutputStream()
-
         val writer = PdfWriter.getInstance(document, baos)
-        document.open()
-
-        document.setPageSize(PageSize.A4)
 
         // Estilos de fuente
         val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
         val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
         val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
 
-        // Logo
-        val logo = Image.getInstance(URL(evento.empresa.logo))
-
-        logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
-        logo.alignment = Element.ALIGN_CENTER
-        document.add(logo)
-
-        // Datos de la empresa
-
-        val titulo = Paragraph()
-        titulo.alignment = Element.ALIGN_CENTER
-        titulo.add(Chunk("Mail: ${evento.empresa.email} \n", fontNormal))
-        titulo.add(Chunk("Teléfono: ${evento.empresa.telefono} \n", fontNormal))
-        titulo.add(Chunk("${evento.empresa.calle} ${evento.empresa.numero} - ${evento.empresa.municipio}", fontNormal))
-
-        document.add(titulo)
+        // Setea el pageSize, logo, header y datos del cliente
+        setInicioDocumento(document, evento, fontNormal, fontSubtitulo)
 
         // Espacio en blanco
         document.add(Paragraph(" "))
 
-        val hoy = LocalDate.now().dayOfMonth.toString() + "/" + LocalDate.now().monthValue.toString()  + "/" + LocalDate.now().year.toString()
-
-        // Datos del cliente
-        document.add(Paragraph("Nombre: ${evento.cliente.nombre}, ${evento.cliente.apellido}", fontSubtitulo) )
-
-        val diaEvento = evento.inicio.toLocalDate().dayOfMonth.toString() + "/" + evento.inicio.toLocalDate().monthValue.toString()  + "/" + evento.inicio.toLocalDate().year.toString()
-        val horaInicio: String = evento.inicio.toLocalTime().toString()
+        // Espacio en blanco
+        document.add(Paragraph(" "))
 
         // Descripción del evento
-        document.add(Paragraph("\nDESCRIPCIÓN \n \n", fontTitulo))
-        document.add(Paragraph("Evento ${evento.nombre} a realizarse el ${diaEvento} desde las ${horaInicio} en ${evento.empresa.nombre}", fontNormal))
-        document.add(Paragraph("Descripcion: ${evento.cateringOtroDescripcion}", fontNormal))
-        document.add(Paragraph("Total invitados: ${evento.capacidad.capacidadAdultos} adultos y ${evento.capacidad.capacidadNinos} niños", fontNormal))
+        setDescripcion(evento, document, fontTitulo, fontNormal)
 
-        //TODO informacion del evento
-        document.add(Paragraph("Extras: ", fontNormal))
-        document.add(Paragraph("Catering: ", fontNormal))
-        document.add(Paragraph("Servicios:", fontNormal))
+        // Espacio en blanco
+        document.add(Paragraph(" "))
 
+        // Setea titulo Informacion sobre evento
+        document.add(Paragraph("INFORMACION SOBRE EL EVENTO", fontTitulo))
 
-        // Firma
-        val firma = Paragraph()
-        firma.alignment = Element.ALIGN_CENTER
-        firma.add(Chunk("\n\n\n\n\n\n ${evento.encargado.nombre} ${evento.encargado.apellido} \n", fontNormal))
-        firma.add(Chunk("${evento.empresa.nombre} \n", fontNormal))
-        firma.add(Chunk("Firma", fontNormal))
-        document.add(firma)
+        // Espacio en blanco
+        document.add(Paragraph(" "))
 
+        // Agrega descripcion de extras
+        val listaExtra = evento.listaExtra.filter{ it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO }.map{ extra ->
+            extra.nombre
+        }
+        if(listaExtra.isNotEmpty()){
+            document.add(Paragraph("Extras: ${listaExtra}", fontNormal))
+        }
 
-        // -------------------------------------------------------
+        // Agrega descripcion de catering
+        val listaCatering = evento.listaExtra.filter{ it.tipoExtra == TipoExtra.TIPO_CATERING || it.tipoExtra == TipoExtra.VARIABLE_CATERING }.map{ extra ->
+            extra.nombre
+        }
+        if(listaCatering.isNotEmpty()){
+            document.add(Paragraph("Catering: ${listaCatering}", fontNormal))
+        }
+
+        // Agrega descripcion de servicios
+        val listaServicio = evento.tipoEvento.listaServicio.map{ servicio ->
+            servicio.nombre
+        }
+        if(listaServicio.isNotEmpty()) {
+            document.add(Paragraph("Servicios: ${listaServicio}", fontNormal))
+        }
 
         // Obtén el PdfContentByte para dibujar detrás del texto
         val cb = writer.directContent
 
-        // Accede a la capa de contenido
-        val content: PdfContentByte = writer.directContent
+        // Firma final de documento
+        setFirma(document, evento, fontNormal, cb)
 
-        // Dibuja un rectángulo para el recuadro
-        cb.setColorStroke(Color.DARK_GRAY)
-        content.setLineWidth(0.5f)
-        content.rectangle(30f, 565f, 530f, -140f)
-        content.stroke()
+        // Dibuja los margenes exteriores
+        setMargenes(document, cb)
 
-        // Dibuja la línea de descripcion
-        content.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
-        content.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
+        // Dibuja el cuadro de descripcion
+        setCuadroDescripcion(document, cb, true)
 
-        // Dibuja la línea de la firma
-        content.moveTo(250f, 315f) // Mueve a la posición donde comienza la línea
-        content.lineTo(350f, 315f) // Dibuja la línea hasta el otro lado
-        content.stroke()
+        // Setea la firma y dibuja la linea de firma
+        setFirma(document, evento, fontNormal, cb)
 
-        // Define el grosor y el color del borde
-        cb.setLineWidth(0.5f) // Usa setLineWidth() en lugar de lineWidth
-        cb.setColorStroke(Color.DARK_GRAY) // Usa Color.BLACK en lugar de BaseColor.BLACK
-
-        // ------------------------------------------------------------
-        // Obtén las dimensiones de la página
-        val pageSize = document.pageSize
-        val pageWidth = pageSize.width
-        val pageHeight = pageSize.height
-
-        cb.setLineWidth(2f)
-        cb.setColorStroke(Color.BLACK)
-
-        cb.rectangle(10f, 10f, pageWidth - 20f, pageHeight - 20f) // Coordenadas 0, 0 y dimensiones de la página
-        cb.stroke()
-
+        // Cierra el documento
         document.close()
         return baos.toByteArray()
     }
@@ -130,132 +237,112 @@ class PdfService {
         val document = Document()
         val baos = ByteArrayOutputStream()
         val writer = PdfWriter.getInstance(document, baos)
-        document.open()
-
-        document.setPageSize(PageSize.A4)
 
         // Estilos de fuente
         val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
         val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
         val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
 
-        // Logo
-        val logo = Image.getInstance(URL(pago.evento.empresa.logo))
+        // Setea el pageSize, logo, header y datos del cliente
+        setInicioDocumento(document, pago.evento, fontNormal, fontSubtitulo)
 
-        logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
-        logo.alignment = Element.ALIGN_CENTER
-        document.add(logo)
-
-        // Datos de la empresa
-
-        val titulo = Paragraph()
-        titulo.alignment = Element.ALIGN_CENTER
-        titulo.add(Chunk("Mail: ${pago.evento.empresa.email} \n", fontNormal))
-        titulo.add(Chunk("Teléfono: ${pago.evento.empresa.telefono} \n", fontNormal))
-        titulo.add(Chunk("${pago.evento.empresa.calle} ${pago.evento.empresa.numero} - ${pago.evento.empresa.municipio}", fontNormal))
-
-        document.add(titulo)
-
-        // Espacio en blanco
-        document.add(Paragraph(" "))
-
-        val hoy = LocalDate.now().dayOfMonth.toString() + "/" + LocalDate.now().monthValue.toString()  + "/" + LocalDate.now().year.toString()
-
-        // Datos del cliente
-        document.add(Paragraph("Nombre: ${pago.evento.cliente.nombre}, ${pago.evento.cliente.apellido}", fontSubtitulo) )
-        document.add(Paragraph("Fecha: ${hoy}", fontSubtitulo))
-        document.add(Paragraph("Forma de pago: ${pago.medioDePago}", fontSubtitulo))
-
-        val diaEvento = pago.evento.inicio.toLocalDate().dayOfMonth.toString() + "/" + pago.evento.inicio.toLocalDate().monthValue.toString()  + "/" + pago.evento.inicio.toLocalDate().year.toString()
-        val horaInicio: String = pago.evento.inicio.toLocalTime().toString()
+        // Datos del pago
+        setPago(document, pago, fontSubtitulo)
 
         // Descripción del evento
-        document.add(Paragraph("\nDESCRIPCIÓN \n \n", fontTitulo))
-        document.add(Paragraph("Evento ${pago.evento.nombre} a realizarse el ${diaEvento} desde las ${horaInicio} en ${pago.evento.empresa.nombre}", fontNormal))
-        document.add(Paragraph("Descripcion: ${pago.evento.cateringOtroDescripcion}", fontNormal))
-        document.add(Paragraph("Total invitados: ${pago.evento.capacidad.capacidadAdultos} adultos y ${pago.evento.capacidad.capacidadNinos} niños", fontNormal))
+        setDescripcion(pago.evento, document, fontTitulo, fontNormal)
 
-        // Recibo
-        document.add(Paragraph("Recibimos $${pago.monto} en concepto de pago", fontSubtitulo))
-
-        // Firma
-        val firma = Paragraph()
-        firma.alignment = Element.ALIGN_CENTER
-        firma.add(Chunk("\n\n\n\n\n\n ${pago.evento.encargado.nombre} ${pago.evento.encargado.apellido} \n", fontNormal))
-        firma.add(Chunk("${pago.evento.empresa.nombre} \n", fontNormal))
-        firma.add(Chunk("Firma", fontNormal))
-        document.add(firma)
-
-
-        // -------------------------------------------------------
+        // Recibo con concepto de pago
+        setRecibo(document, pago, fontSubtitulo)
 
         // Obtén el PdfContentByte para dibujar detrás del texto
         val cb = writer.directContent
 
-        // Accede a la capa de contenido
-        val content: PdfContentByte = writer.directContent
+        // Firma final de documento
+        setFirma(document, pago.evento, fontNormal, cb)
 
-        // Dibuja un rectángulo para el recuadro
-        cb.setColorStroke(Color.DARK_GRAY)
-        content.setLineWidth(0.5f)
-        content.rectangle(30f, 565f, 530f, -140f)
-        content.stroke()
+        // Dibuja los margenes exteriores
+        setMargenes(document, cb)
 
-        // Dibuja la línea de descripcion
-        content.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
-        content.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
+        // Dibuja el cuadro de descripcion
+        setCuadroDescripcion(document, cb, false)
 
-        // Dibuja la línea de la firma
-        content.moveTo(250f, 315f) // Mueve a la posición donde comienza la línea
-        content.lineTo(350f, 315f) // Dibuja la línea hasta el otro lado
-        content.stroke()
+        // Setea la firma y dibuja la linea de firma
+        setFirma(document,pago.evento,fontNormal, cb)
 
-        // Define el grosor y el color del borde
-        cb.setLineWidth(0.5f) // Usa setLineWidth() en lugar de lineWidth
-        cb.setColorStroke(Color.DARK_GRAY) // Usa Color.BLACK en lugar de BaseColor.BLACK
-
-        // ------------------------------------------------------------
-        // Obtén las dimensiones de la página
-        val pageSize = document.pageSize
-        val pageWidth = pageSize.width
-        val pageHeight = pageSize.height
-
-        cb.setLineWidth(2f)
-        cb.setColorStroke(Color.BLACK)
-
-        cb.rectangle(10f, 10f, pageWidth - 20f, pageHeight - 20f) // Coordenadas 0, 0 y dimensiones de la página
-        cb.stroke()
-
+        // Cierra el documento
         document.close()
+
         return baos.toByteArray()
     }
 
+
     fun generarEstadoDeCuenta(evento : Evento): ByteArray {
+
         val document = Document()
         val baos = ByteArrayOutputStream()
+        val writer = PdfWriter.getInstance(document, baos)
 
-        // Configurar el escritor de PDF
-        PdfWriter.getInstance(document, baos)
+        // Estilos de fuente
+        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
+        val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
+        val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
 
-        // Abrir el documento
-        document.open()
+        // Setea el pageSize, logo, header y datos del cliente
+        setInicioDocumento(document, evento, fontNormal, fontSubtitulo)
 
-        // Agregar contenido al PDF
-        document.add(Paragraph("Estado de Cuenta"))
+        // Espacio en blanco
+        document.add(Paragraph(" "))
 
-        document.add(Paragraph("Evento: ${evento.nombre} - ${evento.codigo}"))
+        // Espacio en blanco
+        document.add(Paragraph(" "))
 
+        // Descripción del evento
+        setDescripcion(evento, document, fontTitulo, fontNormal)
+
+        // Espacio en blanco
+        document.add(Paragraph(" "))
+
+        // Setea titulo Estado de cuenta
+        document.add(Paragraph("ESTADO DE CUENTA", fontTitulo))
+
+        // Espacio en blanco
+        document.add(Paragraph(" "))
+
+        // Agrega lista de pagos del evento
         document.add(Paragraph("Lista de Pagos:"))
 
-        evento.listaPago.forEachIndexed{ index, pago ->
-            document.add(Paragraph("(${index + 1}) ${pago.fecha} ${pago.monto} ${pago.medioDePago}"))
+        //TODO mejorar concepto sacandolo de pago.concepto
+        evento.listaPago.sortedBy{ it.id }.forEachIndexed{ index, pago ->
+            var concepto = "Seña"
+            if(true){
+                if(true){
+                    concepto = "Cuota (${index + 1})"
+                }else{
+                    concepto = "Cuota (${index + 2})"
+                }
+            }
+            document.add(Paragraph("- ${concepto} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
         }
 
-        document.add(Paragraph("Monto total abonado: $${evento.getTotalAbonado()}"))
-        document.add(Paragraph("Monto faltante: $${evento.getMontoFaltante()}"))
-        document.add(Paragraph("Precio total del evento: $${evento.getPresupuestoTotal()}"))
+        document.add(Paragraph("Monto total abonado: $${evento.getTotalAbonado().toInt()} | Monto faltante: $${evento.getMontoFaltante().toInt()} | Total: $${evento.getPresupuestoTotal().toInt()}", fontSubtitulo))
 
-        // Cerrar el documento
+        // Obtén el PdfContentByte para dibujar detrás del texto
+        val cb = writer.directContent
+
+        // Firma final de documento
+        setFirma(document, evento, fontNormal, cb)
+
+        // Dibuja los margenes exteriores
+        setMargenes(document, cb)
+
+        // Dibuja el cuadro de descripcion
+        setCuadroDescripcion(document, cb, true)
+
+        // Setea la firma y dibuja la linea de firma
+        setFirma(document, evento, fontNormal, cb)
+
+        // Cierra el documento
         document.close()
 
         return baos.toByteArray()
