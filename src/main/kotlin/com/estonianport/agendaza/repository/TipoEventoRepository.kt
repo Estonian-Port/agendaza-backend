@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.repository
 
-import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
@@ -25,24 +24,24 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
 
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t WHERE t.empresa.id = :empresaId " +
+            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoByEmpresaId(empresaId: Long) : List<TipoEventoDTO>
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t WHERE t.empresa.id = :empresaId " +
+            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoByEmpresaId(empresaId: Long, pageable : Pageable) : Page<TipoEventoDTO>
 
-    @Query("SELECT COUNT(t) FROM TipoEvento t WHERE t.empresa.id = :empresaId AND t.fechaBaja IS NULL")
+    @Query("SELECT COUNT(t) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId AND t.fechaBaja IS NULL")
     fun getCantidadTipoEvento(empresaId : Long) : Int
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t WHERE t.empresa.id = :empresaId " +
+            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.nombre ILIKE %:buscar% AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoFilterNombre(empresaId : Long, buscar : String, pageable : Pageable) : Page<TipoEventoDTO>
 
-    @Query("SELECT COUNT(t) FROM TipoEvento t WHERE t.empresa.id = :empresaId " +
+    @Query("SELECT COUNT(t) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId  " +
             "AND t.nombre ILIKE %:buscar% AND t.fechaBaja IS NULL")
     fun getCantidadTipoEventoFiltrados(empresaId : Long, buscar: String) : Int
 

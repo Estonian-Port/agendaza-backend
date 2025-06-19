@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
+import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.service.EmpresaService
@@ -33,6 +34,11 @@ class ServicioController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
+    @GetMapping("/getAllServicio")
+    fun abm(): List<ServicioDTO> {
+        return servicioService.fromListaServicioToListaServicioDto(servicioService.getAll()!!)
+    }
+
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ServicioDTO {
         val servicio = servicioService.get(id)!!
@@ -44,18 +50,16 @@ class ServicioController {
 
     @PostMapping("/saveServicio")
     fun save(@RequestBody servicioDTO: GenericItemDTO): ServicioDTO {
+
         var servicio = Servicio(servicioDTO.id, servicioDTO.nombre)
+
+        servicio.listaTipoEvento = servicioDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
 
         servicio = servicioService.save(servicio)
 
-        servicioDTO.listaTipoEventoId.forEach {
-            val tipoEvento = tipoEventoService.get(it)!!
-            tipoEvento.listaServicio.add(servicio)
-            tipoEventoService.save(tipoEvento)
-        }
-
         val empresa = empresaService.findById(servicioDTO.empresaId)
         empresa.listaServicio.add(servicio)
+
         empresaService.save(empresa)
 
         return servicio.toDTO()

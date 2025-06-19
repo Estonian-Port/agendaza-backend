@@ -3,7 +3,9 @@ package com.estonianport.agendaza.dto
 import com.estonianport.agendaza.model.TipoExtra
 
 
-class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra, val empresaId : Long){
+class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){
+
+    var empresaId : Long = 0
 
     var precio : Double = 0.0
 

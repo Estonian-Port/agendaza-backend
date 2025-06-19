@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.GenericItemDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.errors.BusinessException
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
@@ -56,15 +57,7 @@ abstract class Empresa(
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaExtra: MutableSet<Extra> = mutableSetOf()
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
@@ -73,6 +66,19 @@ abstract class Empresa(
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
+    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "empresa_extra",
+            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
+            inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+    )
+    var listaExtra: MutableSet<Extra> = mutableSetOf()
 
     @JsonIgnore
     @ManyToMany
@@ -86,6 +92,8 @@ abstract class Empresa(
     @Column
     var fechaBaja : LocalDate? = null
 
+    @Column
+    var logo : String = "https://iili.io/3SVIGuj.png" //Agendaza Logo por defecto
 
     fun recorrerEspecificaciones(evento: Evento) {
         listaEspecificacion.forEach { especificacion ->
@@ -111,6 +119,7 @@ abstract class Empresa(
         return getPrecioOfExtraByFecha(extraVariable.extra, fecha) * extraVariable.cantidad
     }
 
+    // TODO Pasar a consulta SQL
     fun getPrecioOfExtraByFecha(extra: Extra, fecha: LocalDateTime): Double{
         return listaPrecioConFechaExtra.find {
             it.extra.id == extra.id &&
@@ -120,9 +129,10 @@ abstract class Empresa(
 
     }
 
-    fun getPrecioOfTipoEvento(tipoEvento: TipoEvento, fecha: LocalDateTime): Double{
+    // TODO Pasar a consulta SQL
+    fun getPrecioOfTipoEvento(tipoEventoId: Long, fecha: LocalDateTime): Double{
         return listaPrecioConFechaTipoEvento.find {
-            it.tipoEvento.id == tipoEvento.id &&
+            it.tipoEvento.id == tipoEventoId &&
             it.fechaBaja == null &&
             it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
         }?.precio ?: return 0.0
@@ -142,6 +152,9 @@ abstract class Empresa(
         return GenericItemDTO(id, nombre)
     }
 
+    fun toTipoEventoPrecioDTO(fecha : LocalDateTime, tipoEvento: TipoEvento): TipoEventoPrecioDTO {
+        return TipoEventoPrecioDTO(tipoEvento.id, tipoEvento.nombre, this.getPrecioOfTipoEvento(tipoEvento.id, fecha))
+    }
 }
 
 @Entity

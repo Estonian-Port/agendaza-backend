@@ -1,15 +1,22 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.CodigoEmpresaId
+import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PagoEmpresaEncargado
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.service.EmpresaService
+import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.PagoService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -31,9 +38,18 @@ class PagoController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
-
     @Autowired
     lateinit var usuarioService: UsuarioService
+
+    @Autowired
+    lateinit var pdfService: PdfService
+
+    @Autowired
+    lateinit var eventoService: EventoService
+
+    @Autowired
+    lateinit var emailService: EmailService
+
 
     @GetMapping("/getPago/{id}")
     fun get(@PathVariable("id") id: Long): PagoDTO {
@@ -88,4 +104,57 @@ class PagoController {
         return pagoService.contadorDePagosFiltrados(id,buscar)
     }
 
+    @GetMapping("/getAllPagoFromEvento/{id}")
+    fun getAllPagoFromEvento(@PathVariable("id") id: Long): EventoPagoDTO {
+        return eventoService.get(id)!!.toEventoPagoDto(pagoService.getAllPagoFromEvento(id))
+    }
+
+    @GetMapping("/descargarPago/{id}")
+    fun descargarPago(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = pagoService.get(id)!!
+        val pdfBytes = pdfService.generarComprobanteDePago(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("/enviarEmailPago/{pago_id}/{evento_id}/{empresa_id}")
+    fun enviarEmailPago(@PathVariable("pago_id") pagoId: Long,@PathVariable("evento_id") eventoId: Long, @PathVariable("empresa_id") empresaId: Long): Boolean {
+
+        try {
+            val pago = pagoService.get(pagoId)!!
+            val evento = eventoService.get(eventoId)!!
+            val empresa = empresaService.get(empresaId)!!
+
+            emailService.enviarEmailPago(pago, evento,empresa)
+            return true
+        } catch (e: Exception) {
+            throw NotFoundException("No se pudo enviar el mail")
+        }
+    }
+
+    @GetMapping("/descargarEstadoCuenta/{evento_id}")
+    fun descargarEstadoCuenta(@PathVariable("evento_id") eventoId: Long): ResponseEntity<ByteArray> {
+        val evento = eventoService.get(eventoId)!!
+        val pdfBytes = pdfService.generarEstadoDeCuenta(evento)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("/enviarEmailEstadoCuenta/{evento_id}/{empresa_id}")
+    fun enviarEmailEstadoCuenta(@PathVariable("evento_id") eventoId: Long, @PathVariable("empresa_id") empresaId: Long): Boolean {
+
+        try {
+            val evento = eventoService.get(eventoId)!!
+            val empresa = empresaService.get(empresaId)!!
+
+            emailService.enviarEmailEstadoCuenta(evento,empresa)
+            return true
+        } catch (e: Exception) {
+            throw NotFoundException("No se pudo enviar el mail")
+        }
+    }
 }

@@ -55,13 +55,15 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     fun findOneByUsername(username: String): Usuario?
 
-    fun getUsuarioByEmail(email : String): Usuario?
+    fun existsByEmail(email: String): Boolean
 
-    fun getUsuarioByCelular(celular : Long) : Usuario?
+    fun existsByCelular(celular: Long): Boolean
 
-    //@EntityGraph(attributePaths = ["listaCargo"])
+    fun getUsuarioByEmail(email: String): Usuario?
+
+    fun getUsuarioByCelular(celular: Long): Usuario?
+
     override fun findById(id: Long) : Optional<Usuario>
-
 
     @Query("SELECT new com.estonianport.agendaza.dto.UsuarioEditCargoDTO(" +
             "c.usuario.id, c.empresa.id, c.tipoCargo) FROM Cargo c WHERE c.empresa.id = :empresaId " +
@@ -77,4 +79,5 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
             "FROM Usuario u INNER JOIN u.listaCargo c INNER JOIN c.empresa e WHERE u.id = :usuarioId " +
             "AND c.fechaBaja IS NULL")
     fun getAllEmpresaByUsuarioId(usuarioId: Long): List<EmpresaAbmDTO>
+
 }
