@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Pago</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            font-family: 'Work Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        table.main-container {
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 14px;
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 0;
+        }
+        h1, h2, h3, h4, p {
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .main-title {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #333333;
+            letter-spacing: 2px;
+            line-height: 38px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+        .subtitle {
+            color: #777777;
+            font-size: 16px;
+            line-height: 24px;
+        }
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: #5caad2;
+            margin: 15px auto;
+        }
+        .section {
+            padding: 20px 30px;
+            border-top: 1px solid #eeeeee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .section-row {
+            display: table;
+            width: 100%;
+        }
+        .section-image, .section-col {
+            display: table-cell;
+            vertical-align: middle;
+            padding: 10px;
+        }
+        .section-image {
+            text-align: center;
+            width: 50%;
+        }
+        .section-col {
+            width: 50%;
+        }
+        .block-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3d3d3d;
+            margin-bottom: 10px;
+        }
+        .block-text {
+            color: #666666;
+            font-size: 14px;
+            line-height: 22px;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            padding: 25px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #888888;
+            border-radius: 0 0 8px 8px;
+        }
+        .footer-logo {
+            max-width: 50px;
+            margin-bottom: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .social-icons {
+            margin-top: 15px;
+        }
+        .social-icons a {
+            display: inline-block;
+            margin: 0 8px;
+        }
+        .social-icons img {
+            width: 28px;
+            height: 28px;
+            vertical-align: middle;
+        }
+        .highlight {
+            color: #5caad2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<table class="main-container">
+    <tr>
+        <td>
+            <div class="header">
+                <img src="{{empresa_logo}}" alt="Logo Empresa" class="logo">
+                <h1 class="main-title">TU <span class="highlight">COMPROBANTE</span></h1>
+                <div class="divider"></div>
+                <p class="subtitle">Tu pago para el evento: <strong class="highlight">{{evento_nombre}}</strong>, ha sido realizado exitosamente.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-row">
+                    <div class="section-image">
+                        <img src="{{imagen_pago}}" alt="Estado de cuenta" class="logo">
+                    </div>
+                    <div class="section-col">
+                        <h2 class="block-title">DETALLES DEL PAGO</h2>
+                        <p class="block-text">
+                        <div>Fecha de pago: <strong class="highlight">{{dia_pago}}</strong></div>
+                        <div>Hora de pago: <strong class="highlight">{{hora_pago}}</strong></div>
+                        <div>Monto abonado: <strong class="highlight">${{pago_monto}}</strong></div>
+                        <div>Monto total abonado hasta la fecha: <strong class="highlight">${{total_pago}}</strong></div>
+                        <div>Monto faltante: <strong class="highlight">${{monto_faltante}}</strong></div>
+                        <div>Precio total del evento: <strong class="highlight">${{presupuesto_total}}</strong></div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-row">
+                    <div class="section-image">
+                        <img src="{{imagen_comprobante}}" alt="Comprobante" class="logo">
+                    </div>
+                    <div class="section-col">
+                        <h2 class="block-title">DETALLES DE LA RESERVA</h2>
+                        <p class="block-text">
+                        <div>Evento: <strong class="highlight">{{evento_nombre}}</strong></div>
+                        <div>Código: <strong class="highlight">{{codigo}}</strong></div>
+                        <div>Fecha del evento: <strong class="highlight">{{dia}}</strong></div>
+                        <div>Horario: <strong class="highlight">{{hora_inicio}}</strong> a <strong class="highlight">{{hora_fin}}</strong></div>
+                        <div>Tipo de evento: <strong class="highlight">{{tipo_evento}}</strong></div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-row">
+                    <div class="section-image">
+                        <img src="{{imagen_empresa}}" alt="Empresa" class="logo">
+                    </div>
+                    <div class="section-col">
+                        <h2 class="block-title">EMPRESA</h2>
+                        <p class="block-text">
+                        <div>Nombre: <strong class="highlight">{{empresa_nombre}}</strong></div>
+                        <div>Teléfono: <strong class="highlight">{{empresa_telefono}}</strong></div>
+                        <div>Email: <strong class="highlight">{{empresa_email}}</strong></div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td class="footer">
+            <div class="footer-logo">
+                <img src="{{agendaza_logo}}" alt="Logo Agendaza">
+            </div>
+            <p>© 2025 Agendaza. Todos los derechos reservados.</p>
+            <div class="social-icons">
+                <a href="{{url_instagram}}" target="_blank"><img src="{{imagen_ig}}" alt="Instagram"></a>
+                <a href="{{url_web}}" target="_blank"><img src="{{imagen_web}}" alt="Web"></a>
+                <a href="{{url_linkedin}}" target="_blank"><img src="{{imagen_linkedin}}" alt="LinkedIn"></a>
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

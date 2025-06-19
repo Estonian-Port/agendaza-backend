@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.ClienteDTO
 import com.estonianport.agendaza.dto.UsuarioAbmDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
@@ -58,6 +59,10 @@ open class Usuario(
 
     fun toUsuarioAbmDto(): UsuarioAbmDTO {
         return UsuarioAbmDTO(id, nombre, apellido, username)
+    }
+
+    fun toClienteDto(): ClienteDTO {
+        return ClienteDTO(id, nombre, apellido, email, celular)
     }
 }
 

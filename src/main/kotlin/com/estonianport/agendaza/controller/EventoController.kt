@@ -1,31 +1,17 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.Estado
-import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.EventoExtraVariable
-import com.estonianport.agendaza.model.TipoExtra
-import com.estonianport.agendaza.service.CapacidadService
-import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.ExtraService
-import com.estonianport.agendaza.service.ExtraVariableService
-import com.estonianport.agendaza.service.PagoService
-import com.estonianport.agendaza.service.TipoEventoService
-import com.estonianport.agendaza.service.UsuarioService
+import com.estonianport.agendaza.model.*
+import com.estonianport.agendaza.service.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
@@ -58,6 +44,9 @@ class EventoController {
 
     @Autowired
     lateinit var pagoService: PagoService
+
+    @Autowired
+    lateinit var pdfService: PdfService
 
     // TODO Sacar, no se va a usar, ya que se accede desde empresa
     @GetMapping("/getAllEvento")
@@ -128,10 +117,13 @@ class EventoController {
         )
 
         //TODO arreglar con cascade
-        if(eventoReservaDto.cliente.id != 0L){
-            evento.cliente = usuarioService.get(eventoReservaDto.cliente.id)!!
-        }else{
-            evento.cliente = usuarioService.save(evento.cliente)
+        val cliente = eventoReservaDto.cliente
+
+        evento.cliente = when {
+            cliente.id != 0L -> usuarioService.get(cliente.id)!!
+            cliente.email.isNotBlank() && usuarioService.existsByEmail(cliente.email) -> usuarioService.getUsuarioByEmail(cliente.email)!!
+            usuarioService.existsByCelular(cliente.celular) -> usuarioService.getUsuarioByCelular(cliente.celular)!!
+            else -> usuarioService.save(cliente)
         }
 
         val eventoSaved = eventoService.save(evento)
@@ -146,7 +138,7 @@ class EventoController {
                 // TODO mejorar el "Action" a un objeto que los tenga, Envia mail con comprobante
                 emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa);
             }
-        } catch (_: BusinessException) {
+        } catch (_: Exception) {
             // TODO enviar notificacion de fallo al enviar el mail
         }
 
@@ -172,29 +164,23 @@ class EventoController {
         return mutableSetOf(Estado.COTIZADO, Estado.RESERVADO)
     }
 
-    @GetMapping("/getEventoPago/{id}")
-    fun getEventoPago(@PathVariable("id") id: Long): EventoPagoDTO? {
-        val evento = eventoService.findById(id)
-
-        return evento.toEventoPagoDto(
-            pagoService.fromListaPagoToListaPagoDto(evento.listaPago)
-        )
-    }
-
     @GetMapping("/getEventoExtra/{id}")
     fun getEventoExtra(@PathVariable("id") id: Long): EventoExtraDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoExtraDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.EVENTO
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.EVENTO
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_EVENTO
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_EVENTO
             )
         )
     }
@@ -202,17 +188,20 @@ class EventoController {
     @GetMapping("/getEventoCatering/{id}")
     fun getEventoCatering(@PathVariable("id") id: Long): EventoCateringDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoCateringDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.TIPO_CATERING
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.TIPO_CATERING
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_CATERING
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_CATERING
             )
         )
     }
@@ -226,27 +215,32 @@ class EventoController {
     @GetMapping("/getEventoVer/{id}")
     fun getEventoVer(@PathVariable("id") id: Long): EventoVerDTO? {
         val evento = eventoService.findById(id)
+        val empresa = empresaService.get(evento.empresa.id)!!
 
         return evento.toEventoVerDto(
             extraService.fromListaExtraToListaExtraDtoByFilter(
+                    empresa,
                     evento.listaExtra,
                     evento.inicio,
                     TipoExtra.EVENTO
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_EVENTO
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_EVENTO
             ),
             extraService.fromListaExtraToListaExtraDtoByFilter(
-                evento.listaExtra,
-                evento.inicio,
-                TipoExtra.TIPO_CATERING
+                    empresa,
+                    evento.listaExtra,
+                    evento.inicio,
+                    TipoExtra.TIPO_CATERING
             ),
             extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                evento.listaEventoExtraVariable,
-                evento.inicio,
-                TipoExtra.VARIABLE_CATERING
+                    empresa,
+                    evento.listaEventoExtraVariable,
+                    evento.inicio,
+                    TipoExtra.VARIABLE_CATERING
             )
         )
     }
@@ -404,7 +398,6 @@ class EventoController {
         return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
     }
 
-    // TODO revisar el return true
     @PutMapping("/reenviarMail/{id}")
     fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
 
@@ -493,24 +486,52 @@ class EventoController {
 
         return evento.toEventoReservaDto(
                 extraService.fromListaExtraToListaExtraDtoByFilter(
+                        empresa,
                         evento.listaExtra,
                         evento.inicio,
                         TipoExtra.EVENTO
                 ),
                 extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        empresa,
                         evento.listaEventoExtraVariable,
                         evento.inicio,
                         TipoExtra.VARIABLE_EVENTO
                 ),
                 extraService.fromListaExtraToListaExtraDtoByFilter(
+                        empresa,
                         evento.listaExtra,
                         evento.inicio,
                         TipoExtra.TIPO_CATERING
                 ),
                 extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
+                        empresa,
                         evento.listaEventoExtraVariable,
                         evento.inicio,
                         TipoExtra.VARIABLE_CATERING
                 ))
+    }
+
+    @GetMapping("/generarEstadoDeCuenta/{id}")
+    fun generarEstadoDeCuenta(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = eventoService.get(id)!!
+        val pdfBytes = pdfService.generarEstadoDeCuenta(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "estado_de_cuenta.pdf")
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("/descargarEvento/{id}")
+    fun descargarEvento(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
+        val pago = eventoService.get(id)!!
+        val pdfBytes = pdfService.generarComprobanteEvento(pago)
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "comprobante_de_evento.pdf")
+
+        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
 }

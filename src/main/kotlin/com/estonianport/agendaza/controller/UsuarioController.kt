@@ -33,22 +33,14 @@ class UsuarioController {
 
     @PutMapping("/getUsuarioByEmail")
     fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
-        try {
-            return usuarioService.getUsuarioByEmail(email)?:
-                throw NotFoundException("No se encontró el Cliente")
-        }catch (e : Exception){
+        return usuarioService.getUsuarioByEmail(email)?:
             throw NotFoundException("No se encontró el Cliente")
-        }
     }
 
     @PutMapping("/getUsuarioByCelular")
     fun getUsuarioByCelular(@RequestBody celular : Long): Usuario? {
-        try {
-            return usuarioService.getUsuarioByCelular(celular)?:
-                throw NotFoundException("No se encontró el Cliente")
-        }catch (e : Exception){
+        return usuarioService.getUsuarioByCelular(celular)?:
             throw NotFoundException("No se encontró el Cliente")
-        }
     }
 
     @GetMapping("/getUsuarioPerfil/{usuarioId}")
@@ -159,6 +151,12 @@ class UsuarioController {
     @GetMapping("/getCantidadClienteFiltrados/{empresaId}/{buscar}")
     fun getCantidadClienteFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) : Int {
         return usuarioService.getCantidadClienteFiltrados(empresaId,buscar)
+    }
+
+    @PostMapping("/saveCliente")
+    fun saveCliente(@RequestBody clienteDto: ClienteDTO): ClienteDTO {
+        var usuario = Usuario(clienteDto.id, clienteDto.nombre,clienteDto.apellido,clienteDto.celular,clienteDto.email)
+        return usuarioService.save(usuario).toClienteDto()
     }
 
 }

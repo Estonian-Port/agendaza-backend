@@ -61,5 +61,13 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.getEspecificaciones(id).map { it.toDTO() }
     }
 
+    fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDto> {
+        return empresaRepository.getAllPrecioConFechaByExtraId(empresaId, extraId)
+    }
+
+    fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDto> {
+        return empresaRepository.getAllPrecioConFechaByTipoEventoId(empresaId, tipoEventoId)
+    }
+
 
 }

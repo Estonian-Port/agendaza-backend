@@ -14,9 +14,9 @@ class EspecificacionSpec: DescribeSpec({
 
     // =================== Extras ========================
 
-    val extraNino = Extra(1, "Niños", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraCorto = Extra(2, "Camarera Corto", TipoExtra.VARIABLE_EVENTO, empresa)
-    val extraCamareraLargo = Extra(3, "Camarera Largo", TipoExtra.VARIABLE_EVENTO, empresa)
+    val extraNino = Extra(1, "Niños", TipoExtra.VARIABLE_EVENTO)
+    val extraCamareraCorto = Extra(2, "Camarera Corto", TipoExtra.VARIABLE_EVENTO)
+    val extraCamareraLargo = Extra(3, "Camarera Largo", TipoExtra.VARIABLE_EVENTO)
 
     // ===================================================
 
@@ -51,11 +51,11 @@ class EspecificacionSpec: DescribeSpec({
 
     // ================ Tipo Evento ======================
 
-    val tipoEventoCorto = TipoEvento(1, "Cumpleaños", Duracion.CORTO, capacidadTipoEvento, LocalTime.now(), empresa)
+    val tipoEventoCorto = TipoEvento(1, "Cumpleaños", Duracion.CORTO, capacidadTipoEvento, LocalTime.now())
     tipoEventoCorto.listaExtra.add(extraNino)
     tipoEventoCorto.listaExtra.add(extraCamareraCorto)
 
-    val tipoEventoLargo = TipoEvento(1, "Casamiento", Duracion.LARGO, capacidadTipoEvento, LocalTime.now(), empresa)
+    val tipoEventoLargo = TipoEvento(1, "Casamiento", Duracion.LARGO, capacidadTipoEvento, LocalTime.now())
     tipoEventoLargo.listaExtra.add(extraNino)
     tipoEventoLargo.listaExtra.add(extraCamareraLargo)
 
