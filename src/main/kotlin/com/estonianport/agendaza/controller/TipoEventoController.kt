@@ -93,6 +93,11 @@ class TipoEventoController {
         return tipoEventoEliminar.toDTO()
     }
 
+    @GetMapping("/getAllTipoEvento/{empresaId}")
+    fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long): List<TipoEventoDTO> {
+        return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId)
+    }
+
     @GetMapping("/getAllTipoEvento/{empresaId}/{pageNumber}")
     fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<TipoEventoDTO> {
         return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId, pageNumber)
