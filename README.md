@@ -1,4 +1,4 @@
-# 📒 Agendaza - Sistema de Gestión para Salones de Eventos
+# 📒 Agendaza (BACK-END) - Sistema de Gestión para Salones de Eventos
 
 Agendaza es un sistema integral para la gestión de eventos en salones. Facilita la administración de reservas, clientes, catering, servicios adicionales y mucho más.
 
