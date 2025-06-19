@@ -93,11 +93,6 @@ class TipoEventoController {
         return tipoEventoEliminar.toDTO()
     }
 
-    @GetMapping("/getAllTipoEvento/{empresaId}")
-    fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long): List<TipoEventoDTO> {
-        return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId)
-    }
-
     @GetMapping("/getAllTipoEvento/{empresaId}/{pageNumber}")
     fun getAllTipoEventoByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<TipoEventoDTO> {
         return tipoEventoService.getAllTipoEventoByEmpresaId(empresaId, pageNumber)
@@ -133,26 +128,10 @@ class TipoEventoController {
         return tipoEventoService.getAllByServicio(servicioId)
     }
 
-    @GetMapping("/getAllPrecioConFechaByTipoEventoId/{id}")
-    fun getAllPrecioConFechaByTipoEventoId(@PathVariable("id") id: Long): List<PrecioConFechaDto> {
-        val tipoEvento = tipoEventoService.get(id)!!
-
-        // Filtra years anteriores al corriente para que ya no figuren a la hora de cargarlos
-        val listaPrecioSinYearAnterior = tipoEvento.empresa.listaPrecioConFechaTipoEvento.filter {
-            it.tipoEvento.id == tipoEvento.id &&
-            it.tipoEvento.fechaBaja == null &&
-            it.desde.year >= LocalDateTime.now().year &&
-            it.fechaBaja == null
-        }
-
-        return listaPrecioSinYearAnterior.map { it.toDTO() }
-
-    }
-
-    @PostMapping("/saveTipoEventoPrecio/{id}")
-    fun saveTipoEventoPrecio(@PathVariable("id") id: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
-        val tipoEvento = tipoEventoService.get(id)!!
-        val empresa = empresaService.get(tipoEvento.empresa.id)!!
+    @PostMapping("/saveTipoEventoPrecio/{empresaId}/{tipoEventoId}")
+    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+        val tipoEvento = tipoEventoService.get(tipoEventoId)!!
+        val empresa = empresaService.get(empresaId)!!
 
         val listaPrecio = empresa.listaPrecioConFechaTipoEvento.filter { it.tipoEvento.id == tipoEvento.id }
 
@@ -237,9 +216,14 @@ class TipoEventoController {
             timeStart.hour.toLong()).plusMinutes(timeStart.minute.toLong())
     }
 
-    @PutMapping("/getPrecioByTipoEventoIdAndFecha/{id}")
-    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("id") id: Long, @RequestBody fechaEvento: LocalDateTime): Double? {
-        val tipoEvento = tipoEventoService.get(id)!!
-        return tipoEvento.empresa.getPrecioOfTipoEvento(tipoEvento, fechaEvento)
+    @GetMapping("/getAllPrecioConFechaByTipoEventoId/{empresaId}/{extraId}")
+    fun getAllPrecioConFechaByTipoEventoId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") tipoEventoId: Long): List<PrecioConFechaDto> {
+        return empresaService.getAllPrecioConFechaByTipoEvento(empresaId, tipoEventoId)
+    }
+
+    @PutMapping("/getPrecioByTipoEventoIdAndFecha/{empresaId}/{tipoEventoId}")
+    fun getPrecioByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): Double? {
+        return empresaService.get(empresaId)!!.getPrecioOfTipoEvento(tipoEventoId, fechaEvento)
     }
 }
+

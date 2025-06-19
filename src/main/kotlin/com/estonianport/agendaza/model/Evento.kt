@@ -107,7 +107,7 @@ open class Evento(
     //TODO Simplificar los filter
     fun getPresupuesto(): Double{
         var presupuesto =
-                empresa.getPrecioOfTipoEvento(tipoEvento, inicio) +
+                empresa.getPrecioOfTipoEvento(tipoEvento.id, inicio) +
                 empresa.getSumOfPrecioByListaExtra(
                     listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
                 empresa.getSumOfPrecioByListaExtraVariable(
@@ -180,7 +180,7 @@ open class Evento(
     fun toEventoExtraDto(listaExtra: List<ExtraDTO>,
                          listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDTO {
         return EventoExtraDTO(id, nombre, codigo, extraOtro, descuento, listaExtra,
-            listaExtraVariable, tipoEvento.toTipoEventoPrecioDTO(inicio), inicio)
+            listaExtraVariable, empresa.toTipoEventoPrecioDTO(inicio, tipoEvento), inicio)
     }
 
     fun toEventoPagoDto(listaPago: List<PagoDTO>): EventoPagoDTO {

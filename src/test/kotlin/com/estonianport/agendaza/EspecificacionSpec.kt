@@ -51,11 +51,11 @@ class EspecificacionSpec: DescribeSpec({
 
     // ================ Tipo Evento ======================
 
-    val tipoEventoCorto = TipoEvento(1, "Cumpleaños", Duracion.CORTO, capacidadTipoEvento, LocalTime.now(), empresa)
+    val tipoEventoCorto = TipoEvento(1, "Cumpleaños", Duracion.CORTO, capacidadTipoEvento, LocalTime.now())
     tipoEventoCorto.listaExtra.add(extraNino)
     tipoEventoCorto.listaExtra.add(extraCamareraCorto)
 
-    val tipoEventoLargo = TipoEvento(1, "Casamiento", Duracion.LARGO, capacidadTipoEvento, LocalTime.now(), empresa)
+    val tipoEventoLargo = TipoEvento(1, "Casamiento", Duracion.LARGO, capacidadTipoEvento, LocalTime.now())
     tipoEventoLargo.listaExtra.add(extraNino)
     tipoEventoLargo.listaExtra.add(extraCamareraLargo)
 

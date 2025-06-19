@@ -33,22 +33,14 @@ class UsuarioController {
 
     @PutMapping("/getUsuarioByEmail")
     fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
-        try {
-            return usuarioService.getUsuarioByEmail(email)?:
-                throw NotFoundException("No se encontró el Cliente")
-        }catch (e : Exception){
+        return usuarioService.getUsuarioByEmail(email)?:
             throw NotFoundException("No se encontró el Cliente")
-        }
     }
 
     @PutMapping("/getUsuarioByCelular")
     fun getUsuarioByCelular(@RequestBody celular : Long): Usuario? {
-        try {
-            return usuarioService.getUsuarioByCelular(celular)?:
-                throw NotFoundException("No se encontró el Cliente")
-        }catch (e : Exception){
+        return usuarioService.getUsuarioByCelular(celular)?:
             throw NotFoundException("No se encontró el Cliente")
-        }
     }
 
     @GetMapping("/getUsuarioPerfil/{usuarioId}")

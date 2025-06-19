@@ -36,9 +36,6 @@ interface ExtraRepository : CrudRepository<Extra, Long>{
     @Query("SELECT e FROM Extra e INNER JOIN e.listaEmpresa ee WHERE ee.id = ?1 AND e.fechaBaja IS NULL AND e.nombre ILIKE %?2% and (e.tipoExtra = TipoExtra.TIPO_CATERING OR e.tipoExtra = TipoExtra.VARIABLE_CATERING)")
     fun extrasCateringByNombre(id : Long, buscar : String, pageable : Pageable) : Page<Extra>
 
-    @Query("SELECT t FROM TipoEvento t LEFT JOIN t.listaExtra tee WHERE tee.id = :extraId")
-    fun getAllTipoEventoConExtra(extraId: Long) : List<TipoEvento>
-
     @Query("SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra ) FROM Extra e WHERE e.fechaBaja IS NULL AND (e.tipoExtra = TipoExtra.EVENTO OR e.tipoExtra = TipoExtra.VARIABLE_EVENTO)")
     fun getAllEvento(): List<ExtraDTO>
 

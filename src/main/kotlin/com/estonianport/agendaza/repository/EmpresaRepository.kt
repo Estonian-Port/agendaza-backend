@@ -28,7 +28,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "(" +
             "SELECT COUNT(te) " +
             "FROM TipoEvento te " +
-            "WHERE te.empresa.id = ?1), " +
+            "WHERE te.empresa.id = ?1 " +
+            "   AND te.fechaBaja IS NULL ), " +
             "(" +
             "SELECT COUNT(ex) " +
             "FROM Extra ex " +
@@ -92,5 +93,13 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             " AND pf.desde >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
             " AND pf.fechaBaja IS NULL")
     fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDto>
+
+    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDto(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.tipoEvento.id) " +
+            "FROM Empresa e " +
+            "INNER JOIN e.listaPrecioConFechaTipoEvento pf " +
+            "WHERE e.id = :empresaId AND pf.tipoEvento.id = :tipoEventoId " +
+            " AND pf.desde >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
+            " AND pf.fechaBaja IS NULL")
+    fun getAllPrecioConFechaByTipoEventoId(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDto>
 
 }

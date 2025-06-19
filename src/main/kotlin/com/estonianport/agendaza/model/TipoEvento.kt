@@ -61,8 +61,4 @@ open class TipoEvento(
         return TipoEventoDTO(id, nombre, LocalTime.of(cantidadDuracion.hour, cantidadDuracion.minute),
             duracion, capacidad, empresa.id)
     }
-
-    fun toTipoEventoPrecioDTO(fecha : LocalDateTime): TipoEventoPrecioDTO {
-        return TipoEventoPrecioDTO(id, nombre, this.empresa.getPrecioOfTipoEvento(this, fecha))
-    }
 }

@@ -77,4 +77,12 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO {
         return usuarioRepository.getUsuarioPerfil(usuarioId)
     }
+
+    fun existsByEmail(email: String): Boolean {
+        return usuarioRepository.existsByEmail(email)
+    }
+
+    fun existsByCelular(celular: Long): Boolean {
+        return usuarioRepository.existsByCelular(celular)
+    }
 }

@@ -93,12 +93,6 @@ class ExtraController {
         return mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
     }
 
-    @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
-    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDto> {
-
-        return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
-    }
-
     @PostMapping("/saveExtraPrecio/{empresaId}/{extraId}")
     fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
         val extra = extraService.get(extraId)!!
@@ -133,6 +127,7 @@ class ExtraController {
 
         return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
     }
+
     @GetMapping("/getAllExtra/{id}/{pageNumber}")
     fun getAllExtra(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
         return extraService.extras(id,pageNumber)
@@ -142,10 +137,10 @@ class ExtraController {
     fun getAllExtraFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
         return extraService.extrasFiltrados(id, pageNumber, buscar)
         //.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO)}
-
     }
     @GetMapping("/cantExtras/{id}")
     fun cantExtras(@PathVariable("id") id: Long) =  extraService.contadorDeExtras(id)
+
     @GetMapping("/cantExtrasFiltrados/{id}/{buscar}")
     fun cantExtrasFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasFiltrados(id,buscar)
 
@@ -164,4 +159,8 @@ class ExtraController {
     @GetMapping("/cantExtrasCATFiltrados/{id}/{buscar}")
     fun cantExtrasCATFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasCateringFiltrados(id,buscar)
 
+    @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
+    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDto> {
+        return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
+    }
 }
