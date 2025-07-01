@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.dto
 
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 
 
 class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){

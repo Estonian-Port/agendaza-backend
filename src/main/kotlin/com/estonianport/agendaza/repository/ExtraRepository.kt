@@ -2,12 +2,10 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.TipoEvento
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import com.estonianport.agendaza.model.TipoExtra
 
 interface ExtraRepository : CrudRepository<Extra, Long>{
 

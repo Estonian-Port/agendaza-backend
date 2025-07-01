@@ -3,7 +3,7 @@ package com.estonianport.agendaza.repository
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query

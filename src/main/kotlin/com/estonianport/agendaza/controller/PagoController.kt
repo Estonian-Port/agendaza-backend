@@ -5,9 +5,8 @@ import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.CodigoEmpresaId
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
-import com.estonianport.agendaza.dto.PagoEmpresaEncargado
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.MedioDePago
+import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
@@ -56,14 +55,13 @@ class PagoController {
         return pagoService.get(id)!!.toDTO()
     }
 
+    // TODO Reemplazar el dto PagoEmpresaEncargado por pagoDTO y que empresa y user vengan por link o dentro de pagodto
     @PostMapping("/savePago")
-    fun save(@RequestBody pagoEmpresaEncargado: PagoEmpresaEncargado): PagoDTO {
-        val empresa = empresaService.get(pagoEmpresaEncargado.empresaId)!!
-        val evento = empresa.listaEvento.find{it.codigo == pagoEmpresaEncargado.pago.codigo}!!
-        val encargado = usuarioService.get(pagoEmpresaEncargado.usuarioId)!!
-        val pagoDto = pagoEmpresaEncargado.pago
+    fun save(@RequestBody pagoDTO: PagoDTO): PagoDTO {
+        val evento = eventoService.getByCodigoAndEmpresaId(pagoDTO.codigo, pagoDTO.empresaId)
+        val encargado = usuarioService.get(pagoDTO.usuarioId)!!
 
-        val pago = Pago(pagoDto.id, pagoDto.monto, pagoDto.medioDePago, LocalDateTime.now(), evento, encargado)
+        val pago = Pago(pagoDTO.id, pagoDTO.monto, pagoDTO.medioDePago, LocalDateTime.now(), evento, encargado, pagoDTO.concepto)
 
         return pagoService.save(pago).toDTO()
     }

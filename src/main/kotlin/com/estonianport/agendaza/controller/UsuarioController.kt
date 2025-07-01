@@ -3,7 +3,7 @@ package com.estonianport.agendaza.controller
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.TipoCargo
+import com.estonianport.agendaza.model.enums.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService

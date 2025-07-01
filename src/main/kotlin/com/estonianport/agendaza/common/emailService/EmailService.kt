@@ -7,7 +7,7 @@ import com.estonianport.agendaza.model.EventoExtraVariable
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
 import org.apache.commons.validator.routines.EmailValidator
@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
-import kotlin.math.absoluteValue
 
 @Service
 class EmailService {

@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.model.enums.TipoCargo
 import jakarta.persistence.*
 import org.hibernate.annotations.Proxy
 import java.time.LocalDate
@@ -8,21 +9,21 @@ import java.time.LocalDate
 @Proxy(lazy = false)
 open class Cargo(
 
-    @Id
+        @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-    @ManyToOne
+        @ManyToOne
     @PrimaryKeyJoinColumn
     val usuario: Usuario,
 
-    @ManyToOne
+        @ManyToOne
     @PrimaryKeyJoinColumn
     val empresa: Empresa,
 
-    @PrimaryKeyJoinColumn
+        @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)
     var tipoCargo : TipoCargo,
 
-    @Column
+        @Column
     var fechaBaja : LocalDate? = null)

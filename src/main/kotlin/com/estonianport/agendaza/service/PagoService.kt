@@ -5,9 +5,8 @@ import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.model.MedioDePago
+import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
-import org.apache.juli.logging.Log
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository

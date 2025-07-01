@@ -1,9 +1,7 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.dto.CantidadesPanelAdmin
-import com.estonianport.agendaza.service.AgendaService
+import com.estonianport.agendaza.dto.CantidadesPanelAdminDTO
 import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -15,7 +13,7 @@ class PanelAdminController {
     lateinit var empresaService: EmpresaService
 
     @GetMapping("/getAllCantidadesForPanelAdminByEmpresaId/{id}")
-    fun getAllCantidadesForPanelAdminByEmpresaId(@PathVariable("id") id: Long): CantidadesPanelAdmin {
+    fun getAllCantidadesForPanelAdminByEmpresaId(@PathVariable("id") id: Long): CantidadesPanelAdminDTO {
         return empresaService.getAllCantidadesForPanelAdminByEmpresaId(id)
     }
 }

@@ -1,6 +1,8 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -24,34 +26,34 @@ import java.time.LocalDateTime
 @Proxy(lazy = false)
 open class Evento(
 
-    @Id
+        @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-    @Column
+        @Column
     var nombre: String,
 
-    @ManyToOne
+        @ManyToOne
     @PrimaryKeyJoinColumn
     val tipoEvento: TipoEvento,
 
-    @Column
+        @Column
     var inicio: LocalDateTime,
 
-    @Column
+        @Column
     var fin: LocalDateTime,
 
-    @ManyToOne(cascade = arrayOf(CascadeType.ALL))
+        @ManyToOne(cascade = arrayOf(CascadeType.ALL))
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
-    @Column
+        @Column
     var extraOtro: Double,
 
-    @Column
+        @Column
     var descuento : Long,
 
-    @ManyToMany(fetch = FetchType.LAZY)
+        @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_extra",
         joinColumns = arrayOf(JoinColumn(name = "evento_id")),
@@ -59,34 +61,34 @@ open class Evento(
     )
     var listaExtra: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
     var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
 
-    @Column
+        @Column
     var cateringOtro : Double,
 
-    @Column
+        @Column
     var cateringOtroDescripcion : String,
 
-    @ManyToOne
+        @ManyToOne
     @PrimaryKeyJoinColumn
     val encargado: Usuario,
 
-    @ManyToOne
+        @ManyToOne
     @PrimaryKeyJoinColumn
     var cliente: Usuario,
 
-    @Column
+        @Column
     val codigo: String,
 
-    @Column
+        @Column
     @Enumerated(EnumType.STRING)
     val estado: Estado,
 
-    @Column
+        @Column
     var anotaciones: String,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa : Empresa){
 

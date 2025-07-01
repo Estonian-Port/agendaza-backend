@@ -1,6 +1,8 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.model.enums.Concepto
+import com.estonianport.agendaza.model.enums.MedioDePago
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -17,7 +19,6 @@ import java.time.LocalDateTime
 @Entity
 @Proxy(lazy = false)
 open class Pago (
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
@@ -41,7 +42,11 @@ open class Pago (
     val encargado: Usuario,
 
     @Column
-    var fechaBaja : LocalDate? = null){
+    @Enumerated(EnumType.STRING)
+    val concepto : Concepto){
+
+    @Column
+    var fechaBaja : LocalDate? = null
 
     fun toDTO() : PagoDTO{
         return PagoDTO(
@@ -50,7 +55,10 @@ open class Pago (
             codigo = evento.codigo,
             medioDePago = medioDePago,
             fecha = fecha,
-            nombreEvento = evento.nombre
+            nombreEvento = evento.nombre,
+            concepto = concepto,
+            empresaId = evento.empresa.id,
+            usuarioId = encargado.id
         )
     }
 }

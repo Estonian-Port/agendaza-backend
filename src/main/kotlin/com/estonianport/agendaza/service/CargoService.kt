@@ -2,11 +2,9 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.dto.AgendaDTO
-import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.repository.CargoRepository
 import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.TipoCargo
+import com.estonianport.agendaza.model.enums.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository

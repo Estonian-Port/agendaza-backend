@@ -4,6 +4,7 @@ import com.estonianport.agendaza.dto.EventoAgendaDTO
 import com.estonianport.agendaza.dto.EventoDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.model.Pago
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
@@ -51,5 +52,7 @@ interface EventoRepository : CrudRepository<Evento, Long>{
 
     @Query("SELECT new com.estonianport.agendaza.dto.EventoDTO(e.id, e.nombre, e.codigo, e.inicio, e.fin, e.tipoEvento.nombre) FROM Evento e WHERE e.empresa.id = :empresaId AND e.inicio BETWEEN :fechaInicio AND :fechaFin AND e.fechaBaja IS NULL")
     fun getAllEventosForAgendaByFecha(fechaInicio: LocalDateTime, fechaFin : LocalDateTime, empresaId : Long): List<EventoDTO>
+
+    fun getByCodigoAndEmpresaId(codigo : String, empresaId : Long) : Evento
 
 }

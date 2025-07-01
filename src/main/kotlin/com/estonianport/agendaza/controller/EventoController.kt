@@ -5,6 +5,8 @@ import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.*
+import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders

@@ -1,16 +1,16 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.PrecioConFechaDto
+import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Capacidad
-import com.estonianport.agendaza.model.Duracion
+import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import com.estonianport.agendaza.model.TipoEvento
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -134,21 +134,21 @@ class TipoEventoController {
     }
 
     @PostMapping("/saveTipoEventoPrecio/{empresaId}/{tipoEventoId}")
-    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody listaPrecioConFechaDTO : MutableSet<PrecioConFechaDTO>): ResponseEntity<PrecioConFechaDTO> {
         val tipoEvento = tipoEventoService.get(tipoEventoId)!!
         val empresa = empresaService.get(empresaId)!!
 
         val listaPrecio = empresa.listaPrecioConFechaTipoEvento.filter { it.tipoEvento.id == tipoEvento.id }
 
         listaPrecio.forEach{
-            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
+            if(!listaPrecioConFechaDTO.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
                 val precioViejo = precioConFechaTipoEventoService.get(it.id)!!
                 precioViejo.fechaBaja = LocalDate.now()
                 precioConFechaTipoEventoService.save(precioViejo)
             }
         }
 
-        listaPrecioConFechaDto.forEach{
+        listaPrecioConFechaDTO.forEach{
 
             // Busca el ultimo dia del mes del hasta
             val fechaHasta = it.hasta.plusMonths(1).minusDays(1).plusHours(20).plusMinutes(59).plusSeconds(59)
@@ -162,7 +162,7 @@ class TipoEventoController {
                 tipoEvento
             ))
         }
-        return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
+        return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
     }
 
     @GetMapping("/getAllServicioByTipoEventoId/{id}")
@@ -222,7 +222,7 @@ class TipoEventoController {
     }
 
     @GetMapping("/getAllPrecioConFechaByTipoEventoId/{empresaId}/{extraId}")
-    fun getAllPrecioConFechaByTipoEventoId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") tipoEventoId: Long): List<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByTipoEventoId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") tipoEventoId: Long): List<PrecioConFechaDTO> {
         return empresaService.getAllPrecioConFechaByTipoEvento(empresaId, tipoEventoId)
     }
 

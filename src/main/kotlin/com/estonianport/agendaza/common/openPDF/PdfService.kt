@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.common.openPDF
 
 import com.estonianport.agendaza.model.*
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.lowagie.text.*
 import com.lowagie.text.pdf.ColumnText
 import com.lowagie.text.pdf.PdfContentByte

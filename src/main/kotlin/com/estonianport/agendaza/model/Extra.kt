@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.hibernate.annotations.Proxy

@@ -1,11 +1,10 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.PrecioConFechaDto
-import com.estonianport.agendaza.dto.ServicioDTO
+import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.PrecioConFechaExtraService
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @RestController
 @CrossOrigin("*")
@@ -94,21 +92,21 @@ class ExtraController {
     }
 
     @PostMapping("/saveExtraPrecio/{empresaId}/{extraId}")
-    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDTO : MutableSet<PrecioConFechaDTO>): ResponseEntity<PrecioConFechaDTO> {
         val extra = extraService.get(extraId)!!
         val empresa = empresaService.get(empresaId)!!
 
         val listaPrecio = empresa.listaPrecioConFechaExtra.filter { it.extra.id == extra.id }
 
         listaPrecio.forEach{
-            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
+            if(!listaPrecioConFechaDTO.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
                 val precioViejo = precioConFechaExtraService.get(it.id)!!
                 precioViejo.fechaBaja = LocalDate.now()
                 precioConFechaExtraService.save(precioViejo)
             }
         }
 
-        listaPrecioConFechaDto.forEach{
+        listaPrecioConFechaDTO.forEach{
 
             // Busca el ultimo dia del mes del hasta
             val fechaHasta = it.hasta.plusMonths(1).minusDays(1).plusHours(20).plusMinutes(59).plusSeconds(59)
@@ -125,7 +123,7 @@ class ExtraController {
             )
         }
 
-        return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
+        return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
     }
 
     @GetMapping("/getAllExtra/{id}/{pageNumber}")
@@ -160,7 +158,7 @@ class ExtraController {
     fun cantExtrasCATFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasCateringFiltrados(id,buscar)
 
     @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
-    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDTO> {
         return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
     }
 }

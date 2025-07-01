@@ -1,10 +1,12 @@
 package com.estonianport.agendaza
 
 import com.estonianport.agendaza.model.*
+import com.estonianport.agendaza.model.enums.Duracion
+import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.TipoExtra
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import java.time.LocalDateTime
 import java.time.LocalTime
 

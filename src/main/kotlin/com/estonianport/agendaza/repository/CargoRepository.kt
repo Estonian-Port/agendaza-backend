@@ -2,7 +2,7 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.AgendaDTO
 import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.TipoCargo
+import com.estonianport.agendaza.model.enums.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
