@@ -14,12 +14,12 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     @Query("SELECT e FROM Empresa e WHERE e.id = :empresaId")
     override fun findById(empresaId: Long) : Optional<Empresa>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, ev.codigo, p.medioDePago, " +
-            "ev.nombre, p.fecha) FROM Pago p LEFT JOIN p.evento ev LEFT JOIN ev.empresa em " +
-            "WHERE em.id = :empresaId")
+    @Query("SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, 0,ev.codigo, p.medioDePago, " +
+            "ev.nombre, p.fecha, em.id, p.encargado.id) FROM Pago p LEFT JOIN p.evento ev LEFT JOIN ev.empresa em " +
+            "WHERE em.id = :empresaId AND p.fechaBaja IS NULL")
     fun getEmpresaListaPagoById(empresaId: Long) : List<PagoDTO>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.CantidadesPanelAdmin (" +
+    @Query("SELECT new com.estonianport.agendaza.dto.CantidadesPanelAdminDTO (" +
             "(" +
             "SELECT COUNT(c) " +
             "FROM Cargo c " +
@@ -86,7 +86,7 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     @Query("SELECT es FROM Empresa e INNER JOIN e.listaEspecificacion es WHERE e.id = :empresaId")
     fun getEspecificaciones(empresaId: Long): List<Especificacion>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDto(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.extra.id) " +
+    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDTO(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.extra.id) " +
             "FROM Empresa e " +
             "INNER JOIN e.listaPrecioConFechaExtra pf " +
             "WHERE e.id = :empresaId AND pf.extra.id = :extraId " +
@@ -94,7 +94,7 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             " AND pf.fechaBaja IS NULL")
     fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDTO>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDto(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.tipoEvento.id) " +
+    @Query("SELECT new com.estonianport.agendaza.dto.PrecioConFechaDTO(pf.id, pf.desde, pf.hasta, pf.precio, pf.empresa.id, pf.tipoEvento.id) " +
             "FROM Empresa e " +
             "INNER JOIN e.listaPrecioConFechaTipoEvento pf " +
             "WHERE e.id = :empresaId AND pf.tipoEvento.id = :tipoEventoId " +

@@ -9,19 +9,19 @@ import java.time.LocalDate
 @Proxy(lazy = false)
 open class Cargo(
 
-        @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-        @ManyToOne
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val usuario: Usuario,
 
-        @ManyToOne
+    @ManyToOne
     @PrimaryKeyJoinColumn
     val empresa: Empresa,
 
-        @PrimaryKeyJoinColumn
+    @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)
     var tipoCargo : TipoCargo,
 

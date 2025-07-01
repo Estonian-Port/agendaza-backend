@@ -55,14 +55,12 @@ class PagoController {
         return pagoService.get(id)!!.toDTO()
     }
 
-    // TODO Reemplazar el dto PagoEmpresaEncargado por pagoDTO y que empresa y user vengan por link o dentro de pagodto
     @PostMapping("/savePago")
     fun save(@RequestBody pagoDTO: PagoDTO): PagoDTO {
         val evento = eventoService.getByCodigoAndEmpresaId(pagoDTO.codigo, pagoDTO.empresaId)
         val encargado = usuarioService.get(pagoDTO.usuarioId)!!
 
-        val pago = Pago(pagoDTO.id, pagoDTO.monto, pagoDTO.medioDePago, LocalDateTime.now(), evento, encargado, pagoDTO.concepto)
-
+        val pago = pagoService.fromDTO(pagoDTO,evento, encargado)
         return pagoService.save(pago).toDTO()
     }
 

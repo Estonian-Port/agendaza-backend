@@ -12,8 +12,6 @@ import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.time.LocalDate
 
-
-
 @Service
 class PdfService {
 
@@ -63,7 +61,7 @@ class PdfService {
     }
 
     private fun setRecibo(document: Document, pago: Pago, fontSubtitulo: Font?) {
-        document.add(Paragraph("Recibimos $${pago.monto} en concepto de pago", fontSubtitulo))
+        document.add(Paragraph("Recibimos $${pago.monto} en concepto de ${pago.getConceptoString()}", fontSubtitulo))
     }
 
     private fun setFirma(document: Document, evento: Evento, fontNormal: Font, cb: PdfContentByte) {
@@ -313,17 +311,8 @@ class PdfService {
         // Agrega lista de pagos del evento
         document.add(Paragraph("Lista de Pagos:"))
 
-        //TODO mejorar concepto sacandolo de pago.concepto
-        evento.listaPago.sortedBy{ it.id }.forEachIndexed{ index, pago ->
-            var concepto = "Seña"
-            if(true){
-                if(true){
-                    concepto = "Cuota (${index + 1})"
-                }else{
-                    concepto = "Cuota (${index + 2})"
-                }
-            }
-            document.add(Paragraph("- ${concepto} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
+        evento.listaPago.filter { it.fechaBaja == null }.sortedBy{ it.id }.forEach{ pago ->
+            document.add(Paragraph("- ${pago.getConceptoString()} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
         }
 
         document.add(Paragraph("Monto total abonado: $${evento.getTotalAbonado().toInt()} | Monto faltante: $${evento.getMontoFaltante().toInt()} | Total: $${evento.getPresupuestoTotal().toInt()}", fontSubtitulo))

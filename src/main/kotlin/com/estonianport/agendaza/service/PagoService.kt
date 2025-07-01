@@ -3,15 +3,24 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
+import com.estonianport.agendaza.model.Adelanto
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
+import com.estonianport.agendaza.model.PagoCuota
+import com.estonianport.agendaza.model.PagoSenia
+import com.estonianport.agendaza.model.PagoTotal
+import com.estonianport.agendaza.model.Usuario
+import com.estonianport.agendaza.model.enums.Concepto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PagoService : GenericServiceImpl<Pago, Long>(){
@@ -26,7 +35,7 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         val evento = empresa.listaEvento.find { it.codigo == codigo }
 
         if(evento != null){
-            return PagoDTO(0, 0.0, evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
+            return PagoDTO(0, 0.0, Concepto.SENIA,0,evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
         }
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }
@@ -57,4 +66,19 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     fun getAllPagoFromEvento(idEvento: Long): List<PagoDTO> {
         return pagoRepository.getAllPagoFromEvento(idEvento)
     }
+
+    fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {
+        return when (pagoDTO.concepto) {
+            Concepto.CUOTA -> PagoCuota(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto,pagoDTO.medioDePago,
+                    LocalDateTime.now(), evento, encargado, pagoDTO.numeroCuota)
+            Concepto.SENIA -> PagoSenia(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,pagoDTO.medioDePago,
+                LocalDateTime.now(), evento, encargado)
+            Concepto.PAGO_TOTAL -> PagoTotal(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto, pagoDTO.medioDePago,
+                LocalDateTime.now(), evento, encargado)
+            Concepto.ADELANTO -> Adelanto(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto, pagoDTO.medioDePago,
+                LocalDateTime.now(), evento, encargado)
+        }
+    }
+
+
 }

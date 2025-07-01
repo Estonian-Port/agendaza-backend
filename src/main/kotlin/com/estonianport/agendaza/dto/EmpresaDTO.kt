@@ -5,7 +5,6 @@ import com.estonianport.agendaza.model.enums.TipoCargo
 class EmpresaAbmDTO(var id: Long, var nombre: String, var tipoCargo: TipoCargo, var email: String,
                     var telefono: Long, var calle: String, var numero: Int, var municipio: String) {
 
-
     var tipo: String = ""
 
 }
