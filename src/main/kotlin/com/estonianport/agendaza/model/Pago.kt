@@ -1,12 +1,8 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.PagoDTO
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.model.enums.MedioDePago
-import com.estonianport.agendaza.model.enums.TipoExtra
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
@@ -21,21 +17,10 @@ import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import org.hibernate.LockMode
 import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "concepto"
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = PagoCuota::class, name = "CUOTA"),
-    JsonSubTypes.Type(value = PagoSenia::class, name = "SENIA"),
-    JsonSubTypes.Type(value = PagoTotal::class, name = "PAGO_TOTAL")
-)
 @Entity
 @Proxy(lazy = false)
 @DiscriminatorColumn(name = "concepto", discriminatorType = DiscriminatorType.STRING)
@@ -51,7 +36,7 @@ abstract class Pago(
 
     @Column(insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    val concepto : Concepto,
+    val concepto: Concepto,
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -70,9 +55,9 @@ abstract class Pago(
 
     @Column
     var fechaBaja: LocalDate? = null
-){
+) {
 
-    abstract fun getConceptoString() : String
+    abstract fun getConceptoString(): String
 
     open fun toDTO(): PagoDTO {
         return PagoDTO(
@@ -82,77 +67,57 @@ abstract class Pago(
             medioDePago = medioDePago,
             fecha = fecha,
             nombreEvento = evento.nombre,
-            concepto = Concepto.SENIA,
-            numeroCuota = 0,
+            concepto = concepto,
+            numeroCuota = if (this is Cuota) this.numeroCuota else null,
             empresaId = evento.empresa.id,
             usuarioId = encargado.id
         )
+    }
+
+    companion object{
+        fun build(id : Long, monto: Double, concepto : Concepto, medioDePago: MedioDePago, fecha: LocalDateTime, evento: Evento, encargado: Usuario, numeroCuota: Int? = null): Pago {
+            return when (concepto) {
+                Concepto.CUOTA -> Cuota(id, monto, Concepto.CUOTA, medioDePago, fecha, evento, encargado, numeroCuota)
+                Concepto.SENIA -> Senia(id, monto, Concepto.SENIA, medioDePago, fecha, evento, encargado)
+                Concepto.PAGO_TOTAL -> PagoTotal(id, monto, Concepto.PAGO_TOTAL, medioDePago, fecha, evento, encargado)
+                Concepto.ADELANTO -> Adelanto(id, monto, Concepto.ADELANTO, medioDePago, fecha, evento, encargado)
+            }
+        }
     }
 }
 
 @Entity
 @DiscriminatorValue("CUOTA")
-open class PagoCuota(
-    id : Long,
+open class Cuota(
+    id: Long,
     monto: Double,
     concepto: Concepto,
     medioDePago: MedioDePago,
     fecha: LocalDateTime,
     evento: Evento,
     encargado: Usuario,
-    open val numeroCuota: Int,
-    fechaBaja: LocalDate? = null) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja){
+    open val numeroCuota: Int?,
+    fechaBaja: LocalDate? = null
+) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
-    override fun toDTO(): PagoDTO {
-        return PagoDTO(
-            id = id,
-            monto = monto,
-            codigo = evento.codigo,
-            medioDePago = medioDePago,
-            fecha = fecha,
-            nombreEvento = evento.nombre,
-            concepto = Concepto.CUOTA,
-            numeroCuota = numeroCuota,
-            empresaId = evento.empresa.id,
-            usuarioId = encargado.id
-        )
-    }
-
-    override fun getConceptoString(): String{
-        return "Cuota $numeroCuota"
-    }
+    override fun getConceptoString(): String =
+        if (numeroCuota == 0) "Cuota" else "Cuota Nº$numeroCuota"
 }
 
 @Entity
 @DiscriminatorValue("SENIA")
-open class PagoSenia(
-    id : Long,
+open class Senia(
+    id: Long,
     monto: Double,
     concepto: Concepto,
     medioDePago: MedioDePago,
     fecha: LocalDateTime,
     evento: Evento,
     encargado: Usuario,
-    fechaBaja: LocalDate? = null) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja){
+    fechaBaja: LocalDate? = null
+) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
-    override fun toDTO(): PagoDTO {
-        return PagoDTO(
-            id = id,
-            monto = monto,
-            codigo = evento.codigo,
-            medioDePago = medioDePago,
-            fecha = fecha,
-            nombreEvento = evento.nombre,
-            concepto = Concepto.SENIA,
-            numeroCuota = 0,
-            empresaId = evento.empresa.id,
-            usuarioId = encargado.id
-        )
-    }
-
-    override fun getConceptoString(): String{
-        return "Seña"
-    }
+    override fun getConceptoString(): String = "Seña"
 }
 
 @Entity
@@ -165,26 +130,10 @@ open class PagoTotal(
     fecha: LocalDateTime,
     evento: Evento,
     encargado: Usuario,
-    fechaBaja: LocalDate? = null) : Pago(id, monto, concepto,medioDePago, fecha, evento, encargado, fechaBaja){
+    fechaBaja: LocalDate? = null
+) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
-    override fun toDTO(): PagoDTO {
-        return PagoDTO(
-            id = id,
-            monto = monto,
-            codigo = evento.codigo,
-            medioDePago = medioDePago,
-            fecha = fecha,
-            nombreEvento = evento.nombre,
-            concepto = Concepto.PAGO_TOTAL,
-            numeroCuota = 0,
-            empresaId = evento.empresa.id,
-            usuarioId = encargado.id
-        )
-    }
-
-    override fun getConceptoString(): String {
-        return "Pago Total"
-    }
+    override fun getConceptoString(): String = "Pago Total"
 }
 
 @Entity
@@ -197,24 +146,8 @@ open class Adelanto(
     fecha: LocalDateTime,
     evento: Evento,
     encargado: Usuario,
-    fechaBaja: LocalDate? = null) : Pago(id, monto, concepto,medioDePago, fecha, evento, encargado, fechaBaja){
+    fechaBaja: LocalDate? = null
+) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
-    override fun toDTO(): PagoDTO {
-        return PagoDTO(
-            id = id,
-            monto = monto,
-            codigo = evento.codigo,
-            medioDePago = medioDePago,
-            fecha = fecha,
-            nombreEvento = evento.nombre,
-            concepto = Concepto.ADELANTO,
-            numeroCuota = 0,
-            empresaId = evento.empresa.id,
-            usuarioId = encargado.id
-        )
-    }
-
-    override fun getConceptoString(): String {
-        return "Adelanto"
-    }
+    override fun getConceptoString(): String = "Adelanto"
 }

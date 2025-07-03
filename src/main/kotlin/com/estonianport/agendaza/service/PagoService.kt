@@ -3,15 +3,14 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Adelanto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.PagoCuota
-import com.estonianport.agendaza.model.PagoSenia
+import com.estonianport.agendaza.model.Cuota
+import com.estonianport.agendaza.model.Senia
 import com.estonianport.agendaza.model.PagoTotal
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Concepto
@@ -68,16 +67,9 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     }
 
     fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {
-        return when (pagoDTO.concepto) {
-            Concepto.CUOTA -> PagoCuota(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto,pagoDTO.medioDePago,
-                    LocalDateTime.now(), evento, encargado, pagoDTO.numeroCuota)
-            Concepto.SENIA -> PagoSenia(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,pagoDTO.medioDePago,
-                LocalDateTime.now(), evento, encargado)
-            Concepto.PAGO_TOTAL -> PagoTotal(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto, pagoDTO.medioDePago,
-                LocalDateTime.now(), evento, encargado)
-            Concepto.ADELANTO -> Adelanto(pagoDTO.id, pagoDTO.monto, pagoDTO.concepto, pagoDTO.medioDePago,
-                LocalDateTime.now(), evento, encargado)
-        }
+        return Pago.build(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,
+            pagoDTO.medioDePago, LocalDateTime.now(), evento, encargado,
+            pagoDTO.numeroCuota)
     }
 
 
