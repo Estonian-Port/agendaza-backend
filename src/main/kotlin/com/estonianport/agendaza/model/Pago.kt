@@ -6,7 +6,6 @@ import com.estonianport.agendaza.model.enums.MedioDePago
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
-import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -17,14 +16,12 @@ import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-@Proxy(lazy = false)
-@DiscriminatorColumn(name = "concepto", discriminatorType = DiscriminatorType.STRING)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "concepto", discriminatorType = DiscriminatorType.STRING)
 abstract class Pago(
 
     @Id
@@ -32,29 +29,29 @@ abstract class Pago(
     open val id: Long,
 
     @Column
-    val monto: Double,
+    open val monto: Double,
 
     @Column(insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    val concepto: Concepto,
+    open val concepto: Concepto,
 
     @Column
     @Enumerated(EnumType.STRING)
-    val medioDePago: MedioDePago,
+    open val medioDePago: MedioDePago,
 
     @Column
-    val fecha: LocalDateTime,
+    open val fecha: LocalDateTime,
 
     @ManyToOne
     @JoinColumn(name = "evento_id")
-    val evento: Evento,
+    open val evento: Evento,
 
     @ManyToOne
     @JoinColumn(name = "encargado_id")
-    val encargado: Usuario,
+    open val encargado: Usuario,
 
     @Column
-    var fechaBaja: LocalDate? = null
+    open var fechaBaja: LocalDate? = null
 ) {
 
     abstract fun getConceptoString(): String
@@ -87,7 +84,6 @@ abstract class Pago(
 }
 
 @Entity
-@DiscriminatorValue("CUOTA")
 open class Cuota(
     id: Long,
     monto: Double,
@@ -101,11 +97,10 @@ open class Cuota(
 ) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
     override fun getConceptoString(): String =
-        if (numeroCuota == 0) "Cuota" else "Cuota Nº$numeroCuota"
+        if (numeroCuota == null || numeroCuota == 0) "Cuota" else "Cuota Nº$numeroCuota"
 }
 
 @Entity
-@DiscriminatorValue("SENIA")
 open class Senia(
     id: Long,
     monto: Double,
@@ -121,7 +116,6 @@ open class Senia(
 }
 
 @Entity
-@DiscriminatorValue("PAGO_TOTAL")
 open class PagoTotal(
     id: Long,
     monto: Double,
@@ -137,7 +131,6 @@ open class PagoTotal(
 }
 
 @Entity
-@DiscriminatorValue("ADELANTO")
 open class Adelanto(
     id: Long,
     monto: Double,
