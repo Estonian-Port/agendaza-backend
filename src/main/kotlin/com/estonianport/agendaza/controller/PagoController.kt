@@ -8,6 +8,7 @@ import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
+import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.PagoService
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
+import kotlin.coroutines.Continuation
 
 @RestController
 @CrossOrigin("*")
@@ -60,7 +62,7 @@ class PagoController {
         val evento = eventoService.getByCodigoAndEmpresaId(pagoDTO.codigo, pagoDTO.empresaId)
         val encargado = usuarioService.get(pagoDTO.usuarioId)!!
 
-        val pago = pagoService.fromDTO(pagoDTO,evento, encargado)
+        val pago = pagoService.fromDTO(pagoDTO, evento, encargado)
         return pagoService.save(pago).toDTO()
     }
 
@@ -73,6 +75,11 @@ class PagoController {
     @GetMapping("/getAllMedioDePago")
     fun getAllMedioDePago(): MutableSet<MedioDePago> {
         return MedioDePago.values().toMutableSet()
+    }
+
+    @GetMapping("/getAllConcepto")
+    fun getAllConcepto(): MutableSet<Concepto> {
+        return Concepto.values().toMutableSet()
     }
 
     @PutMapping("/getEventoForPago")
@@ -100,9 +107,10 @@ class PagoController {
         return pagoService.contadorDePagosFiltrados(id,buscar)
     }
 
-    @GetMapping("/getAllPagoFromEvento/{id}")
-    fun getAllPagoFromEvento(@PathVariable("id") id: Long): EventoPagoDTO {
-        return eventoService.get(id)!!.toEventoPagoDto(pagoService.getAllPagoFromEvento(id))
+    // TODO se podria dividir en dos consultas, una q traiga a lista y otra q traiga la info del evento
+    @GetMapping("/getAllPagoFromEvento/{eventoId}")
+    fun getAllPagoFromEvento(@PathVariable("eventoId") eventoId: Long): EventoPagoDTO {
+        return eventoService.get(eventoId)!!.toEventoPagoDto(pagoService.getAllPagoFromEvento(eventoId))
     }
 
     @GetMapping("/descargarPago/{id}")

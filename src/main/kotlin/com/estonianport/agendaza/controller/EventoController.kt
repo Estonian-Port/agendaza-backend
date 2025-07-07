@@ -66,6 +66,7 @@ class EventoController {
 
     @GetMapping("/cantEventosFiltrados/{id}/{buscar}")
     fun cantEventosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) =  eventoService.contadorDeEventosFiltrados(id,buscar)
+
     @PostMapping("/saveEvento")
     fun save(@RequestBody eventoReservaDto: EventoReservaDTO): Long {
 
@@ -152,7 +153,6 @@ class EventoController {
         val evento = eventoService.findById(id)
         evento.fechaBaja = LocalDate.now()
 
-        //TODO eliminar pagos (Poner cartel en el front que se va a hacer eso)
         return eventoService.save(evento).toDto()
     }
 

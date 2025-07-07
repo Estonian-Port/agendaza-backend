@@ -62,8 +62,8 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         pagoRepository.save(pago)
     }
 
-    fun getAllPagoFromEvento(idEvento: Long): List<PagoDTO> {
-        return pagoRepository.getAllPagoFromEvento(idEvento)
+    fun getAllPagoFromEvento(eventoId: Long): List<PagoDTO> {
+        return pagoRepository.getAllPagoFromEvento(eventoId)
     }
 
     fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {

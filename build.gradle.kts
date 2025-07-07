@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.estonianport.agendaza"
-version = "0.5.0"
+version = "0.6.1"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {

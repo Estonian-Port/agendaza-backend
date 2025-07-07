@@ -56,4 +56,8 @@ class EmpresaController {
         return empresaService.getEspecificaciones(empresaId)
     }
 
+    @GetMapping("/getAllCantidadesForPanelAdminByEmpresaId/{id}")
+    fun getAllCantidadesForPanelAdminByEmpresaId(@PathVariable("id") id: Long): CantidadesPanelAdminDTO {
+        return empresaService.getAllCantidadesForPanelAdminByEmpresaId(id)
+    }
 }

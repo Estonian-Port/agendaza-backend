@@ -23,7 +23,7 @@ interface PagoRepository : CrudRepository<Pago, Long>{
     fun pagosByNombre(id : Long, buscar : String, pageable : Pageable) : Page<Pago>
 
     @Query("SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, 0,ev.codigo, p.medioDePago," +
-            "ev.nombre, p.fecha, ev.empresa.id, p.encargado.id) FROM Pago p LEFT JOIN p.evento ev WHERE p.evento.id = :idEvento AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
-    fun getAllPagoFromEvento(idEvento: Long) : List<PagoDTO>
+            "ev.nombre, p.fecha, ev.empresa.id, p.encargado.id) FROM Pago p LEFT JOIN p.evento ev WHERE p.evento.id = :eventoId AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
+    fun getAllPagoFromEvento(eventoId: Long) : List<PagoDTO>
 
 }
