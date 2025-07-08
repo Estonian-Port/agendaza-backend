@@ -6,6 +6,7 @@ import com.estonianport.agendaza.model.enums.MedioDePago
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
+import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -84,6 +85,7 @@ abstract class Pago(
 }
 
 @Entity
+@DiscriminatorValue("CUOTA")
 open class Cuota(
     id: Long,
     monto: Double,
@@ -101,6 +103,7 @@ open class Cuota(
 }
 
 @Entity
+@DiscriminatorValue("SENIA")
 open class Senia(
     id: Long,
     monto: Double,
@@ -116,6 +119,7 @@ open class Senia(
 }
 
 @Entity
+@DiscriminatorValue("PAGO_TOTAL")
 open class PagoTotal(
     id: Long,
     monto: Double,
@@ -131,6 +135,7 @@ open class PagoTotal(
 }
 
 @Entity
+@DiscriminatorValue("ADELANTO")
 open class Adelanto(
     id: Long,
     monto: Double,
