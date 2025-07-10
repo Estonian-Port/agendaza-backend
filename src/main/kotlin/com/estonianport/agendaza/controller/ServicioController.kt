@@ -51,7 +51,11 @@ class ServicioController {
     @PostMapping("/saveServicio")
     fun save(@RequestBody servicioDTO: GenericItemDTO): ServicioDTO {
 
-        var servicio = Servicio(servicioDTO.id, servicioDTO.nombre)
+        var servicio : Servicio = if(servicioDTO.id != 0L){
+            servicioService.get(servicioDTO.id)!!
+        }else{
+            Servicio(0, servicioDTO.nombre)
+        }
 
         servicio.listaTipoEvento = servicioDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
 
@@ -65,15 +69,20 @@ class ServicioController {
         return servicio.toDTO()
     }
 
-    @DeleteMapping("/deleteServicio/{id}")
-    fun delete(@PathVariable("id") id: Long): ResponseEntity<Servicio> {
-        servicioService.deleteService(id)
+    @DeleteMapping("/deleteServicio/{servicioId}/{empresaId}")
+    fun delete(@PathVariable("servicioId") servicioId: Long, @PathVariable("empresaId") empresaId: Long): ResponseEntity<Servicio> {
+        servicioService.deleteService(servicioId, empresaId)
         return ResponseEntity<Servicio>(HttpStatus.OK)
     }
 
     @GetMapping("/getAllServicio/{empresaId}/{pageNumber}")
     fun getAllServicioByEmpresaId(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int): List<ServicioDTO> {
         return servicioService.getAllServicioByEmpresaId(empresaId, pageNumber)
+    }
+
+    @GetMapping("/getAllServicioAgregar/{empresaId}")
+    fun getAllServicioAgregar(@PathVariable("empresaId") empresaId: Long): List<ServicioDTO> {
+        return servicioService.getAllServicioAgregar(empresaId)
     }
 
     @GetMapping("/getCantidadServicio/{empresaId}")

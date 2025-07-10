@@ -15,10 +15,10 @@ open class Servicio(
     var id: Long,
 
     @Column
-    var nombre: String,
+    var nombre: String){
 
     @ManyToMany(mappedBy = "listaServicio", fetch = FetchType.LAZY)
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()){
+    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
 
     @JsonIgnore
     @ManyToMany

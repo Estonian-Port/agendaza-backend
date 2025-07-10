@@ -16,6 +16,9 @@ import java.time.LocalDateTime
 class ExtraService : GenericServiceImpl<Extra, Long>() {
 
     @Autowired
+    private lateinit var empresaService: EmpresaService
+
+    @Autowired
     lateinit var extraRepository: ExtraRepository
 
     override val dao: CrudRepository<Extra, Long>
@@ -36,7 +39,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
                     .map { extra -> extra.toDTO() }
 
 
-    fun contadorDeExtrasCateringFiltrados(id: Long, buscar: String) = extraRepository.cantidadExtrasCateringFiltrados(id, buscar)
+    fun contadorDeExtrasCateringFilter(id: Long, buscar: String) = extraRepository.cantidadExtrasCateringFilter(id, buscar)
 
     fun contadorDeExtrasCatering(id: Long) = extraRepository.cantidadExtrasCatering(id)
 
@@ -68,5 +71,20 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
 
     fun getAllCatering(): List<ExtraDTO> {
         return extraRepository.getAllCatering()
+    }
+
+    fun getAllExtraEventoAgregar(empresaId: Long): List<ExtraDTO> {
+        return extraRepository.getAllExtraEventoAgregar(empresaId)
+    }
+
+    fun getAllExtraCaterigAgregar(empresaId: Long): List<ExtraDTO> {
+        return extraRepository.getAllExtraCateringAgregar(empresaId)
+    }
+
+    fun deleteExtra(extraId: Long, empresaId: Long) {
+        val empresa: Empresa = empresaService.get(empresaId)!!
+
+        empresa.listaExtra = empresa.listaExtra.filter { extra -> extra.id != extraId }.toMutableSet()
+        empresaService.save(empresa)
     }
 }

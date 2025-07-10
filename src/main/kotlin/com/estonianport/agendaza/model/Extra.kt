@@ -20,10 +20,10 @@ open class Extra(
 
     @Column
     @Enumerated(EnumType.STRING)
-    val tipoExtra : TipoExtra,
+    val tipoExtra : TipoExtra){
 
     @ManyToMany(mappedBy = "listaExtra", fetch = FetchType.LAZY)
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()){
+    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
 
     @Column
     var fechaBaja : LocalDate? = null

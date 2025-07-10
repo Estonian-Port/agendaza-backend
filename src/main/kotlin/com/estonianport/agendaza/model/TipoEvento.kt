@@ -23,25 +23,25 @@ import java.time.LocalDate
 @Proxy(lazy = false)
 open class TipoEvento(
 
-        @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long,
 
-        @Column
+    @Column
     val nombre: String,
 
-        @JoinColumn(name = "duracion")
+    @JoinColumn(name = "duracion")
     @Enumerated(EnumType.STRING)
     val duracion : Duracion,
 
-        @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
-        @Column
+    @Column
     val cantidadDuracion: LocalTime,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     val empresa: Empresa){
 
