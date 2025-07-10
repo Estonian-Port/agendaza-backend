@@ -8,6 +8,7 @@ import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
+import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
@@ -63,6 +64,7 @@ class PagoController {
         val encargado = usuarioService.get(pagoDTO.usuarioId)!!
 
         val pago = pagoService.fromDTO(pagoDTO, evento, encargado)
+
         return pagoService.save(pago).toDTO()
     }
 

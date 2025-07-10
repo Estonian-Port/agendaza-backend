@@ -4,14 +4,10 @@ import GenericServiceImpl
 import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.Adelanto
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.Cuota
-import com.estonianport.agendaza.model.Senia
-import com.estonianport.agendaza.model.PagoTotal
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Concepto
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +30,8 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         val evento = empresa.listaEvento.find { it.codigo == codigo }
 
         if(evento != null){
-            return PagoDTO(0, 0.0, Concepto.SENIA,null,evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
+            return PagoDTO(0, 0.0, Concepto.SENIA,null,evento.codigo,
+                MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio, LocalDateTime.now())
         }
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }
@@ -67,8 +64,10 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     }
 
     fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {
-        return Pago.build(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,
-            pagoDTO.medioDePago, LocalDateTime.now(), evento, encargado,
+        val fecha = if(pagoDTO.fecha.toLocalDate() != LocalDate.now()) pagoDTO.fecha else LocalDateTime.now()
+
+        return Pago(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,
+            pagoDTO.medioDePago, fecha, evento, encargado,
             pagoDTO.numeroCuota)
     }
 

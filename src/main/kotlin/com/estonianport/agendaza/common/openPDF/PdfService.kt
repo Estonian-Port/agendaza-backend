@@ -61,10 +61,10 @@ class PdfService {
     }
 
     private fun setRecibo(document: Document, pago: Pago, fontSubtitulo: Font?) {
-        document.add(Paragraph("Recibimos $${pago.monto} en concepto de ${pago.getConceptoString()}", fontSubtitulo))
+        document.add(Paragraph("Recibimos $${pago.monto} en concepto de ${pago.concepto.getDescripcion(pago)}", fontSubtitulo))
     }
 
-    private fun setFirma(document: Document, evento: Evento, fontNormal: Font, cb: PdfContentByte) {
+    private fun setFirma(evento: Evento, fontNormal: Font, cb: PdfContentByte) {
 
         // Coordenadas donde querés colocar el texto
         val x = 300f
@@ -88,7 +88,7 @@ class PdfService {
         cb.stroke()
     }
 
-    private fun setCuadroDescripcion(document : Document, cb: PdfContentByte, cuadroGrande : Boolean) {
+    private fun setCuadroDescripcion(cb: PdfContentByte, cuadroGrande : Boolean) {
 
         // Setea color y ancho del cuadro
         cb.setColorStroke(Color.DARK_GRAY)
@@ -215,16 +215,16 @@ class PdfService {
         val cb = writer.directContent
 
         // Firma final de documento
-        setFirma(document, evento, fontNormal, cb)
+        setFirma(evento, fontNormal, cb)
 
         // Dibuja los margenes exteriores
         setMargenes(document, cb)
 
         // Dibuja el cuadro de descripcion
-        setCuadroDescripcion(document, cb, true)
+        setCuadroDescripcion(cb, true)
 
         // Setea la firma y dibuja la linea de firma
-        setFirma(document, evento, fontNormal, cb)
+        setFirma(evento, fontNormal, cb)
 
         // Cierra el documento
         document.close()
@@ -258,16 +258,16 @@ class PdfService {
         val cb = writer.directContent
 
         // Firma final de documento
-        setFirma(document, pago.evento, fontNormal, cb)
+        setFirma(pago.evento, fontNormal, cb)
 
         // Dibuja los margenes exteriores
         setMargenes(document, cb)
 
         // Dibuja el cuadro de descripcion
-        setCuadroDescripcion(document, cb, false)
+        setCuadroDescripcion(cb, false)
 
         // Setea la firma y dibuja la linea de firma
-        setFirma(document,pago.evento,fontNormal, cb)
+        setFirma(pago.evento,fontNormal, cb)
 
         // Cierra el documento
         document.close()
@@ -312,7 +312,7 @@ class PdfService {
         document.add(Paragraph("Lista de Pagos:"))
 
         evento.listaPago.filter { it.fechaBaja == null }.sortedBy{ it.id }.forEach{ pago ->
-            document.add(Paragraph("- ${pago.getConceptoString()} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
+            document.add(Paragraph("- ${pago.concepto.getDescripcion(pago)} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
         }
 
         document.add(Paragraph("Monto total abonado: $${evento.getTotalAbonado().toInt()} | Monto faltante: $${evento.getMontoFaltante().toInt()} | Total: $${evento.getPresupuestoTotal().toInt()}", fontSubtitulo))
@@ -321,16 +321,16 @@ class PdfService {
         val cb = writer.directContent
 
         // Firma final de documento
-        setFirma(document, evento, fontNormal, cb)
+        setFirma( evento, fontNormal, cb)
 
         // Dibuja los margenes exteriores
         setMargenes(document, cb)
 
         // Dibuja el cuadro de descripcion
-        setCuadroDescripcion(document, cb, true)
+        setCuadroDescripcion(cb, true)
 
         // Setea la firma y dibuja la linea de firma
-        setFirma(document, evento, fontNormal, cb)
+        setFirma(evento, fontNormal, cb)
 
         // Cierra el documento
         document.close()
