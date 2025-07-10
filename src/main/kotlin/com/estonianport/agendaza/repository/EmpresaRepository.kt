@@ -14,11 +14,6 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     @Query("SELECT e FROM Empresa e WHERE e.id = :empresaId")
     override fun findById(empresaId: Long) : Optional<Empresa>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, 0,ev.codigo, p.medioDePago, " +
-            "ev.nombre, p.fecha, em.id, p.encargado.id) FROM Pago p LEFT JOIN p.evento ev LEFT JOIN ev.empresa em " +
-            "WHERE em.id = :empresaId AND p.fechaBaja IS NULL")
-    fun getEmpresaListaPagoById(empresaId: Long) : List<PagoDTO>
-
     @Query("SELECT new com.estonianport.agendaza.dto.CantidadesPanelAdminDTO (" +
             "(" +
             "SELECT COUNT(c) " +

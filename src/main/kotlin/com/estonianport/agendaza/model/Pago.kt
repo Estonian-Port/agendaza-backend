@@ -73,7 +73,7 @@ abstract class Pago(
     }
 
     companion object{
-        fun build(id : Long, monto: Double, concepto : Concepto, medioDePago: MedioDePago, fecha: LocalDateTime, evento: Evento, encargado: Usuario, numeroCuota: Int? = null): Pago {
+        fun build(id : Long, monto: Double, concepto : Concepto, medioDePago: MedioDePago, fecha: LocalDateTime, evento: Evento, encargado: Usuario, numeroCuota: String? = null): Pago {
             return when (concepto) {
                 Concepto.CUOTA -> Cuota(id, monto, Concepto.CUOTA, medioDePago, fecha, evento, encargado, numeroCuota)
                 Concepto.SENIA -> Senia(id, monto, Concepto.SENIA, medioDePago, fecha, evento, encargado)
@@ -94,12 +94,12 @@ open class Cuota(
     fecha: LocalDateTime,
     evento: Evento,
     encargado: Usuario,
-    open val numeroCuota: Int?,
+    open val numeroCuota: String?,
     fechaBaja: LocalDate? = null
 ) : Pago(id, monto, concepto, medioDePago, fecha, evento, encargado, fechaBaja) {
 
     override fun getConceptoString(): String =
-        if (numeroCuota == null || numeroCuota == 0) "Cuota" else "Cuota Nº$numeroCuota"
+        if (numeroCuota == null) "Cuota" else "Cuota Nº$numeroCuota"
 }
 
 @Entity

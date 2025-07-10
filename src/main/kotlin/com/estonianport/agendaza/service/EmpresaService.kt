@@ -38,11 +38,6 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.save(empresaActualizada).toGenericItemDTO()
     }
 
-
-    fun getEmpresaListaPagoById(id : Long): List<PagoDTO>{
-        return empresaRepository.getEmpresaListaPagoById(id)
-    }
-
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
         return eventoRepository.eventosByEmpresa(id, PageRequest.of(pageNumber,10))
                 .map { evento -> evento.toDto() }.toList()
