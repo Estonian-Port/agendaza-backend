@@ -136,7 +136,7 @@ open class Evento(
     }
 
     fun getTotalAbonado(): Double {
-        return listaPago.sumOf { it.monto }
+        return listaPago.filter{ pago -> pago.fechaBaja == null }.sumOf { it.monto }
     }
 
     fun getMontoFaltante(): Double {
