@@ -1,11 +1,10 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.PrecioConFechaDto
-import com.estonianport.agendaza.dto.ServicioDTO
+import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.PrecioConFechaExtraService
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @RestController
 @CrossOrigin("*")
@@ -53,13 +51,18 @@ class ExtraController {
         val extra = extraService.get(id)!!
         val extraDto = extra.toDTO()
 
-        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extraDto.id).map { it.id }
+        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extraDto.id).map { it.id }.toMutableSet()
         return extraDto
     }
 
     @PostMapping("/saveExtra")
     fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
-        var extra = Extra(extraDTO.id, extraDTO.nombre, extraDTO.tipoExtra)
+
+        var extra : Extra = if(extraDTO.id != 0L){
+            extraService.get(extraDTO.id)!!
+        }else{
+            Extra(0, extraDTO.nombre, extraDTO.tipoExtra)
+        }
 
         extra.listaTipoEvento = extraDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
 
@@ -73,14 +76,10 @@ class ExtraController {
         return extra.toDTO()
     }
 
-    @DeleteMapping("/deleteExtra/{id}")
-    fun delete(@PathVariable("id") id: Long): ExtraDTO {
-        val extraEliminar =  extraService.get(id)!!
-        extraEliminar.fechaBaja = LocalDate.now()
-        extraService.save(extraEliminar)
-        // Deja los precios con fecha del extra eliminado sin fecha baja
-
-        return extraEliminar.toDTO()
+    @DeleteMapping("/deleteExtra/{extraId}/{empresaId}")
+    fun delete(@PathVariable("extraId") extraId: Long, @PathVariable("empresaId") empresaId: Long): ResponseEntity<ExtraDTO> {
+        extraService.deleteExtra(extraId, empresaId)
+        return ResponseEntity<ExtraDTO>(HttpStatus.OK)
     }
 
     @GetMapping("/getAllEventoTipoExtra")
@@ -94,21 +93,21 @@ class ExtraController {
     }
 
     @PostMapping("/saveExtraPrecio/{empresaId}/{extraId}")
-    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDto : MutableSet<PrecioConFechaDto>): ResponseEntity<PrecioConFechaDto> {
+    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDTO : MutableSet<PrecioConFechaDTO>): ResponseEntity<PrecioConFechaDTO> {
         val extra = extraService.get(extraId)!!
         val empresa = empresaService.get(empresaId)!!
 
         val listaPrecio = empresa.listaPrecioConFechaExtra.filter { it.extra.id == extra.id }
 
         listaPrecio.forEach{
-            if(!listaPrecioConFechaDto.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
+            if(!listaPrecioConFechaDTO.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
                 val precioViejo = precioConFechaExtraService.get(it.id)!!
                 precioViejo.fechaBaja = LocalDate.now()
                 precioConFechaExtraService.save(precioViejo)
             }
         }
 
-        listaPrecioConFechaDto.forEach{
+        listaPrecioConFechaDTO.forEach{
 
             // Busca el ultimo dia del mes del hasta
             val fechaHasta = it.hasta.plusMonths(1).minusDays(1).plusHours(20).plusMinutes(59).plusSeconds(59)
@@ -125,7 +124,7 @@ class ExtraController {
             )
         }
 
-        return ResponseEntity<PrecioConFechaDto>(HttpStatus.OK)
+        return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
     }
 
     @GetMapping("/getAllExtra/{id}/{pageNumber}")
@@ -138,29 +137,47 @@ class ExtraController {
         return extraService.extrasFiltrados(id, pageNumber, buscar)
         //.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO)}
     }
+
     @GetMapping("/cantExtras/{id}")
     fun cantExtras(@PathVariable("id") id: Long) =  extraService.contadorDeExtras(id)
 
     @GetMapping("/cantExtrasFiltrados/{id}/{buscar}")
-    fun cantExtrasFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasFiltrados(id,buscar)
+    fun cantExtrasFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) {
+        extraService.contadorDeExtrasFiltrados(id,buscar)
+    }
 
-    @GetMapping("/getAllExtraCAT/{id}/{pageNumber}")
-    fun getAllExtraCAT(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
+    @GetMapping("/getAllExtraCatering/{id}/{pageNumber}")
+    fun getAllExtraCatering(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
         return extraService.extrasCatering(id,pageNumber)
     }
-    @GetMapping("/getAllExtraCATFilter/{id}/{pageNumber}/{buscar}")
-    fun getAllExtraCATFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
+
+    @GetMapping("/getAllExtraCateringFilter/{id}/{pageNumber}/{buscar}")
+    fun getAllExtraCateringFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
         return extraService.extrasCateringFiltrados(id, pageNumber, buscar)
     }
 
-    @GetMapping("/cantExtrasCAT/{id}")
-    fun cantExtrasCAT(@PathVariable("id") id: Long) =  extraService.contadorDeExtrasCatering(id)
+    @GetMapping("/cantExtraCatering/{id}")
+    fun cantExtraCatering(@PathVariable("id") id: Long) : Int {
+        return extraService.contadorDeExtrasCatering(id)
+    }
 
-    @GetMapping("/cantExtrasCATFiltrados/{id}/{buscar}")
-    fun cantExtrasCATFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) = extraService.contadorDeExtrasCateringFiltrados(id,buscar)
+    @GetMapping("/cantExtraCateringFilter/{id}/{buscar}")
+    fun cantExtraCateringFilter(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
+        return extraService.contadorDeExtrasCateringFilter(id,buscar)
+    }
 
     @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
-    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDTO> {
         return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
+    }
+
+    @GetMapping("/getAllExtraEventoAgregar/{empresaId}")
+    fun getAllExtraEventoAgregar(@PathVariable("empresaId") empresaId: Long): List<ExtraDTO> {
+        return extraService.getAllExtraEventoAgregar(empresaId)
+    }
+
+    @GetMapping("/getAllExtraCateringAgregar/{empresaId}")
+    fun getAllExtraCateringAgregar(@PathVariable("empresaId") empresaId: Long): List<ExtraDTO> {
+        return extraService.getAllExtraCaterigAgregar(empresaId)
     }
 }

@@ -5,8 +5,7 @@ import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.TipoEvento
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
@@ -15,6 +14,9 @@ import java.time.LocalDateTime
 
 @Service
 class ExtraService : GenericServiceImpl<Extra, Long>() {
+
+    @Autowired
+    private lateinit var empresaService: EmpresaService
 
     @Autowired
     lateinit var extraRepository: ExtraRepository
@@ -37,7 +39,7 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
                     .map { extra -> extra.toDTO() }
 
 
-    fun contadorDeExtrasCateringFiltrados(id: Long, buscar: String) = extraRepository.cantidadExtrasCateringFiltrados(id, buscar)
+    fun contadorDeExtrasCateringFilter(id: Long, buscar: String) = extraRepository.cantidadExtrasCateringFilter(id, buscar)
 
     fun contadorDeExtrasCatering(id: Long) = extraRepository.cantidadExtrasCatering(id)
 
@@ -69,5 +71,20 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
 
     fun getAllCatering(): List<ExtraDTO> {
         return extraRepository.getAllCatering()
+    }
+
+    fun getAllExtraEventoAgregar(empresaId: Long): List<ExtraDTO> {
+        return extraRepository.getAllExtraEventoAgregar(empresaId)
+    }
+
+    fun getAllExtraCaterigAgregar(empresaId: Long): List<ExtraDTO> {
+        return extraRepository.getAllExtraCateringAgregar(empresaId)
+    }
+
+    fun deleteExtra(extraId: Long, empresaId: Long) {
+        val empresa: Empresa = empresaService.get(empresaId)!!
+
+        empresa.listaExtra = empresa.listaExtra.filter { extra -> extra.id != extraId }.toMutableSet()
+        empresaService.save(empresa)
     }
 }

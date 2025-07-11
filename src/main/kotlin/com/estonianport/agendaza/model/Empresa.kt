@@ -3,6 +3,7 @@ package com.estonianport.agendaza.model
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.errors.BusinessException
+import com.estonianport.agendaza.model.enums.TipoPrestador
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo

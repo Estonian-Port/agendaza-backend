@@ -9,7 +9,6 @@ import com.estonianport.agendaza.repository.EventoRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -39,11 +38,6 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.save(empresaActualizada).toGenericItemDTO()
     }
 
-
-    fun getEmpresaListaPagoById(id : Long): List<PagoDTO>{
-        return empresaRepository.getEmpresaListaPagoById(id)
-    }
-
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
         return eventoRepository.eventosByEmpresa(id, PageRequest.of(pageNumber,10))
                 .map { evento -> evento.toDto() }.toList()
@@ -53,7 +47,7 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
             .map { evento -> evento.toDto() }.toList()
     }
 
-    fun getAllCantidadesForPanelAdminByEmpresaId(id: Long): CantidadesPanelAdmin {
+    fun getAllCantidadesForPanelAdminByEmpresaId(id: Long): CantidadesPanelAdminDTO {
         return empresaRepository.getAllCantidadesForPanelAdminByEmpresaId(id)
     }
 
@@ -61,11 +55,11 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.getEspecificaciones(id).map { it.toDTO() }
     }
 
-    fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDTO> {
         return empresaRepository.getAllPrecioConFechaByExtraId(empresaId, extraId)
     }
 
-    fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDto> {
+    fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO> {
         return empresaRepository.getAllPrecioConFechaByTipoEventoId(empresaId, tipoEventoId)
     }
 

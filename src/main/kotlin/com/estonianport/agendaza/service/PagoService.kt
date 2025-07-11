@@ -5,14 +5,17 @@ import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.model.MedioDePago
+import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
-import org.apache.juli.logging.Log
+import com.estonianport.agendaza.model.Usuario
+import com.estonianport.agendaza.model.enums.Concepto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PagoService : GenericServiceImpl<Pago, Long>(){
@@ -27,7 +30,8 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         val evento = empresa.listaEvento.find { it.codigo == codigo }
 
         if(evento != null){
-            return PagoDTO(0, 0.0, evento.codigo, MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio)
+            return PagoDTO(0, 0.0, Concepto.SENIA,null,evento.codigo,
+                MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio, LocalDateTime.now())
         }
         throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
     }
@@ -55,7 +59,17 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
         pagoRepository.save(pago)
     }
 
-    fun getAllPagoFromEvento(idEvento: Long): List<PagoDTO> {
-        return pagoRepository.getAllPagoFromEvento(idEvento)
+    fun getAllPagoFromEvento(eventoId: Long): List<PagoDTO> {
+        return pagoRepository.getAllPagoFromEvento(eventoId)
     }
+
+    fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {
+        val fecha = if(pagoDTO.fecha.toLocalDate() != LocalDate.now()) pagoDTO.fecha else LocalDateTime.now()
+
+        return Pago(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,
+            pagoDTO.medioDePago, fecha, evento, encargado,
+            pagoDTO.numeroCuota)
+    }
+
+
 }

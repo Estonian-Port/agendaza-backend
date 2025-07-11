@@ -2,12 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.Servicio
-import com.estonianport.agendaza.model.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -61,4 +56,8 @@ class EmpresaController {
         return empresaService.getEspecificaciones(empresaId)
     }
 
+    @GetMapping("/getAllCantidadesForPanelAdminByEmpresaId/{id}")
+    fun getAllCantidadesForPanelAdminByEmpresaId(@PathVariable("id") id: Long): CantidadesPanelAdminDTO {
+        return empresaService.getAllCantidadesForPanelAdminByEmpresaId(id)
+    }
 }

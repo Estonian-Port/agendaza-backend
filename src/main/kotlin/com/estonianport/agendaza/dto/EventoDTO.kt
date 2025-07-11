@@ -1,7 +1,7 @@
 package com.estonianport.agendaza.dto
 
 import com.estonianport.agendaza.model.Capacidad
-import com.estonianport.agendaza.model.Estado
+import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.Usuario
 import java.time.LocalDateTime
 

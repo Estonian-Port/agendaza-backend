@@ -2,11 +2,8 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
-import com.estonianport.agendaza.dto.EventoAgendaDTO
-import com.estonianport.agendaza.dto.EventoDTO
+import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.repository.EventoRepository
-import com.estonianport.agendaza.dto.EventoReservaDTO
-import com.estonianport.agendaza.dto.UsuarioEmpresaDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.EventoExtraVariable
@@ -195,6 +192,10 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             eventoReservaDto.estado,
             eventoReservaDto.anotaciones,
             empresa)
+    }
+
+    fun getByCodigoAndEmpresaId(codigo : String, empresaId : Long): Evento {
+        return eventoRepository.getByCodigoAndEmpresaId(codigo, empresaId)
     }
 
 }

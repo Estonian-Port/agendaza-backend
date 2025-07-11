@@ -1,3 +1,3 @@
-package com.estonianport.agendaza.model
+package com.estonianport.agendaza.model.enums
 
 enum class Estado { COTIZADO, RESERVADO, ABONADO }

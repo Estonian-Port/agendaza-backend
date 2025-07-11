@@ -1,8 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.TipoEventoDTO
-import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.estonianport.agendaza.model.enums.Duracion
 import jakarta.persistence.CascadeType
 import java.time.LocalTime
 import jakarta.persistence.Column
@@ -14,13 +13,11 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
 import org.hibernate.annotations.Proxy
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Entity
 @Proxy(lazy = false)

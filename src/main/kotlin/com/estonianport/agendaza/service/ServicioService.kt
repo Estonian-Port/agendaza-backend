@@ -3,9 +3,11 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.errors.NotFoundException
+import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.repository.ServicioRepository
 import com.estonianport.agendaza.model.Servicio
+import com.estonianport.agendaza.repository.EmpresaRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -20,6 +22,9 @@ import java.time.LocalDate
 class ServicioService : GenericServiceImpl<Servicio, Long>(){
 
     @Autowired
+    private lateinit var empresaService: EmpresaService
+
+    @Autowired
     lateinit var servicioRepository: ServicioRepository
 
     override val dao: CrudRepository<Servicio, Long>
@@ -31,11 +36,11 @@ class ServicioService : GenericServiceImpl<Servicio, Long>(){
         }
     }
 
-    fun deleteService(id : Long){
-        val servicio = servicioRepository.findById(id)
-                .orElseThrow { NotFoundException("Servicio no encontrado") }
-        servicio.fechaBaja = LocalDate.now()
-        save(servicio)
+    fun deleteService(servicioId : Long, empresaId: Long){
+        val empresa: Empresa = empresaService.get(empresaId)!!
+
+        empresa.listaServicio = empresa.listaServicio.filter { servicio -> servicio.id != servicioId }.toMutableSet()
+        empresaService.save(empresa)
     }
 
     fun getAllServicioByEmpresaId(empresaId: Long, pageNumber: Int): List<ServicioDTO> {
@@ -52,6 +57,10 @@ class ServicioService : GenericServiceImpl<Servicio, Long>(){
 
     fun getCantidadServicioFiltrados(empresaId: Long, buscar: String): Int {
         return servicioRepository.getCantidadServicioFiltrados(empresaId, buscar)
+    }
+
+    fun getAllServicioAgregar(empresaId: Long): List<ServicioDTO> {
+        return servicioRepository.getAllServicioAgregar(empresaId)
     }
 
 }

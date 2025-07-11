@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.PrecioConFechaDto
+import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -54,8 +54,8 @@ open class PrecioConFechaExtra(
     @PrimaryKeyJoinColumn
     val extra: Extra) : PrecioConFecha(id, precio, desde, hasta, empresa) {
 
-    fun toDTO(): PrecioConFechaDto{
-        return PrecioConFechaDto(
+    fun toDTO(): PrecioConFechaDTO{
+        return PrecioConFechaDTO(
             id,
             desde,
             hasta,
@@ -80,8 +80,8 @@ open class PrecioConFechaTipoEvento(
     @PrimaryKeyJoinColumn
     val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {
 
-    fun toDTO(): PrecioConFechaDto{
-        return PrecioConFechaDto(
+    fun toDTO(): PrecioConFechaDTO{
+        return PrecioConFechaDTO(
             id,
             desde,
             hasta,

@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.dto
 
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 
 
 class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){
@@ -9,7 +9,7 @@ class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){
 
     var precio : Double = 0.0
 
-    var listaTipoEventoId: List<Long> = mutableListOf()
+    var listaTipoEventoId: MutableSet<Long> = mutableSetOf()
 
 }
 

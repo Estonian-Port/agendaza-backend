@@ -26,4 +26,11 @@ interface ServicioRepository : CrudRepository<Servicio, Long> {
             "AND s.nombre ILIKE %:buscar% AND s.fechaBaja IS NULL")
     fun getCantidadServicioFiltrados(empresaId: Long, buscar: String): Int
 
+    @Query("""SELECT new com.estonianport.agendaza.dto.ServicioDTO(s.id, s.nombre)
+            FROM Servicio s
+            LEFT JOIN s.listaEmpresa e WITH e.id = :empresaId
+            WHERE e.id IS NULL AND s.fechaBaja IS NULL
+            ORDER BY s.id DESC
+            LIMIT 10""")
+    fun getAllServicioAgregar(empresaId: Long): List<ServicioDTO>
 }

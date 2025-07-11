@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.model.enums.TipoCargo
 import jakarta.persistence.*
 import org.hibernate.annotations.Proxy
 import java.time.LocalDate
@@ -24,5 +25,5 @@ open class Cargo(
     @Enumerated(EnumType.STRING)
     var tipoCargo : TipoCargo,
 
-    @Column
+        @Column
     var fechaBaja : LocalDate? = null)

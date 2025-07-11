@@ -1,6 +1,8 @@
 package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -134,7 +136,7 @@ open class Evento(
     }
 
     fun getTotalAbonado(): Double {
-        return listaPago.sumOf { it.monto }
+        return listaPago.filter{ pago -> pago.fechaBaja == null }.sumOf { it.monto }
     }
 
     fun getMontoFaltante(): Double {

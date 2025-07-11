@@ -5,7 +5,7 @@ import com.estonianport.agendaza.repository.ExtraVariableRepository
 import com.estonianport.agendaza.dto.EventoExtraVariableDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.EventoExtraVariable
-import com.estonianport.agendaza.model.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
