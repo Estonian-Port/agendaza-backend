@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
+import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.repository.TipoEventoRepository

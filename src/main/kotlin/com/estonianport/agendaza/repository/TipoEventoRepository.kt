@@ -48,5 +48,5 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     @Query("SELECT tee FROM TipoEvento te INNER JOIN te.listaExtra tee WHERE te.id = :tipoEventoId " +
             "AND tee.tipoExtra = :tipoExtra AND tee.fechaBaja IS NULL")
     fun getAllExtraByTipoExtra(tipoEventoId: Long, tipoExtra: TipoExtra): List<Extra>
-
+    
 }

@@ -165,13 +165,6 @@ class TipoEventoController {
         return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
     }
 
-    @GetMapping("/getAllServicioByTipoEventoId/{id}")
-    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): List<ServicioDTO>{
-        return servicioService.fromListaServicioToListaServicioDto(
-            tipoEventoService.get(id)!!.listaServicio.filter { it.fechaBaja == null }
-        )
-    }
-
     // TODO revisar aca ====================================
     @PutMapping("/getAllExtraEventoByTipoEventoIdAndFecha/{empresaId}/{extraId}")
     fun getAllExtraEventoByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
