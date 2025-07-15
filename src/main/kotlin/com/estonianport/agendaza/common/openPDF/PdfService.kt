@@ -15,6 +15,7 @@ import java.awt.Color
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class PdfService {
@@ -52,13 +53,14 @@ class PdfService {
         val hoy = LocalDate.now().dayOfMonth.toString() + "/" +
                     LocalDate.now().monthValue.toString() + "/" +
                     LocalDate.now().year.toString()
-        document.add(Paragraph("Fecha: ${hoy}", fontSubtitulo))
+        document.add(Paragraph("Fecha: $hoy", fontSubtitulo))
         document.add(Paragraph("Forma de pago: ${pago.medioDePago}", fontSubtitulo))
     }
 
     private fun setDescripcion(evento: Evento, document: Document, fontTitulo: Font, fontNormal: Font) {
-        val diaEvento =
-            evento.inicio.toLocalDate().dayOfMonth.toString() + "/" + evento.inicio.toLocalDate().monthValue.toString() + "/" + evento.inicio.toLocalDate().year.toString()
+        val diaEvento = evento.inicio.toLocalDate().dayOfMonth.toString() + "/" +
+                evento.inicio.toLocalDate().monthValue.toString() + "/" +
+                evento.inicio.toLocalDate().year.toString()
         val horaInicio: String = evento.inicio.toLocalTime().toString()
         val horaFin: String = evento.fin.toLocalTime().toString()
 
@@ -80,6 +82,9 @@ class PdfService {
 
         var cateringDescripcion : String
 
+        val fechaEvento: LocalDate = evento.inicio.toLocalDate()
+        val eventoAnioMes: YearMonth = YearMonth.from(fechaEvento)
+
         if (evento.cateringOtro != 0.0) {
             cateringDescripcion = evento.cateringOtroDescripcion + ". Precio por plato: $" + evento.cateringOtro
         } else {
@@ -88,11 +93,7 @@ class PdfService {
                 TipoExtra.TIPO_CATERING
             )
 
-            val precioCatering = evento.empresa.listaPrecioConFechaExtra.find {
-                it.extra.id == catering.id
-                        && it.desde.month == evento.inicio.month
-                        && it.desde.year == evento.inicio.year
-            }?.precio ?: 0
+            val precioCatering = buscarPrecio(catering.id, eventoAnioMes, evento.empresa.listaPrecioConFechaExtra)
 
             cateringDescripcion = if (catering.id != 0L) {
                 "${catering.nombre}. Precio por plato: $$precioCatering"
@@ -109,20 +110,19 @@ class PdfService {
             )
         )
 
-        val precioTipoEvento = evento.empresa.listaPrecioConFechaTipoEvento.find {
-            it.tipoEvento.id == evento.tipoEvento.id
-                    && it.desde.month == evento.inicio.month
-                    && it.desde.year == evento.inicio.year
+        val precioTipoEvento = evento.empresa.listaPrecioConFechaTipoEvento.find { it ->
+            it.tipoEvento.id == evento.tipoEvento.id &&
+                    YearMonth.from(it.desde) <= eventoAnioMes &&
+                    eventoAnioMes <= YearMonth.from(it.hasta)
         }
 
-        //if (precioTipoEvento != null && precioTipoEvento.precio != 0.0) {
+        if (precioTipoEvento != null && precioTipoEvento.precio != 0.0) {
             //recuadro(document,"COSTO DEL SALON", fontTitulo)
             espacioEnBlanco(document)
             document.add(Paragraph("COSTO DEL SALON", fontSubtitulo))
             lineaHorizontal(document)
             document.add(Paragraph("${evento.tipoEvento.nombre}. Valor: $100000", fontNormal))
-
-        //}
+        }
 
         //recuadro(document,"TOTAL", fontTitulo, true)
         espacioEnBlanco(document)
@@ -296,31 +296,22 @@ class PdfService {
         //document.add(Paragraph("INFORMACION SOBRE EL EVENTO", fontTitulo))
         //lineaHorizontal(document)
 
-        // Agrega descripcion de extras
+        val ymEvento = YearMonth.from(evento.inicio)
+        val listaPreciosExtra = evento.empresa.listaPrecioConFechaExtra
+
         val listaExtra = evento.listaExtra
             .filter { it.tipoExtra == TipoExtra.EVENTO }
             .map { extra ->
-                val precio = evento.empresa.listaPrecioConFechaExtra.find {
-                    it.extra.id == extra.id &&
-                            it.desde.month == evento.inicio.month &&
-                            it.desde.year == evento.inicio.year
-                }?.precio ?: 0
-
+                val precio = buscarPrecio(extra.id, ymEvento, listaPreciosExtra)
                 "${extra.nombre} $${precio}"
             }
 
-        // Agrega descripcion de catering
         val listaExtraVariable = evento.listaEventoExtraVariable
-            .filter{ it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
-            .map { extraVariable->
-                val cantidad = extraVariable.cantidad
-                val precio = evento.empresa.listaPrecioConFechaExtra.find {
-                    it.extra.id == extraVariable.extra.id
-                            && it.desde.month == evento.inicio.month
-                            && it.desde.year == evento.inicio.year
-                }?.precio ?: 0
-
-                "${extraVariable.extra.nombre}: $cantidad x $${precio}"
+            .filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+            .map { extraVar ->
+                val cantidad = extraVar.cantidad
+                val precio = buscarPrecio(extraVar.extra.id, ymEvento, listaPreciosExtra)
+                "${extraVar.extra.nombre}: $cantidad x $${precio}"
             }
 
         // Agrega descripcion de catering
@@ -328,19 +319,14 @@ class PdfService {
             .filter{ it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
             .map { extraVariable->
                 val cantidad = extraVariable.cantidad
-                val precio = evento.empresa.listaPrecioConFechaExtra.find {
-                    it.extra.id == extraVariable.extra.id
-                    && it.desde.month == evento.inicio.month
-                    && it.desde.year == evento.inicio.year
-                }?.precio ?: 0
-
+                val precio = buscarPrecio(extraVariable.extra.id, ymEvento, listaPreciosExtra)
                 "${extraVariable.extra.nombre}: $cantidad x $${precio}"
             }
 
         if(listaExtra.isNotEmpty() || listaExtraVariable.isNotEmpty() || listaCatering.isNotEmpty()) {
             //recuadro(document, "EXTRAS", fontTitulo, true)}
             espacioEnBlanco(document)
-            document.add(Paragraph("EXTRAS:", fontSubtitulo))
+            document.add(Paragraph("ADICIONALES DEL EVENTO:", fontSubtitulo))
             lineaHorizontal(document)
 
             document.add(Paragraph(listaExtra.joinToString(" - "), fontNormal))
@@ -401,6 +387,15 @@ class PdfService {
         return baos.toByteArray()
     }
 
+    fun buscarPrecio(extraId: Long, ymEvento: YearMonth, lista: MutableSet<PrecioConFechaExtra>): Double {
+        return lista.find { r ->
+            r.extra.id == extraId &&
+                    YearMonth.from(r.desde) <= ymEvento &&
+                    ymEvento <= YearMonth.from(r.hasta)
+        }?.precio ?: 0.0
+    }
+
+
     fun generarComprobanteDePago(pago : Pago): ByteArray {
 
         val document = Document()
@@ -424,6 +419,8 @@ class PdfService {
         // Descripción del evento
         setDescripcion(pago.evento, document, fontTitulo, fontNormal)
 
+        lineaHorizontal(document)
+
         // Recibo con concepto de pago
         setRecibo(document, pago, fontSubtitulo)
 
@@ -434,10 +431,7 @@ class PdfService {
         setFirma(pago.evento, fontNormal, cb)
 
         // Dibuja el cuadro de descripcion
-        setCuadroDescripcion(cb, false)
-
-        // Setea la firma y dibuja la linea de firma
-        setFirma(pago.evento,fontNormal, cb)
+        //setCuadroDescripcion(cb, false)
 
         // Cierra el documento
         document.close()
@@ -463,12 +457,6 @@ class PdfService {
         // Setea el pageSize, logo, header y datos del cliente
         setInicioDocumento(document, evento, fontNormal, fontSubtitulo)
 
-        // Espacio en blanco
-        espacioEnBlanco(document)
-
-        // Espacio en blanco
-        espacioEnBlanco(document)
-
         // Descripción del evento
         setDescripcion(evento, document, fontTitulo, fontNormal)
 
@@ -477,9 +465,7 @@ class PdfService {
 
         // Setea titulo Estado de cuenta
         document.add(Paragraph("ESTADO DE CUENTA", fontTitulo))
-
-        // Espacio en blanco
-        espacioEnBlanco(document)
+        lineaHorizontal(document)
 
         // Agrega lista de pagos del evento
         document.add(Paragraph("Lista de Pagos:"))
@@ -488,6 +474,9 @@ class PdfService {
             document.add(Paragraph("- ${pago.concepto.getDescripcion(pago)} | fecha: ${pago.fecha.dayOfMonth}-${pago.fecha.monthValue}-${pago.fecha.year} | monto: $${pago.monto.toInt()} | medio de pago: ${pago.medioDePago}"))
         }
 
+        lineaHorizontal(document)
+
+        // Agrega el total abonado hasta la fecha y faltante
         document.add(Paragraph("Monto total abonado: $${evento.getTotalAbonado().toInt()} | Monto faltante: $${evento.getMontoFaltante().toInt()} | Total: $${evento.getPresupuestoTotal().toInt()}", fontSubtitulo))
 
         // Obtén el PdfContentByte para dibujar detrás del texto
@@ -497,10 +486,7 @@ class PdfService {
         setFirma( evento, fontNormal, cb)
 
         // Dibuja el cuadro de descripcion
-        setCuadroDescripcion(cb, true)
-
-        // Setea la firma y dibuja la linea de firma
-        setFirma(evento, fontNormal, cb)
+        //setCuadroDescripcion(cb, true)
 
         // Cierra el documento
         document.close()
