@@ -90,6 +90,15 @@ abstract class Empresa(
     )
     var listaServicio: MutableSet<Servicio> = mutableSetOf()
 
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+        name = "empresa_clausula",
+        joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
+        inverseJoinColumns = arrayOf(JoinColumn(name = "clasusula_id"))
+    )
+    var listaClausula: MutableSet<Clausula> = mutableSetOf()
+
     @Column
     var fechaBaja : LocalDate? = null
 

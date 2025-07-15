@@ -2,14 +2,11 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
-import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ServicioService
 import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 
 @RestController
 @CrossOrigin("*")
@@ -33,11 +29,6 @@ class ServicioController {
 
     @Autowired
     lateinit var empresaService: EmpresaService
-
-    @GetMapping("/getAllServicio")
-    fun abm(): List<ServicioDTO> {
-        return servicioService.fromListaServicioToListaServicioDto(servicioService.getAll()!!)
-    }
 
     @GetMapping("/getServicio/{id}")
     fun get(@PathVariable("id") id: Long): ServicioDTO {
@@ -91,12 +82,17 @@ class ServicioController {
     }
 
     @GetMapping("/getAllServicioFiltrados/{empresaId}/{pageNumber}/{buscar}")
-    fun getAllServicioFilterNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<ServicioDTO> {
-        return servicioService.getAllServicioFilterNombre(empresaId, buscar, pageNumber)
+    fun getAllServicioFiltradosNombre(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar: String): List<ServicioDTO> {
+        return servicioService.getAllServicioFiltradosNombre(empresaId, buscar, pageNumber)
     }
 
     @GetMapping("/getCantidadServicioFiltrados/{empresaId}/{buscar}")
     fun getCantidadServicioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar: String): Int {
         return servicioService.getCantidadServicioFiltrados(empresaId, buscar)
+    }
+
+    @GetMapping("/getAllServicioByTipoEventoId/{id}")
+    fun getAllServicioByTipoEventoId(@PathVariable("id") id: Long): List<ServicioDTO>{
+        return servicioService.getAllServicioByTipoEventoId(id)
     }
 }

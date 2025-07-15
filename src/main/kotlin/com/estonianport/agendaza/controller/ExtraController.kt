@@ -135,7 +135,6 @@ class ExtraController {
     @GetMapping("/getAllExtraFilter/{id}/{pageNumber}/{buscar}")
     fun getAllExtraFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
         return extraService.extrasFiltrados(id, pageNumber, buscar)
-        //.filter{ (it.tipoExtra == TipoExtra.EVENTO || it.tipoExtra == TipoExtra.VARIABLE_EVENTO)}
     }
 
     @GetMapping("/cantExtras/{id}")

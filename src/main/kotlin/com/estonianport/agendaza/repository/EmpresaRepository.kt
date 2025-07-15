@@ -71,9 +71,10 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "WHERE e.id = ?1 " +
             "   AND s.fechaBaja IS NULL ), " +
             "(" +
-            "SELECT COUNT(es) " +
-            "FROM Especificacion es " +
-            "WHERE es.empresa.id = ?1)) " +
+            "SELECT COUNT(c) " +
+            "FROM Clausula c " +
+            "INNER JOIN c.listaEmpresa e " +
+            "WHERE e.id = ?1)) " +
             "FROM Empresa e " +
             "WHERE e.id = ?1")
     fun getAllCantidadesForPanelAdminByEmpresaId(id : Long) : CantidadesPanelAdminDTO
