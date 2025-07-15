@@ -13,11 +13,11 @@ Agendaza es un sistema integral para la gestión de eventos en salones. Facilita
 
 ## ✨ Características
 
+- Calendario con los eventos registrados
 - Gestión de clientes y reservas
-- Administración de servicios de catering y adicionales
+- Administración de servicios, catering y extras
 - Seguimiento de pagos y contratos
-- Reportes e informes por evento o período
-
+- Reportes e informes por evento
 ---
 
 ## 🗺️ Modelo de Entidad-Relación
@@ -28,9 +28,8 @@ Agendaza es un sistema integral para la gestión de eventos en salones. Facilita
 
 ## 🚀 Estado actual
 
-Versión **0.5.0** — En desarrollo activo.  
-Se encuentra implementado el núcleo funcional del sistema. Se planifican mejoras progresivas e integración de CI/CD.
-
+Versión **0.6.2** — En desarrollo activo.  
+Se encuentra implementado nuevos comprobantes, mejorar jerarquía en servicios, extras y clausulas. Para su reutilizacion con otras empresas. 
 ---
 
 ## 🛠️ Tecnologías utilizadas
@@ -38,7 +37,7 @@ Se encuentra implementado el núcleo funcional del sistema. Se planifican mejora
 - Backend: Kotlin + Spring Boot
 - Frontend: Angular + Bootstrap
 - Base de datos: PostgreSQL
-- Orquestación: Docker + Docker Compose
+- Orquestación: Docker + Docker Compose (Proximamente)
 
 ---
 
