@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.TipoEventoDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.enums.TipoExtra
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import java.time.LocalDateTime
 
 interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     override fun findAll(): List<TipoEvento>
@@ -48,5 +50,16 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     @Query("SELECT tee FROM TipoEvento te INNER JOIN te.listaExtra tee WHERE te.id = :tipoEventoId " +
             "AND tee.tipoExtra = :tipoExtra AND tee.fechaBaja IS NULL")
     fun getAllExtraByTipoExtra(tipoEventoId: Long, tipoExtra: TipoExtra): List<Extra>
-    
+
+    @Query("""SELECT new com.estonianport.agendaza.dto.TipoEventoPrecioDTO(te.id, te.nombre, COALESCE(p.precio, 0))
+        FROM TipoEvento te
+        LEFT JOIN precio_con_fecha_tipo_evento p ON p.tipoEvento.id = te.id
+            AND p.empresa.id = :empresaId
+            AND p.fechaBaja IS NULL
+            AND p.desde <= :fechaEvento
+            AND p.hasta >= :fechaEvento
+        WHERE te.id = :tipoEventoId 
+            AND te.fechaBaja IS NULL""")
+    fun getTipoEventoConPrecio(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime): TipoEventoPrecioDTO?
+
 }

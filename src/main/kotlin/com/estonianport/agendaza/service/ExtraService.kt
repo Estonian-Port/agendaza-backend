@@ -3,6 +3,7 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.enums.TipoExtra
@@ -87,4 +88,9 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
         empresa.listaExtra = empresa.listaExtra.filter { extra -> extra.id != extraId }.toMutableSet()
         empresaService.save(empresa)
     }
+
+    fun getAllExtraConPrecioByTipoEventoAndFecha(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime, tipoExtra: TipoExtra): List<ExtraPrecioDTO>{
+        return extraRepository.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tipoExtra)
+    }
+
 }

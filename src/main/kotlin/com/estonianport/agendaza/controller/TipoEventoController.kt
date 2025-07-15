@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TimeDTO
@@ -165,25 +166,25 @@ class TipoEventoController {
         return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
     }
 
-    // TODO revisar aca ====================================
-    @PutMapping("/getAllExtraEventoByTipoEventoIdAndFecha/{empresaId}/{extraId}")
-    fun getAllExtraEventoByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDto(empresaService.get(empresaId)!!,tipoEventoService.getAllExtraByTipoExtra(extraId, TipoExtra.EVENTO), fechaEvento)
+    // TODO Se puede sinplificar a 1 solo endpoint y que reciba tambien el TipoExtra para diferenciar
+    @PutMapping("/getAllExtraEventoConPrecioByTipoEventoAndFecha/{empresaId}/{tipoEventoId}")
+    fun getAllExtraEventoConPrecioByTipoEventoAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraPrecioDTO> {
+        return extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.EVENTO)
     }
 
-    @PutMapping("/getAllExtraEventoVariableByTipoEventoIdAndFecha/{empresaId}/{extraId}")
-    fun getAllExtraEventoVariableByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDto(empresaService.get(empresaId)!!, tipoEventoService.getAllExtraByTipoExtra(extraId, TipoExtra.VARIABLE_EVENTO), fechaEvento)
+    @PutMapping("/getAllExtraEventoVariableByTipoEventoIdAndFecha/{empresaId}/{tipoEventoId}")
+    fun getAllExtraEventoVariableByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraPrecioDTO> {
+        return extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_EVENTO)
     }
 
-    @PutMapping("/getAllTipoCateringByTipoEventoIdAndFecha/{empresaId}/{extraId}")
-    fun getAllTipoCateringByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDto(empresaService.get(empresaId)!!, tipoEventoService.getAllExtraByTipoExtra(extraId, TipoExtra.TIPO_CATERING), fechaEvento)
+    @PutMapping("/getAllTipoCateringByTipoEventoIdAndFecha/{empresaId}/{tipoEventoId}")
+    fun getAllTipoCateringByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraPrecioDTO> {
+        return extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.TIPO_CATERING)
     }
 
-    @PutMapping("/getAllCateringExtraByTipoEventoIdAndFecha/{empresaId}/{extraId}")
-    fun getAllCateringExtraByTipoEventoId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraDTO> {
-        return extraService.fromListaExtraToListaExtraDto(empresaService.get(empresaId)!!, tipoEventoService.getAllExtraByTipoExtra(extraId, TipoExtra.VARIABLE_CATERING), fechaEvento)
+    @PutMapping("/getAllCateringExtraByTipoEventoIdAndFecha/{empresaId}/{tipoEventoId}")
+    fun getAllCateringExtraByTipoEventoId(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): List<ExtraPrecioDTO> {
+        return extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_CATERING)
     }
 
     // ====================================
@@ -221,7 +222,7 @@ class TipoEventoController {
 
     @PutMapping("/getPrecioByTipoEventoIdAndFecha/{empresaId}/{tipoEventoId}")
     fun getPrecioByTipoEventoIdAndFecha(@PathVariable("empresaId") empresaId: Long, @PathVariable("tipoEventoId") tipoEventoId: Long, @RequestBody fechaEvento : LocalDateTime): Double? {
-        return empresaService.get(empresaId)!!.getPrecioOfTipoEvento(tipoEventoId, fechaEvento)
+        return tipoEventoService.getTipoEventoConPrecio(empresaId, tipoEventoId, fechaEvento)?.precio ?: 0.0
     }
 }
 

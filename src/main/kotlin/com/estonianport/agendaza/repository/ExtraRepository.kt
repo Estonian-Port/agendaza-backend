@@ -1,11 +1,15 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.ExtraPrecioDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import java.time.LocalDateTime
 
 interface ExtraRepository : CrudRepository<Extra, Long>{
 
@@ -67,5 +71,19 @@ interface ExtraRepository : CrudRepository<Extra, Long>{
         ORDER BY e.id DESC
         LIMIT 10""")
     fun getAllExtraCateringAgregar(empresaId: Long): List<ExtraDTO>
+
+    @Query("""SELECT new com.estonianport.agendaza.dto.ExtraPrecioDTO(e.id, e.nombre, e.tipoExtra, COALESCE(p.precio, 0))
+            FROM TipoEvento te
+            JOIN te.listaExtra e
+            LEFT JOIN precio_con_fecha_extra p ON p.extra.id = e.id 
+                AND p.empresa.id = :empresaId
+                AND p.fechaBaja IS NULL 
+                AND p.desde <= :fechaEvento 
+                AND p.hasta >= :fechaEvento
+            WHERE te.id = :tipoEventoId 
+                AND e.tipoExtra = :tipoExtra 
+                AND e.fechaBaja IS NULL
+            ORDER BY e.nombre""")
+    fun getAllExtraConPrecioByTipoEventoAndFecha(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime, tipoExtra: TipoExtra): List<ExtraPrecioDTO>
 
 }
