@@ -3,6 +3,7 @@ package com.estonianport.agendaza.service
 import GenericServiceImpl
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.repository.TipoEventoRepository
 import com.estonianport.agendaza.model.TipoEvento
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
@@ -49,8 +51,8 @@ class TipoEventoService : GenericServiceImpl<TipoEvento, Long>() {
         return tipoEventoRepository.getCantidadTipoEventoFiltrados(empresaId, buscar)
     }
 
-    fun getAllExtraByTipoExtra(id: Long, tipoExtra: TipoExtra) : List<Extra> {
-        return tipoEventoRepository.getAllExtraByTipoExtra(id, tipoExtra)
+    fun getTipoEventoConPrecio(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime): TipoEventoPrecioDTO?{
+        return tipoEventoRepository.getTipoEventoConPrecio(empresaId, tipoEventoId, fechaEvento)
     }
 
 }

@@ -13,5 +13,7 @@ class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){
 
 }
 
+class ExtraPrecioDTO(val id: Long, val nombre: String, val tipoExtra: TipoExtra, val precio: Double){}
+
 class EventoExtraVariableDTO(val id : Long, val cantidad : Int, val nombre : String, val precio : Double){}
 
