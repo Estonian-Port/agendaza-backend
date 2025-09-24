@@ -4,26 +4,24 @@ import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-@Proxy(lazy = false)
-open class Extra(
+class Extra(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @Column
-    val nombre: String,
+    var nombre: String,
 
     @Column
     @Enumerated(EnumType.STRING)
-    val tipoExtra : TipoExtra){
+    var tipoExtra : TipoExtra){
 
     @ManyToMany(mappedBy = "listaExtra", fetch = FetchType.LAZY)
-    val listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+    var listaEmpresa: MutableSet<Empresa> = mutableSetOf()
 
     @Column
     var fechaBaja : LocalDate? = null
@@ -32,8 +30,8 @@ open class Extra(
     @ManyToMany
     @JoinTable(
             name = "tipo_evento_extra",
-            joinColumns = arrayOf(JoinColumn(name = "extra_id") ),
-            inverseJoinColumns = arrayOf(JoinColumn(name = "tipo_evento_id"))
+            joinColumns = [JoinColumn(name = "extra_id")],
+            inverseJoinColumns = [JoinColumn(name = "tipo_evento_id")]
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
@@ -42,7 +40,7 @@ open class Extra(
     }
 
     fun toExtraPrecioDTO(empresa: Empresa, fechaEvento: LocalDateTime): ExtraDTO {
-        val extraDTO = ExtraDTO(id, nombre, tipoExtra)
+        var extraDTO = ExtraDTO(id, nombre, tipoExtra)
         extraDTO.precio = empresa.getPrecioOfExtraByFecha(this, fechaEvento)
         return extraDTO
     }

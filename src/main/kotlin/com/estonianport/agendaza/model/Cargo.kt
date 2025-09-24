@@ -2,24 +2,22 @@ package com.estonianport.agendaza.model
 
 import com.estonianport.agendaza.model.enums.TipoCargo
 import jakarta.persistence.*
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 
 @Entity
-@Proxy(lazy = false)
-open class Cargo(
+class Cargo(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val usuario: Usuario,
+    var usuario: Usuario,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val empresa: Empresa,
+    var empresa: Empresa,
 
     @PrimaryKeyJoinColumn
     @Enumerated(EnumType.STRING)

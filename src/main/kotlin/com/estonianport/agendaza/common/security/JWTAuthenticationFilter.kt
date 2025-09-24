@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.common.security
 
+import com.estonianport.agendaza.service.UsuarioService
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -9,7 +10,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.io.IOException
 
-class JWTAuthenticationFilter : UsernamePasswordAuthenticationFilter() {
+class JWTAuthenticationFilter(
+    private val usuarioService: UsuarioService
+) : UsernamePasswordAuthenticationFilter() {
 
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse?): Authentication? {
         var authCredentials = AuthCredentials()
@@ -31,6 +34,8 @@ class JWTAuthenticationFilter : UsernamePasswordAuthenticationFilter() {
 
     override fun successfulAuthentication(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?, authResult: Authentication?) {
         val userDetails : UserDetailImpl = authResult?.principal as UserDetailImpl
+
+        //val email = authResult?.name ?: return usuarioService.actualizarFechaUltimoAcceso(email, LocalDate.now())
 
         val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
 

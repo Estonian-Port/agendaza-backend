@@ -4,20 +4,18 @@ import com.estonianport.agendaza.dto.EspecificacionDTO
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.persistence.*
-import org.hibernate.annotations.Proxy
 
 @Entity
-@Proxy(lazy = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Especificacion(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long,
+    open var id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    val empresa: Empresa){
+    var empresa: Empresa){
 
     abstract fun aplicar(evento: Evento)
 
@@ -26,22 +24,22 @@ abstract class Especificacion(
 }
 
 @Entity
-open class PrecioDePlatoNinos(
+class PrecioDePlatoNinos(
         id: Long,
         empresa: Empresa,
 
         @Column
-        open val porcentaje: Int) : Especificacion(id, empresa) {
+        open var porcentaje: Int) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadNinos = evento.capacidad.capacidadNinos
+        var capacidadNinos = evento.capacidad.capacidadNinos
         var precioPlato = 0.0
 
         if(evento.cateringOtro != 0.0){
             precioPlato = evento.cateringOtro
 
         }else if(evento.listaExtra.any { it.tipoExtra == TipoExtra.TIPO_CATERING }){
-            val extra = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING }
+            var extra = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING }
 
             if (extra != null) {
                 precioPlato = evento.empresa.getPrecioOfExtraByFecha(extra, evento.inicio)
@@ -53,29 +51,29 @@ open class PrecioDePlatoNinos(
 
     override fun toDTO(): EspecificacionDTO{
         return EspecificacionDTO(
-                nombre = "El precio del plato para niños representa un % del valor del plato",
+                nombre = "El precio del plato para niños representa un % del varor del plato",
                 detalle = "Porcentaje: $porcentaje%"
         )
     }
 }
 
 @Entity
-open class AgregarExtraNinoSiSuperaCapacidad(
+class AgregarExtraNinoSiSuperaCapacidad(
         id: Long,
         empresa: Empresa,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
-        open val extraNino: Extra) : Especificacion(id, empresa) {
+        open var extraNino: Extra) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadNinosEvento = evento.capacidad.capacidadNinos
-        val capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
+        var capacidadNinosEvento = evento.capacidad.capacidadNinos
+        var capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
 
         if (capacidadNinosEvento > capacidadNinosTipoEvento) {
-            val ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
+            var ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
 
-            val extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
+            var extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
             evento.listaEventoExtraVariable.add(extraEventoVariableNino)
         }
     }
@@ -89,28 +87,28 @@ open class AgregarExtraNinoSiSuperaCapacidad(
 }
 
 @Entity
-open class AgregarExtraCamareraSiSuperaCapacidad(
+class AgregarExtraCamareraSiSuperaCapacidad(
         id: Long,
         empresa: Empresa,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
-        open val extraCamarera: Extra,
+        open var extraCamarera: Extra,
 
         @Column
         @Enumerated(EnumType.STRING)
-        private val duracionEsperada: Duracion): Especificacion(id, empresa) {
+        private var duracionEsperada: Duracion): Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadAdultosEvento = evento.capacidad.capacidadAdultos
-        val capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
+        var capacidadAdultosEvento = evento.capacidad.capacidadAdultos
+        var capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
 
         // Verifica que la duración del evento coincida con la especificada
         if (evento.tipoEvento.duracion == duracionEsperada) {
             if (capacidadAdultosEvento > capacidadAdultosTipoEvento) {
-                val adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
+                var adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
 
-                val extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
+                var extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
                 evento.listaEventoExtraVariable.add(extraEventoVariableNino)
             }
 

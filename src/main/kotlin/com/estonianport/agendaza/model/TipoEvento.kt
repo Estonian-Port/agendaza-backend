@@ -16,34 +16,32 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 
 @Entity
-@Proxy(lazy = false)
 open class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @Column
-    val nombre: String,
+    var nombre: String,
 
     @JoinColumn(name = "duracion")
     @Enumerated(EnumType.STRING)
-    val duracion : Duracion,
+    var duracion : Duracion,
 
     @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
     @Column
-    val cantidadDuracion: LocalTime,
+    var cantidadDuracion: LocalTime,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    val empresa: Empresa){
+    var empresa: Empresa){
 
     @ManyToMany(mappedBy = "listaTipoEvento", fetch = FetchType.LAZY)
     var listaExtra: MutableSet<Extra> = mutableSetOf()

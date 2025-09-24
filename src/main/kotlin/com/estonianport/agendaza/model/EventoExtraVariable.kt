@@ -2,29 +2,25 @@ package com.estonianport.agendaza.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.PrimaryKeyJoinColumn
-import org.hibernate.annotations.Proxy
-import java.time.LocalDateTime
 
 @Entity
-@Proxy(lazy = false)
-open class EventoExtraVariable(
+class EventoExtraVariable(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val extra: Extra,
+    var extra: Extra,
 
     @Column
-    val cantidad : Int) {
+    var cantidad : Int) {
 
     @ManyToOne
     @PrimaryKeyJoinColumn

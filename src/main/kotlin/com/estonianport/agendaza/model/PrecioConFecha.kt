@@ -10,12 +10,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.PrimaryKeyJoinColumn
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @MappedSuperclass
-@Proxy(lazy = false)
 abstract class PrecioConFecha (
 
     @Id
@@ -23,17 +21,17 @@ abstract class PrecioConFecha (
     var id: Long,
 
     @Column
-    open var precio : Double,
+    var precio : Double,
 
     @Column
-    open var desde: LocalDateTime,
+    var desde: LocalDateTime,
 
     @Column
-    open var hasta: LocalDateTime,
+    var hasta: LocalDateTime,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    open var empresa: Empresa){
+    var empresa: Empresa){
 
     @Column
     var fechaBaja : LocalDate? = null
@@ -41,8 +39,7 @@ abstract class PrecioConFecha (
 }
 
 @Entity(name = "precio_con_fecha_extra")
-@Proxy(lazy = false)
-open class PrecioConFechaExtra(
+class PrecioConFechaExtra(
     id: Long,
     precio: Double,
     desde: LocalDateTime,
@@ -52,7 +49,7 @@ open class PrecioConFechaExtra(
     @JsonIgnore
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val extra: Extra) : PrecioConFecha(id, precio, desde, hasta, empresa) {
+    var extra: Extra) : PrecioConFecha(id, precio, desde, hasta, empresa) {
 
     fun toDTO(): PrecioConFechaDTO{
         return PrecioConFechaDTO(
@@ -67,8 +64,7 @@ open class PrecioConFechaExtra(
 }
 
 @Entity(name = "precio_con_fecha_tipo_evento")
-@Proxy(lazy = false)
-open class PrecioConFechaTipoEvento(
+class PrecioConFechaTipoEvento(
     id: Long,
     precio: Double,
     desde: LocalDateTime,
@@ -78,7 +74,7 @@ open class PrecioConFechaTipoEvento(
     @JsonIgnore
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {
+    var tipoEvento: TipoEvento): PrecioConFecha(id, precio, desde, hasta, empresa) {
 
     fun toDTO(): PrecioConFechaDTO{
         return PrecioConFechaDTO(

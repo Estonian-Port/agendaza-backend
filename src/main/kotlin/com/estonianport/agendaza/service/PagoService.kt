@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
+import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
@@ -26,18 +27,19 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     override val dao: CrudRepository<Pago, Long>
         get() = pagoRepository
 
-    fun getEventoForPago(codigo : String, empresa : Empresa) : PagoDTO {
-        val evento = empresa.listaEvento.find { it.codigo == codigo }
+    fun getEventoForEditEventoPago(evento: Evento) : EventoPagoDTO {
+        val eventoPagoDto = pagoRepository.getEventoForPago(evento.id)?:
+            throw NotFoundException("No se encontró el evento")
 
-        if(evento != null){
-            return PagoDTO(0, 0.0, Concepto.SENIA,null,evento.codigo,
-                MedioDePago.TRANSFERENCIA, evento.nombre, evento.inicio, LocalDateTime.now())
-        }
-        throw NotFoundException("No se encontró el evento con codigo: ${codigo}")
+        eventoPagoDto.precioTotal = evento.getPresupuestoTotal()
+
+        return eventoPagoDto
     }
 
-    fun fromListaPagoToListaPagoDto(listaPago : MutableSet<Pago>) : List<PagoDTO>{
-        return listaPago.map{ pago -> pago.toDTO() }}
+    fun getEventoForSavePago(eventoId : Long): PagoDTO {
+        return pagoRepository.getEventoForSavePago(eventoId, LocalDateTime.now())?:
+            throw NotFoundException("No se encontró el evento")
+    }
 
     fun contadorDePagos(id : Long) = pagoRepository.cantidadPagos(id)
 
@@ -60,16 +62,16 @@ class PagoService : GenericServiceImpl<Pago, Long>(){
     }
 
     fun getAllPagoFromEvento(eventoId: Long): List<PagoDTO> {
-        return pagoRepository.getAllPagoFromEvento(eventoId)
+        return pagoRepository.getAllPagoFromEvento(eventoId)?:
+            throw NotFoundException("No hay pagos registrados para el evento")
     }
 
     fun fromDTO(pagoDTO: PagoDTO, evento: Evento, encargado: Usuario): Pago {
         val fecha = if(pagoDTO.fecha.toLocalDate() != LocalDate.now()) pagoDTO.fecha else LocalDateTime.now()
 
-        return Pago(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto,
-            pagoDTO.medioDePago, fecha, evento, encargado,
+        return Pago(pagoDTO.id,pagoDTO.monto, pagoDTO.concepto!!,
+            pagoDTO.medioDePago!!, fecha, evento, encargado,
             pagoDTO.numeroCuota)
     }
-
 
 }

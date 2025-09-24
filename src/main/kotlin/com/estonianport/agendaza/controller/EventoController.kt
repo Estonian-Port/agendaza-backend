@@ -45,9 +45,6 @@ class EventoController {
     lateinit var emailService: EmailService
 
     @Autowired
-    lateinit var pagoService: PagoService
-
-    @Autowired
     lateinit var pdfService: PdfService
 
     // TODO Sacar, no se va a usar, ya que se accede desde empresa

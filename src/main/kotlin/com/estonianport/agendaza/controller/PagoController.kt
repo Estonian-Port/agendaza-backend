@@ -2,13 +2,11 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
-import com.estonianport.agendaza.dto.CodigoEmpresaId
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
 import kotlin.coroutines.Continuation
@@ -75,19 +74,13 @@ class PagoController {
     }
 
     @GetMapping("/getAllMedioDePago")
-    fun getAllMedioDePago(): MutableSet<MedioDePago> {
-        return MedioDePago.values().toMutableSet()
+    fun getAllMedioDePago(): Array<MedioDePago> {
+        return MedioDePago.entries.toTypedArray()
     }
 
     @GetMapping("/getAllConcepto")
-    fun getAllConcepto(): MutableSet<Concepto> {
-        return Concepto.values().toMutableSet()
-    }
-
-    @PutMapping("/getEventoForPago")
-    fun getEventoForPago(@RequestBody codigoEmpresaId: CodigoEmpresaId): PagoDTO {
-        val empresa = empresaService.get(codigoEmpresaId.empresaId)!!
-        return pagoService.getEventoForPago(codigoEmpresaId.codigo, empresa)
+    fun getAllConcepto(): Array<Concepto> {
+        return Concepto.entries.toTypedArray()
     }
 
     @GetMapping("/getAllPagos/{id}/{pageNumber}")
@@ -103,16 +96,24 @@ class PagoController {
     @GetMapping("/cantPagos/{id}")
     fun cantPagos(@PathVariable("id") id: Long) =  pagoService.contadorDePagos(id)
 
-
     @GetMapping("/cantPagosFiltrados/{id}/{buscar}")
     fun cantPagosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
         return pagoService.contadorDePagosFiltrados(id,buscar)
     }
 
-    // TODO se podria dividir en dos consultas, una q traiga a lista y otra q traiga la info del evento
+    @GetMapping("/getEventoForSavePago/{eventoId}")
+    fun getEventoForSavePago(@PathVariable("eventoId") eventoId: Long): PagoDTO {
+        return pagoService.getEventoForSavePago(eventoId)
+    }
+
+    @GetMapping("/getEventoForEditEventoPago/{eventoId}")
+    fun getEventoForEditEventoPago(@PathVariable("eventoId") eventoId: Long): EventoPagoDTO {
+        return pagoService.getEventoForEditEventoPago(eventoService.get(eventoId)!!)
+    }
+
     @GetMapping("/getAllPagoFromEvento/{eventoId}")
-    fun getAllPagoFromEvento(@PathVariable("eventoId") eventoId: Long): EventoPagoDTO {
-        return eventoService.get(eventoId)!!.toEventoPagoDto(pagoService.getAllPagoFromEvento(eventoId))
+    fun getAllPagoFromEvento(@PathVariable("eventoId") eventoId: Long): List<PagoDTO> {
+        return pagoService.getAllPagoFromEvento(eventoId)
     }
 
     @GetMapping("/descargarPago/{id}")

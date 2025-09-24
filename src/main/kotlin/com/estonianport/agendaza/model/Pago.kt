@@ -16,39 +16,39 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-open class Pago(
+ class Pago(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long,
+    var id: Long,
 
     @Column
-    open val monto: Double,
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    open val concepto: Concepto,
+    var monto: Double,
 
     @Column
     @Enumerated(EnumType.STRING)
-    open val medioDePago: MedioDePago,
+    var concepto: Concepto,
 
     @Column
-    open val fecha: LocalDateTime,
+    @Enumerated(EnumType.STRING)
+    var medioDePago: MedioDePago,
+
+    @Column
+    var fecha: LocalDateTime,
 
     @ManyToOne
     @JoinColumn(name = "evento_id")
-    open val evento: Evento,
+    var evento: Evento,
 
     @ManyToOne
     @JoinColumn(name = "encargado_id")
-    open val encargado: Usuario,
+    var encargado: Usuario,
 
     @Column
-    open var numeroCuota: String? = null,
+    var numeroCuota: String? = null,
 
     @Column
-    open var fechaBaja: LocalDate? = null
+    var fechaBaja: LocalDate? = null
 ) {
 
     fun toDTO(): PagoDTO {

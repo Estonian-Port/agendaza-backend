@@ -22,7 +22,7 @@ class EventoReservaDTO(val id: Long, val nombre: String, var capacidad : Capacid
                        val cliente : Usuario, val encargadoId : Long, val estado : Estado, val anotaciones : String) {}
 
 class EventoPagoDTO(val id : Long, val nombre : String, val codigo : String,
-                    val precioTotal : Double, val listaPagos : List<PagoDTO>) {}
+                    var precioTotal : Double) {}
 
 class EventoExtraDTO(val id: Long, val nombre: String, val codigo: String,
                      val extraOtro: Double, val descuento: Long,

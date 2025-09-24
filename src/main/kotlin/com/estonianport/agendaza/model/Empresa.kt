@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.persistence.*
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -21,63 +20,62 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = Catering::class, name ="CATERING"),
     JsonSubTypes.Type(value = Prestador::class, name ="PRESTADOR"))
 @Entity
-@Proxy(lazy = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 abstract class Empresa(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @Column
-    val nombre: String,
+    var nombre: String,
 
     @Column
-    val telefono : Long,
+    var telefono : Long,
 
     @Column
-    val email : String,
+    var email : String,
 
     @Column
-    val calle: String,
+    var calle: String,
 
     @Column
-    val numero: Int,
+    var numero: Int,
 
     @Column
-    val municipio: String) {
+    var municipio: String) {
 
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaEvento : MutableSet<Evento> = mutableSetOf()
+    var listaEvento : MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaEmpleados: MutableSet<Cargo> = mutableSetOf()
+    var listaEmpleados: MutableSet<Cargo> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
+    var listaPrecioConFechaExtra: MutableSet<PrecioConFechaExtra> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
+    var listaPrecioConFechaTipoEvento: MutableSet<PrecioConFechaTipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaEspecificacion: MutableList<Especificacion> = mutableListOf()
+    var listaEspecificacion: MutableList<Especificacion> = mutableListOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    val listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
+    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "empresa_extra",
-            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
-            inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+            joinColumns = [JoinColumn(name = "empresa_id")],
+            inverseJoinColumns = [JoinColumn(name = "extra_id")]
     )
     var listaExtra: MutableSet<Extra> = mutableSetOf()
 
@@ -85,8 +83,8 @@ abstract class Empresa(
     @ManyToMany
     @JoinTable(
             name = "empresa_servicio",
-            joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
-            inverseJoinColumns = arrayOf(JoinColumn(name = "servicio_id"))
+            joinColumns = [JoinColumn(name = "empresa_id")],
+            inverseJoinColumns = [JoinColumn(name = "servicio_id")]
     )
     var listaServicio: MutableSet<Servicio> = mutableSetOf()
 
@@ -94,8 +92,8 @@ abstract class Empresa(
     @ManyToMany
     @JoinTable(
         name = "empresa_clausula",
-        joinColumns = arrayOf(JoinColumn(name = "empresa_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "clasusula_id"))
+        joinColumns = [JoinColumn(name = "empresa_id")],
+        inverseJoinColumns = [JoinColumn(name = "clasusula_id")]
     )
     var listaClausula: MutableSet<Clausula> = mutableSetOf()
 
@@ -168,8 +166,7 @@ abstract class Empresa(
 }
 
 @Entity
-@Proxy(lazy = false)
-open class Salon(
+class Salon(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -185,8 +182,7 @@ open class Salon(
 }
 
 @Entity
-@Proxy(lazy = false)
-open class Catering(
+class Catering(
     id : Long,
     nombre : String,
     telefono : Long,
@@ -202,8 +198,7 @@ open class Catering(
 }
 
 @Entity
-@Proxy(lazy = false)
-open class Prestador(
+class Prestador(
     id : Long,
     nombre : String,
     telefono : Long,

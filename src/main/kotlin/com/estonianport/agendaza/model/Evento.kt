@@ -18,24 +18,22 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrimaryKeyJoinColumn
-import org.hibernate.annotations.Proxy
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
-@Proxy(lazy = false)
-open class Evento(
+class Evento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    var id: Long,
 
     @Column
     var nombre: String,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val tipoEvento: TipoEvento,
+    var tipoEvento: TipoEvento,
 
     @Column
     var inicio: LocalDateTime,
@@ -43,7 +41,7 @@ open class Evento(
     @Column
     var fin: LocalDateTime,
 
-    @ManyToOne(cascade = arrayOf(CascadeType.ALL))
+    @ManyToOne(cascade = [CascadeType.ALL])
     @PrimaryKeyJoinColumn
     var capacidad: Capacidad,
 
@@ -56,8 +54,8 @@ open class Evento(
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_extra",
-        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "extra_id"))
+        joinColumns = [JoinColumn(name = "evento_id")],
+        inverseJoinColumns = [JoinColumn(name = "extra_id")]
     )
     var listaExtra: MutableSet<Extra>,
 
@@ -72,36 +70,36 @@ open class Evento(
 
     @ManyToOne
     @PrimaryKeyJoinColumn
-    val encargado: Usuario,
+    var encargado: Usuario,
 
     @ManyToOne
     @PrimaryKeyJoinColumn
     var cliente: Usuario,
 
     @Column
-    val codigo: String,
+    var codigo: String,
 
     @Column
     @Enumerated(EnumType.STRING)
-    val estado: Estado,
+    var estado: Estado,
 
     @Column
     var anotaciones: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    val empresa : Empresa){
+    var empresa : Empresa){
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_empleado",
-        joinColumns = arrayOf(JoinColumn(name = "evento_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "usuario_id"))
+        joinColumns = [JoinColumn(name = "evento_id")],
+        inverseJoinColumns = [JoinColumn(name = "usuario_id")]
     )
-    val listaEmpleado: MutableSet<Usuario> = mutableSetOf()
+    var listaEmpleado: MutableSet<Usuario> = mutableSetOf()
 
-    @OneToMany(mappedBy = "evento", cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY)
-    val listaPago: MutableSet<Pago> = mutableSetOf()
+    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var listaPago: MutableSet<Pago> = mutableSetOf()
 
     @Column
     var fechaBaja : LocalDate? = null
@@ -185,8 +183,8 @@ open class Evento(
             listaExtraVariable, empresa.toTipoEventoPrecioDTO(inicio, tipoEvento), inicio)
     }
 
-    fun toEventoPagoDto(listaPago: List<PagoDTO>): EventoPagoDTO {
-        return EventoPagoDTO(id, nombre, codigo, getPresupuestoTotal(), listaPago)
+    fun toEventoPagoDto(): EventoPagoDTO {
+        return EventoPagoDTO(id, nombre, codigo, getPresupuestoTotal())
     }
 
     fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDTO {
