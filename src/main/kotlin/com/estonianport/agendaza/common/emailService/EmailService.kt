@@ -42,6 +42,7 @@ class EmailService {
             helper.setSubject(subject)
             sender.send(message)
         } catch (e: MessagingException) {
+            println(e.message)
             throw BusinessException("No se pudo enviar el mail")
         }
     }
