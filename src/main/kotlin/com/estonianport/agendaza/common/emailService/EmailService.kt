@@ -8,48 +8,68 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.enums.TipoExtra
-import jakarta.mail.MessagingException
-import jakarta.mail.internet.MimeMessage
 import org.apache.commons.validator.routines.EmailValidator
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 
 @Service
 class EmailService {
 
-    @Autowired
-    lateinit var sender: JavaMailSender
+    private val httpClient = HttpClient.newHttpClient()
+    private val resendApiKey = System.getenv("MAIL_PASS")
+        ?: throw IllegalStateException("MAIL_PASS no definido")
+    private val fromEmail = "Agendaza <agendaza@estonianport.com.ar>"
 
     fun isEmailValid(target: String): Boolean {
         return target.isNotEmpty() && EmailValidator.getInstance().isValid(target)
     }
 
     fun sendEmail(emailBody: Email) {
-        if(!isEmailValid(emailBody.email)){
+        if (!isEmailValid(emailBody.email)) {
             throw BusinessException("Email Invalido")
         }
         sendEmailTool(emailBody.content, emailBody.email, emailBody.subject)
     }
 
-    private fun sendEmailTool(textMessage: String, email: String, subject: String) {
-        val message: MimeMessage = sender.createMimeMessage()
-        val helper = MimeMessageHelper(message)
+    private fun sendEmailTool(html: String, email: String, subject: String) {
         try {
-            helper.setTo(email)
-            helper.setText(textMessage, true)
-            helper.setSubject(subject)
-            sender.send(message)
-        } catch (e: MessagingException) {
-            println(e.message)
+            val body = """
+            {
+              "from": "$fromEmail",
+              "to": ["$email"],
+              "subject": "$subject",
+              "html": ${jsonEscape(html)}
+            }
+            """.trimIndent()
+
+            val request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.resend.com/emails"))
+                .header("Authorization", "Bearer $resendApiKey")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build()
+
+            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+
+            if (response.statusCode() !in 200..299) {
+                println("Error Resend: ${response.body()}")
+                throw BusinessException("No se pudo enviar el mail")
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
             throw BusinessException("No se pudo enviar el mail")
         }
     }
 
     fun loadHtmlTemplate(nombreArchivo: String): String {
-        val inputStream = javaClass.classLoader.getResourceAsStream("templates/email/$nombreArchivo")
-                ?: throw BusinessException("No se encontró la plantilla de mail")
+        val inputStream = javaClass.classLoader
+            .getResourceAsStream("templates/email/$nombreArchivo")
+            ?: throw BusinessException("No se encontró la plantilla de mail")
+
         return inputStream.bufferedReader().use { it.readText() }
     }
 
@@ -61,9 +81,9 @@ class EmailService {
         return result
     }
 
-    fun enviarMailComprabanteReserva(evento: Evento, action: String, empresa : Empresa) {
+    fun enviarMailComprabanteReserva(evento: Evento, action: String, empresa: Empresa) {
 
-        if(!isEmailValid(evento.cliente.email)){
+        if (!isEmailValid(evento.cliente.email)) {
             throw BusinessException("Email Invalido")
         }
 
@@ -87,7 +107,8 @@ class EmailService {
         }
 
         // -------------------------- Extra variable --------------------------
-        val listaEventoEventoExtraVariable: List<EventoExtraVariable> = evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+        val listaEventoEventoExtraVariable: List<EventoExtraVariable> =
+            evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
         val extraVariableMail = StringBuilder()
         if (listaEventoEventoExtraVariable.isNotEmpty()) {
             val listaExtraVariable: MutableSet<Extra> = mutableSetOf()
@@ -154,7 +175,8 @@ class EmailService {
             }
 
             // ------------------- Extra Catering -----------------------
-            val listaCateringExtraCatering: List<EventoExtraVariable> = evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
+            val listaCateringExtraCatering: List<EventoExtraVariable> =
+                evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
             val extraVariableCateringMail = StringBuilder()
             if (listaCateringExtraCatering.isNotEmpty()) {
                 val listaExtraCatering: MutableSet<Extra> = mutableSetOf()
@@ -196,15 +218,10 @@ class EmailService {
         val horaInicio: String = evento.inicio.toLocalTime().toString()
         val horaFin: String = evento.fin.toLocalTime().toString()
 
-        // ----------------- Armado email -------------------------
-        val emailBody = Email(
-            evento.cliente.email,
-            "Tu evento: " + evento.nombre + " para el " + dia + ", codigo: " + evento.codigo
-        )
-
         // ----------------- Content email -------------------------
         val template = loadHtmlTemplate("comprobante_reserva.html")
-        emailBody.content = renderTemplate(template, mapOf(
+        val content = renderTemplate(
+            template, mapOf(
                 "empresa_logo" to empresa.logo,
                 "evento_nombre" to evento.nombre,
                 "action" to action,
@@ -235,29 +252,31 @@ class EmailService {
                 "imagen_ig" to "https://iili.io/3USINa4.png",
                 "imagen_web" to "https://iili.io/3USIh6G.png",
                 "imagen_linkedin" to "https://iili.io/3USIwFf.png",
-        ))
+            )
+        )
 
         // ----------------- Envio email -------------------------
-        sendEmail(emailBody)
-
+        sendEmail(
+            Email(
+                email = evento.cliente.email,
+                subject = "Tu evento: " + evento.nombre + " para el " + dia + ", codigo: " + evento.codigo,
+                content = content
+            )
+        )
     }
 
-    fun enviarEmailPago(pago: Pago, evento: Evento, empresa : Empresa) {
+    fun enviarEmailPago(pago: Pago, evento: Evento, empresa: Empresa) {
         val diaPago: String = pago.fecha.toLocalDate().toString()
-        val horaPago: String = pago.fecha.toLocalTime().hour.toString() + ":" + pago.fecha.toLocalTime().minute.toString()
+        val horaPago: String =
+            pago.fecha.toLocalTime().hour.toString() + ":" + pago.fecha.toLocalTime().minute.toString()
 
-        // ---------------- Dia y hora evento ---------------------
         val dia: String = evento.inicio.toLocalDate().toString()
         val horaInicio: String = evento.inicio.toLocalTime().toString()
         val horaFin: String = evento.fin.toLocalTime().toString()
 
-        // ----------------- Armado email -------------------------
-        val emailBody =
-                Email(evento.cliente.email, "Tu pago del evento  " + evento.nombre + ", codigo: " + evento.codigo)
-
-        // ----------------- Content email -------------------------
         val template = loadHtmlTemplate("comprobante_pago.html")
-        emailBody.content = renderTemplate(template, mapOf(
+        val content = renderTemplate(
+            template, mapOf(
                 "empresa_logo" to empresa.logo,
                 "evento_nombre" to evento.nombre,
                 "codigo" to evento.codigo,
@@ -284,25 +303,27 @@ class EmailService {
                 "imagen_ig" to "https://iili.io/3USINa4.png",
                 "imagen_web" to "https://iili.io/3USIh6G.png",
                 "imagen_linkedin" to "https://iili.io/3USIwFf.png"
-        ))
+            )
+        )
 
-        sendEmail(emailBody)
+        sendEmail(
+            Email(
+                email = evento.cliente.email,
+                subject = "Tu pago del evento  " + evento.nombre + ", codigo: " + evento.codigo,
+                content = content
+            )
+        )
     }
 
-    fun enviarEmailEstadoCuenta(evento: Evento, empresa : Empresa) {
+    fun enviarEmailEstadoCuenta(evento: Evento, empresa: Empresa) {
 
-        // ---------------- Dia y hora evento ---------------------
         val dia: String = evento.inicio.toLocalDate().toString()
         val horaInicio: String = evento.inicio.toLocalTime().toString()
         val horaFin: String = evento.fin.toLocalTime().toString()
 
-        // ----------------- Armado email -------------------------
-        val emailBody =
-                Email(evento.cliente.email, "Tu estado de cuenta del evento  " + evento.nombre + ", codigo: " + evento.codigo)
-
-        // ----------------- Content email -------------------------
         val template = loadHtmlTemplate("comprobante_estado_cuenta.html")
-        emailBody.content = renderTemplate(template, mapOf(
+        val content = renderTemplate(
+            template, mapOf(
                 "empresa_logo" to empresa.logo,
                 "evento_nombre" to evento.nombre,
                 "codigo" to evento.codigo,
@@ -326,9 +347,23 @@ class EmailService {
                 "imagen_ig" to "https://iili.io/3USINa4.png",
                 "imagen_web" to "https://iili.io/3USIh6G.png",
                 "imagen_linkedin" to "https://iili.io/3USIwFf.png"
-        ))
+            )
+        )
 
-        sendEmail(emailBody)
+        sendEmail(
+            Email(
+                email = evento.cliente.email,
+                subject = "Tu estado de cuenta del evento  " + evento.nombre + ", codigo: " + evento.codigo,
+                content = content
+            )
+        )
     }
 
+    private fun jsonEscape(html: String): String {
+        return "\"" + html
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "") + "\""
+    }
 }
