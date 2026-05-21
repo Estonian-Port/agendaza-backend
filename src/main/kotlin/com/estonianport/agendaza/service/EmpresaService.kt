@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EmpresaService : GenericServiceImpl<Empresa, Long>() {
@@ -33,18 +34,20 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         }
 
         val empresaActualizada = empresa.copy(empresaDTO.nombre, empresaDTO.telefono, empresaDTO.email,
-                empresaDTO.calle, empresaDTO.numero, empresaDTO.municipio)
+            empresaDTO.calle, empresaDTO.numero, empresaDTO.municipio)
 
         return empresaRepository.save(empresaActualizada).toGenericItemDTO()
     }
 
+
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
         return eventoRepository.eventosByEmpresa(id, PageRequest.of(pageNumber,10))
-                .map { evento -> evento.toDto() }.toList()
+            .content
     }
+
     fun getAllEventoByFilterName(id : Long, pageNumber : Int, buscar: String): List<EventoDTO>{
         return eventoRepository.eventosByNombre(id, buscar, PageRequest.of(pageNumber,10))
-            .map { evento -> evento.toDto() }.toList()
+            .content
     }
 
     fun getAllCantidadesForPanelAdminByEmpresaId(id: Long): CantidadesPanelAdminDTO {
@@ -62,6 +65,5 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO> {
         return empresaRepository.getAllPrecioConFechaByTipoEventoId(empresaId, tipoEventoId)
     }
-
 
 }

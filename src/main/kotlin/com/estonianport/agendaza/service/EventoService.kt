@@ -13,6 +13,7 @@ import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.CollectionUtils
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -33,12 +34,18 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         return eventoRepository.getAllEventosForAgendaByEmpresaId(id)
     }
 
-    fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): List<Evento> {
-        return eventoRepository.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto.usuarioId, usuarioEmpresaDto.empresaId)
+    fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): List<EventoConUsuarioDTO>{
+        return eventoRepository.getEventosByUsuarioIdAndEmpresaId(
+            usuarioEmpresaDto.usuarioId,
+            usuarioEmpresaDto.empresaId
+        )
     }
 
     fun getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): Int {
-        return eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto.usuarioId, usuarioEmpresaDto.empresaId)
+        return eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(
+            usuarioEmpresaDto.usuarioId,
+            usuarioEmpresaDto.empresaId
+        )
     }
 
     fun getAllEventosForAgendaByFecha(fecha: String, empresaId : Long): List<EventoDTO> {
@@ -47,6 +54,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         return eventoRepository.getAllEventosForAgendaByFecha(fechaInicio, fechaFin, empresaId)
     }
 
+    @Transactional(readOnly = true)
     fun findById(id : Long): Evento {
         return eventoRepository.findById(id).get()
     }
@@ -54,6 +62,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     fun contadorDeEventos(id : Long): Int {
         return eventoRepository.cantidadDeEventos(id)
     }
+
     fun contadorDeEventosFiltrados(id : Long, buscar : String): Int {
         return eventoRepository.cantidadDeEventosFiltrados(id,buscar)
     }
@@ -125,10 +134,9 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
                 }
             }
         }
-        // Si no intercepta a ninguna da el disponible
         return true
     }
-    
+
     private fun getRango(inicio: String, fin: String): List<Int> {
         val horaInicioSplit = inicio.split(":")
         val horaFinSplit = fin.split(":")
@@ -141,7 +149,6 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
 
     private fun getRangoConMargen(inicio: String, fin: String): List<Int> {
         val horaInicioSplit = inicio.split(":")
-
         val horaFinSplit = fin.split(":")
 
         var horaInicio = (horaInicioSplit[0] + horaInicioSplit[1]).toInt()
@@ -194,6 +201,7 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
             empresa)
     }
 
+    @Transactional(readOnly = true)
     fun getByCodigoAndEmpresaId(codigo : String, empresaId : Long): Evento {
         return eventoRepository.getByCodigoAndEmpresaId(codigo, empresaId)
     }

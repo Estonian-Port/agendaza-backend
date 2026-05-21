@@ -47,3 +47,27 @@ class EventoVerDTO(val id: Long, val nombre: String, val codigo: String, val ini
 
 class EventoBuscarFechaDTO(val empresaId : Long, val desde : LocalDateTime, val hasta : LocalDateTime) {
 }
+
+data class EventoConUsuarioDTO(
+    val id: Long,
+    val nombre: String,
+    val codigo: String,
+    val usuarioId: Long,
+    val usuarioNombre: String,
+    val usuarioApellido: String,
+    val usuarioUsername: String
+)
+
+fun EventoConUsuarioDTO.toEventoUsuarioDto(): EventoUsuarioDTO {
+    return EventoUsuarioDTO(
+        id = id,
+        nombre = nombre,
+        codigo = codigo,
+        usuario = UsuarioAbmDTO(
+            id = usuarioId,
+            nombre = usuarioNombre,
+            apellido = usuarioApellido,
+            username = usuarioUsername
+        )
+    )
+}

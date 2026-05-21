@@ -449,8 +449,8 @@ class EventoController {
     }
 
     @PutMapping("/getEventosByUsuarioAndEmpresa")
-    fun getEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDTO): List<EventoUsuarioDTO> {
-        return eventoService.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto).map { it.toEventoUsuarioDto(it) }
+    fun getEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDTO): List<EventoConUsuarioDTO> {
+        return eventoService.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto)
     }
 
     @PutMapping("/getCantEventosByUsuarioAndEmpresa")
