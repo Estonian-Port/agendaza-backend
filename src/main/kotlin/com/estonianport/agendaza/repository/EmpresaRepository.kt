@@ -14,70 +14,29 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
     @Query("SELECT e FROM Empresa e WHERE e.id = :empresaId")
     override fun findById(empresaId: Long) : Optional<Empresa>
 
-    @Query("SELECT new com.estonianport.agendaza.dto.CantidadesPanelAdminDTO (" +
-            "(" +
-            "SELECT COUNT(c) " +
-            "FROM Cargo c " +
-            "WHERE c.empresa.id = ?1" +
-            "AND c.fechaBaja IS NULL), " +
-            "(" +
-            "SELECT COUNT(te) " +
-            "FROM TipoEvento te " +
-            "WHERE te.empresa.id = ?1 " +
-            "   AND te.fechaBaja IS NULL ), " +
-            "(" +
-            "SELECT COUNT(ex) " +
-            "FROM Extra ex " +
-            "INNER JOIN ex.listaEmpresa e " +
-            "WHERE e.id = ?1 " +
-            "   AND ex.fechaBaja IS NULL " +
-            "   AND (ex.tipoExtra = 'EVENTO' " +
-            "   OR ex.tipoExtra = 'VARIABLE_EVENTO')), " +
-            "(" +
-            "SELECT COUNT(p) " +
-            "FROM Pago p " +
-            "INNER JOIN Evento ev ON " +
-            "   ev.id = p.evento.id " +
-            "INNER JOIN Empresa e ON " +
-            "   e.id = ev.empresa.id " +
-            "WHERE e.id = ?1 " +
-            "   AND p.fechaBaja IS NULL), " +
-            "(" +
-            "SELECT COUNT(ev) " +
-            "FROM Evento ev " +
-            "WHERE ev.empresa.id = ?1 " +
-            "AND ev.fechaBaja IS NULL), " +
-            "(" +
-            "SELECT COUNT(DISTINCT ev.cliente) " +
-            "FROM Evento ev " +
-            "INNER JOIN Empresa e ON " +
-            "   e.id = ev.empresa.id " +
-            "INNER JOIN Usuario u ON " +
-            "   u.id = ev.cliente.id " +
-            "WHERE e.id = ?1 " +
-            "AND u.fechaBaja IS NULL), " +
-            "(" +
-            "SELECT COUNT(ex) " +
-            "FROM Extra ex " +
-            "INNER JOIN ex.listaEmpresa e " +
-            "WHERE e.id = ?1 " +
-            "   AND ex.fechaBaja IS NULL " +
-            "   AND (ex.tipoExtra = 'TIPO_CATERING' " +
-            "   OR ex.tipoExtra = 'VARIABLE_CATERING')), " +
-            "(" +
-            "SELECT COUNT(s) " +
-            "FROM Servicio s " +
-            "INNER JOIN s.listaEmpresa e " +
-            "WHERE e.id = ?1 " +
-            "   AND s.fechaBaja IS NULL ), " +
-            "(" +
-            "SELECT COUNT(c) " +
-            "FROM Clausula c " +
-            "INNER JOIN c.listaEmpresa e " +
-            "WHERE e.id = ?1)) " +
-            "FROM Empresa e " +
-            "WHERE e.id = ?1")
-    fun getAllCantidadesForPanelAdminByEmpresaId(id : Long) : CantidadesPanelAdminDTO
+    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :id AND c.fechaBaja IS NULL")
+    fun countCargosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(te) FROM TipoEvento te WHERE te.empresa.id = :id AND te.fechaBaja IS NULL")
+    fun countTipoEventoByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(ex) FROM Extra ex JOIN ex.listaEmpresa e WHERE e.id = :id AND ex.fechaBaja IS NULL AND ex.tipoExtra IN :tipos")
+    fun countExtraByEmpresaIdAndTipos(id: Long, tipos: List<String>): Long
+
+    @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = :id AND p.fechaBaja IS NULL")
+    fun countPagosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(ev) FROM Evento ev WHERE ev.empresa.id = :id AND ev.fechaBaja IS NULL")
+    fun countEventosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(DISTINCT ev.cliente) FROM Evento ev WHERE ev.empresa.id = :id AND ev.cliente.fechaBaja IS NULL")
+    fun countClientesDistintosActivosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(s) FROM Servicio s JOIN s.listaEmpresa e WHERE e.id = :id AND s.fechaBaja IS NULL")
+    fun countServiciosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(c) FROM Clausula c JOIN c.listaEmpresa e WHERE e.id = :id")
+    fun countClausulasByEmpresaId(id: Long): Long
 
     @Query("SELECT es FROM Empresa e INNER JOIN e.listaEspecificacion es WHERE e.id = :empresaId")
     fun getEspecificaciones(empresaId: Long): List<Especificacion>

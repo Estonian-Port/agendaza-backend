@@ -4,9 +4,9 @@ import GenericServiceImpl
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.repository.EmpresaRepository
-import com.estonianport.agendaza.repository.EventoRepository
+import com.estonianport.agendaza.repository.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -20,6 +20,24 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     @Autowired
     lateinit var eventoRepository: EventoRepository
+
+    @Autowired
+    lateinit var cargoRepository: CargoRepository
+
+    @Autowired
+    lateinit var tipoEventoRepository: TipoEventoRepository
+
+    @Autowired
+    lateinit var extraRepository: ExtraRepository
+
+    @Autowired
+    lateinit var pagoRepository: PagoRepository
+
+    @Autowired
+    lateinit var servicioRepository: ServicioRepository
+
+    @Autowired
+    lateinit var clausulaRepository: ClausulaRepository
 
     override val dao: CrudRepository<Empresa, Long>
         get() = empresaRepository
@@ -39,7 +57,6 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         return empresaRepository.save(empresaActualizada).toGenericItemDTO()
     }
 
-
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
         return eventoRepository.eventosByEmpresa(id, PageRequest.of(pageNumber,10))
             .content
@@ -50,8 +67,32 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
             .content
     }
 
+    @Cacheable(value = ["panelAdminCantidades"], key = "#id")
+    @Transactional(readOnly = true)
     fun getAllCantidadesForPanelAdminByEmpresaId(id: Long): CantidadesPanelAdminDTO {
-        return empresaRepository.getAllCantidadesForPanelAdminByEmpresaId(id)
+        val cargos = cargoRepository.countActivosByEmpresaId(id)
+        val tiposEvento = tipoEventoRepository.countActivosByEmpresaId(id)
+
+        val extrasEvento = extraRepository.countActivosByEmpresaIdAndTipos(id, listOf("EVENTO", "VARIABLE_EVENTO"))
+        val extrasCatering = extraRepository.countActivosByEmpresaIdAndTipos(id, listOf("TIPO_CATERING", "VARIABLE_CATERING"))
+
+        val pagos = pagoRepository.countActivosByEmpresaId(id)
+        val eventos = eventoRepository.countActivosByEmpresaId(id)
+        val clientes = eventoRepository.countClientesByEmpresaId(id)
+        val servicios = servicioRepository.countActivosByEmpresaId(id)
+        val clausulas = clausulaRepository.countByEmpresaId(id)
+
+        return CantidadesPanelAdminDTO(
+            cantUsuarios = cargos,
+            cantTipoEvento = tiposEvento,
+            cantExtras = extrasEvento,
+            cantPagos = pagos,
+            cantEventos = eventos,
+            cantCliente = clientes,
+            cantCatering = extrasCatering,
+            cantServicios = servicios,
+            cantClausula = clausulas
+        )
     }
 
     fun getEspecificaciones(id: Long): List<EspecificacionDTO> {
@@ -65,5 +106,4 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO> {
         return empresaRepository.getAllPrecioConFechaByTipoEventoId(empresaId, tipoEventoId)
     }
-
 }

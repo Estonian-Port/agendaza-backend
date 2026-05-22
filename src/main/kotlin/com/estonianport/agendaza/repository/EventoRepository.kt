@@ -66,4 +66,8 @@ interface EventoRepository : CrudRepository<Evento, Long>{
     @Query("SELECT e FROM Evento e WHERE e.codigo = ?1 AND e.empresa.id = ?2 AND e.fechaBaja IS NULL")
     fun getByCodigoAndEmpresaId(codigo : String, empresaId : Long) : Evento
 
-}
+    @Query("SELECT COUNT(ev) FROM Evento ev WHERE ev.empresa.id = :id AND ev.fechaBaja IS NULL")
+    fun countActivosByEmpresaId(id: Long): Long
+
+    @Query("SELECT COUNT(DISTINCT ev.cliente) FROM Evento ev WHERE ev.empresa.id = :id AND ev.cliente.fechaBaja IS NULL")
+    fun countClientesByEmpresaId(id: Long): Long}

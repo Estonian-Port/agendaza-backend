@@ -86,4 +86,6 @@ interface ExtraRepository : CrudRepository<Extra, Long>{
             ORDER BY e.nombre""")
     fun getAllExtraConPrecioByTipoEventoAndFecha(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime, tipoExtra: TipoExtra): List<ExtraPrecioDTO>
 
+    @Query("SELECT COUNT(ex) FROM Extra ex JOIN ex.listaEmpresa e WHERE e.id = :id AND ex.fechaBaja IS NULL AND ex.tipoExtra IN :tipos")
+    fun countActivosByEmpresaIdAndTipos(id: Long, tipos: List<String>): Long
 }

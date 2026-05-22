@@ -27,5 +27,7 @@ interface CargoRepository : CrudRepository<Cargo, Long>{
     @Query("SELECT c.tipoCargo FROM Cargo c WHERE c.empresa.id = :empresaId AND c.usuario.id = :usuarioId AND c.fechaBaja IS NULL")
     fun getTipoCargoByEmpresaIdAndUsuarioId(empresaId: Long, usuarioId: Long): TipoCargo
 
+    @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :id AND c.fechaBaja IS NULL")
+    fun countActivosByEmpresaId(id: Long): Long
 }
 

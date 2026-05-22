@@ -42,4 +42,6 @@ interface ServicioRepository : CrudRepository<Servicio, Long> {
         ORDER BY s.id DESC""")
     fun getAllServicioByTipoEventoId(tipoEventoId: Long): List<ServicioDTO>
 
+    @Query("SELECT COUNT(s) FROM Servicio s JOIN s.listaEmpresa e WHERE e.id = :id AND s.fechaBaja IS NULL")
+    fun countActivosByEmpresaId(id: Long): Long
 }
