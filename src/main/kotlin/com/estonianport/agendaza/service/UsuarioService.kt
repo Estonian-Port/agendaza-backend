@@ -19,7 +19,6 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     override val dao: CrudRepository<Usuario, Long>
         get() = usuarioRepository
 
-    @Cacheable(value=["usuarioUsername"], key = "#username")
     fun getUsuarioIdByUsername(username: String): Long {
         return usuarioRepository.getByUsername(username).id
     }
