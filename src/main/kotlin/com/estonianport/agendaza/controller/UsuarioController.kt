@@ -159,4 +159,9 @@ class UsuarioController {
         return usuarioService.save(usuario).toClienteDto()
     }
 
+    @GetMapping("/getListaAgendaByUsuarioId/{id}")
+    fun getListaAgendaByUsuarioId(@PathVariable("id") usuarioId: Long): List<AgendaDTO> {
+        return cargoService.getListaCargosByUsuarioId(usuarioId)
+    }
+
 }

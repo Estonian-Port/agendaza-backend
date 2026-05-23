@@ -11,6 +11,8 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,8 +32,10 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
 
+    @Cacheable(value = ["agendaEventos"], key = "#id")
     fun getAllEventosForAgendaByEmpresaId(id : Long) : List<EventoAgendaDTO>{
-        return eventoRepository.getAllEventosForAgendaByEmpresaId(id)
+        val hace2Meses = LocalDateTime.now().minusMonths(2)
+        return eventoRepository.getAllEventosForAgendaByEmpresaId(id, hace2Meses)
     }
 
     fun getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto: UsuarioEmpresaDTO): List<EventoConUsuarioDTO>{

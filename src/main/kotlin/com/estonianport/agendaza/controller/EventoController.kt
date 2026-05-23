@@ -533,4 +533,15 @@ class EventoController {
 
         return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
     }
+
+    @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
+    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDTO> {
+        return eventoService.getAllEventosForAgendaByEmpresaId(id)
+    }
+
+    @GetMapping("/getAllEventosForAgendaByFecha")
+    fun getAllEventosForAgendaByFecha(@RequestParam("fecha") fecha : String, @RequestParam("empresaId") empresaId : Long): List<EventoDTO> {
+        return eventoService.getAllEventosForAgendaByFecha(fecha, empresaId)
+    }
+
 }

@@ -5,6 +5,7 @@ import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -18,6 +19,7 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     override val dao: CrudRepository<Usuario, Long>
         get() = usuarioRepository
 
+    @Cacheable(value=["usuarioUsername"], key = "#id")
     fun getUsuarioIdByUsername(username: String): Long {
         return usuarioRepository.getByUsername(username).id
     }
