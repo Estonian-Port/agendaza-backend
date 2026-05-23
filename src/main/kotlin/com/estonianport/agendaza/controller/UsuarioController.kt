@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -96,8 +97,8 @@ class UsuarioController {
         return usuarioService.save(usuario)
     }
 
-    @PutMapping("/getUsuarioIdByUsername")
-    fun getUsuarioIdByUsername(@RequestBody username: String): Long {
+    @GetMapping("/getUsuarioIdByUsername/{username}")
+    fun getUsuarioIdByUsername(@PathVariable("username") username: String): Long {
         return usuarioService.getUsuarioIdByUsername(username)
     }
 
