@@ -3,6 +3,7 @@ package com.estonianport.agendaza.dto
 import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.Usuario
+import java.io.Serializable
 import java.time.LocalDateTime
 
 data class EventoDTO(var id: Long, var nombre: String, var codigo : String,
@@ -10,7 +11,8 @@ data class EventoDTO(var id: Long, var nombre: String, var codigo : String,
 
 data class EventoUsuarioDTO(var id: Long, var nombre: String, var codigo : String, var usuario: UsuarioAbmDTO)
 
-data class EventoAgendaDTO(var id: Long, var title: String, var start : LocalDateTime, var end : LocalDateTime) {}
+data class EventoAgendaDTO(var id: Long, var title: String, var start : LocalDateTime, var end : LocalDateTime):
+    Serializable
 
 data class EventoReservaDTO(val id: Long, val nombre: String, var capacidad : Capacidad, var codigo : String,
                        val inicio : LocalDateTime, var fin : LocalDateTime, val tipoEventoId : Long,

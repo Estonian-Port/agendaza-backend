@@ -2,6 +2,7 @@ package com.estonianport.agendaza.common.cache
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule // <-- NUEVA IMPORTACIÓN
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,10 +21,11 @@ class RedisConfig {
     fun cacheManager(connectionFactory: RedisConnectionFactory): RedisCacheManager {
         val objectMapper = ObjectMapper().apply {
             registerKotlinModule()
-            // CAMBIAMOS ESTA CONFIGURACIÓN:
+            registerModule(JavaTimeModule()) // <-- AGREGA ESTA LÍNEA (Enseña a Jackson a manejar LocalDateTime)
+
             activateDefaultTyping(
                 polymorphicTypeValidator,
-                ObjectMapper.DefaultTyping.EVERYTHING, // <-- Forzamos a que lo aplique a todo tipo de clases
+                ObjectMapper.DefaultTyping.EVERYTHING,
                 JsonTypeInfo.As.PROPERTY
             )
         }
