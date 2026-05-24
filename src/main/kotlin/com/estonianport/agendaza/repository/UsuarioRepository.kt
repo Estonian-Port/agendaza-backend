@@ -80,4 +80,12 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
             "AND c.fechaBaja IS NULL")
     fun getAllEmpresaByUsuarioId(usuarioId: Long): List<EmpresaAbmDTO>
 
+
+    @Query("""
+        SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(u.id, u.nombre, u.apellido, u.username, u.email, u.celular) 
+        FROM Usuario u 
+        WHERE u.email = :email
+    """)
+    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto?
+
 }

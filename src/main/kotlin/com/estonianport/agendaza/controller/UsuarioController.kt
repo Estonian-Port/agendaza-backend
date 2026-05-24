@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.enums.TipoCargo
@@ -9,6 +10,7 @@ import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,8 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 @CrossOrigin("*")
@@ -32,10 +34,21 @@ class UsuarioController {
     @Autowired
     lateinit var cargoService: CargoService
 
+    @GetMapping("/me")
+    fun getUsuarioDtoByEmail(principal: Principal): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuarioDto = usuarioService.getUsuarioDtoByEmail(principal.name)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuarioDto
+            )
+        )
+    }
+
     @PutMapping("/getUsuarioByEmail")
-    fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
-        return usuarioService.getUsuarioByEmail(email)?:
-            throw NotFoundException("No se encontró el Cliente")
+    fun getUsuarioByEmail(@RequestBody email : String): UsuarioResponseDto? {
+        return usuarioService.getUsuarioDtoByEmail(email)
     }
 
     @PutMapping("/getUsuarioByCelular")
@@ -95,11 +108,6 @@ class UsuarioController {
         val usuario = usuarioService.get(usuarioEditPasswordDto.id)!!
         usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
         return usuarioService.save(usuario)
-    }
-
-    @GetMapping("/getUsuarioIdByUsername/{username}")
-    fun getUsuarioIdByUsername(@PathVariable("username") username: String): Long {
-        return usuarioService.getUsuarioIdByUsername(username)
     }
 
     @GetMapping("/getAllEmpresaByUsuarioId/{usuarioId}")

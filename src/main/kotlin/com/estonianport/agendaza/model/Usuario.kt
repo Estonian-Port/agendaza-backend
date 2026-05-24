@@ -10,11 +10,21 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import java.time.LocalDate
 
 @Entity
-open class Usuario(
+@Table(
+    name = "usuario",
+    indexes = [
+        Index(name = "idx_usuario_username", columnList = "username", unique = true),
+        Index(name = "idx_usuario_email", columnList = "email", unique = true),
+        Index(name = "idx_usuario_celular", columnList = "celular", unique = true)
+    ]
+)
+class Usuario(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

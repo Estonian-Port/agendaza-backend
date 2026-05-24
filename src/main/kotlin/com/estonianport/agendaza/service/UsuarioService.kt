@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UsuarioService : GenericServiceImpl<Usuario, Long>() {
@@ -59,8 +60,10 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return usuarioRepository.getAllEmpresaByUsuarioId(usuarioId)
     }
 
-    fun getUsuarioByEmail(email : String) : Usuario?{
-        return usuarioRepository.getUsuarioByEmail(email)
+    @Transactional(readOnly = true)
+    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto {
+        return usuarioRepository.getUsuarioDtoByEmail(email)
+            ?: throw NoSuchElementException("No se encontró un usuario con el email proporcionado")
     }
 
     fun getUsuarioByCelular(celular : Long): Usuario?{
@@ -86,4 +89,7 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun existsByCelular(celular: Long): Boolean {
         return usuarioRepository.existsByCelular(celular)
     }
-}
+
+    fun getUsuarioByEmail(email : String) : Usuario?{
+        return usuarioRepository.getUsuarioByEmail(email)
+    }}
