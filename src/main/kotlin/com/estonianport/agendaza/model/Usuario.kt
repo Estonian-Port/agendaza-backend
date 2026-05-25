@@ -21,7 +21,9 @@ import java.time.LocalDate
     indexes = [
         Index(name = "idx_usuario_username", columnList = "username", unique = true),
         Index(name = "idx_usuario_email", columnList = "email", unique = true),
-        Index(name = "idx_usuario_celular", columnList = "celular", unique = true)
+        Index(name = "idx_usuario_celular", columnList = "celular", unique = true),
+        Index(name = "idx_usuario_email_baja", columnList = "email,fecha_baja"),
+        Index(name = "idx_usuario_celular_baja", columnList = "celular,fecha_baja")
     ]
 )
 class Usuario(
@@ -30,36 +32,36 @@ class Usuario(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long,
 
-    @Column
+    @Column(nullable = false)
     var nombre: String,
 
-    @Column
+    @Column(nullable = false)
     var apellido: String,
 
-    @Column
+    @Column(nullable = false, unique = true)
     var celular: Long,
 
-    @Column
+    @Column(nullable = false, unique = true)
     var email: String) {
 
-    @Column
+    @Column(nullable = false, unique = true)
     var username: String = ""
 
-    @Column
+    @Column(nullable = false)
     var password: String = ""
 
     @Column
     var fechaNacimiento: LocalDate = LocalDate.now()
 
-    @Column
-    var fechaAlta : LocalDate = LocalDate.now()
+    @Column(nullable = false, updatable = false)
+    var fechaAlta: LocalDate = LocalDate.now()
 
     @Column
-    var fechaBaja : LocalDate? = null
+    var fechaBaja: LocalDate? = null
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var listaEventosContratados : MutableSet<Evento> = mutableSetOf()
+    var listaEventosContratados: MutableSet<Evento> = mutableSetOf()
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
@@ -72,7 +74,6 @@ class Usuario(
     fun toClienteDto(): ClienteDTO {
         return ClienteDTO(id, nombre, apellido, email, celular)
     }
+
+    fun isActive(): Boolean = fechaBaja == null
 }
-
-
-

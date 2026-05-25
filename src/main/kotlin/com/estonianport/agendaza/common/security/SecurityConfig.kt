@@ -22,8 +22,8 @@ class SecurityConfig(
 ) {
 
     @Bean
-    fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager, usuarioService: UsuarioService): SecurityFilterChain {
-        val jwtAuthenticationFilter = JWTAuthenticationFilter(usuarioService)
+    fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager): SecurityFilterChain {
+        val jwtAuthenticationFilter = JWTAuthenticationFilter()
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
         jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler())

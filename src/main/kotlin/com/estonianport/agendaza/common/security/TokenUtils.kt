@@ -1,4 +1,4 @@
-package com.estonianport.centro_sis.common.security
+package com.estonianport.agendaza.common.security
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException

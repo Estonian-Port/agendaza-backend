@@ -121,8 +121,8 @@ class EventoController {
 
         evento.cliente = when {
             cliente.id != 0L -> usuarioService.get(cliente.id)!!
-            cliente.email.isNotBlank() && usuarioService.existsByEmail(cliente.email) -> usuarioService.getUsuarioByEmail(cliente.email)!!
-            usuarioService.existsByCelular(cliente.celular) -> usuarioService.getUsuarioByCelular(cliente.celular)!!
+            cliente.email.isNotBlank() && usuarioService.existsByEmail(cliente.email) -> usuarioService.getByEmail(cliente.email)!!
+            usuarioService.existsByCelular(cliente.celular) -> usuarioService.getByCelular(cliente.celular)!!
             else -> usuarioService.save(cliente)
         }
 
