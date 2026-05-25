@@ -25,10 +25,9 @@ class ExtraService : GenericServiceImpl<Extra, Long>() {
     override val dao: CrudRepository<Extra, Long>
         get() = extraRepository
 
-    fun fromListaExtraDtoToListaExtra(listaExtraDTO: List<ExtraDTO>): List<Extra> {
-        return listaExtraDTO.map { extra -> this.get(extra.id)!! }
+    fun fromListaExtraDtoToSetExtra(listaExtraDTO: List<ExtraDTO>): MutableSet<Extra> {
+        return listaExtraDTO.map { extra -> this.get(extra.id)!! }.toMutableSet()
     }
-
 
     fun contadorDeExtras(id: Long) = extraRepository.cantidadExtras(id)
 

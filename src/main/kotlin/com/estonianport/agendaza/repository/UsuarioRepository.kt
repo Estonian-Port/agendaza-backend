@@ -37,6 +37,15 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto?
 
     @Query("""
+        SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+        ) 
+        FROM Usuario u 
+        WHERE u.username = :username
+    """)
+    fun getUsuarioDtoByUsername(username: String): UsuarioResponseDto?
+
+    @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioPerfilDTO(
             u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 

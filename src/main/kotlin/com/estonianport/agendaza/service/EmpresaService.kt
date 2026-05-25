@@ -42,8 +42,10 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     override val dao: CrudRepository<Empresa, Long>
         get() = empresaRepository
 
-    fun findById(id : Long): Empresa {
-        return empresaRepository.findById(id).get()
+    fun findById(id: Long): Empresa {
+        return empresaRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Empresa no encontrada con el ID: $id")
+        }
     }
 
     fun save(empresaDTO: EmpresaDTO): GenericItemDTO{

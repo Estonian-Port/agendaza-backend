@@ -1,22 +1,18 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.common.emailService.EmailService
-import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.*
-import com.estonianport.agendaza.model.enums.Estado
-import com.estonianport.agendaza.model.enums.TipoExtra
-import com.estonianport.agendaza.service.*
+import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.service.EventoService
+import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 
 @RestController
+@RequestMapping("/v1/eventos")
 @CrossOrigin("*")
 class EventoController {
 
@@ -26,446 +22,585 @@ class EventoController {
     @Autowired
     lateinit var empresaService: EmpresaService
 
-    @Autowired
-    lateinit var tipoEventoService: TipoEventoService
+    // ==================== BÚSQUEDAS BÁSICAS ====================
 
-    @Autowired
-    lateinit var capacidadService: CapacidadService
+    /**
+     * Obtiene un evento por su ID con todos sus detalles
+     */
+    @GetMapping("/{eventoId}")
+    fun getEvento(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<EventoVerDTO>> {
+        val evento = eventoService.getEventoVer(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
 
-    @Autowired
-    lateinit var extraService: ExtraService
-
-    @Autowired
-    lateinit var extraVariableService: ExtraVariableService
-
-    @Autowired
-    lateinit var usuarioService: UsuarioService
-
-    @Autowired
-    lateinit var emailService: EmailService
-
-    @Autowired
-    lateinit var pdfService: PdfService
-
-    // TODO Sacar, no se va a usar, ya que se accede desde empresa
-    @GetMapping("/getAllEvento")
-    fun getAll(): List<EventoDTO>? {
-        return eventoService.listaEventoToListaEventoDto(eventoService.getAll())
-    }
-
-    @GetMapping("/getEvento/{id}")
-    fun get(@PathVariable("id") id: Long): Evento? {
-        return eventoService.findById(id)
-    }
-
-    @GetMapping("/cantEventos/{id}")
-    fun cantEventos(@PathVariable("id") id: Long) =  eventoService.contadorDeEventos(id)
-
-    @GetMapping("/cantEventosFiltrados/{id}/{buscar}")
-    fun cantEventosFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) =  eventoService.contadorDeEventosFiltrados(id,buscar)
-
-    @PostMapping("/saveEvento")
-    fun save(@RequestBody eventoReservaDto: EventoReservaDTO): Long {
-        return eventoService.registrarReserva(eventoReservaDto)
-    }
-
-    @DeleteMapping("/deleteEvento/{id}")
-    fun delete(@PathVariable("id") id: Long): EventoDTO {
-        val evento = eventoService.findById(id)
-        evento.fechaBaja = LocalDate.now()
-
-        return eventoService.save(evento).toDto()
-    }
-
-    @GetMapping("/getAllEstado")
-    fun getAllEstado(): MutableSet<Estado>? {
-        return Estado.values().toMutableSet()
-    }
-
-    @GetMapping("/getAllEstadoForSaveEvento")
-    fun getAllEstadoForSaveEvento(): MutableSet<Estado>? {
-        return mutableSetOf(Estado.COTIZADO, Estado.RESERVADO)
-    }
-
-    @GetMapping("/getEventoExtra/{id}")
-    fun getEventoExtra(@PathVariable("id") id: Long): EventoExtraDTO? {
-        val evento = eventoService.findById(id)
-        val empresa = empresaService.get(evento.empresa.id)!!
-
-        return evento.toEventoExtraDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                    empresa,
-                    evento.listaExtra,
-                    evento.inicio,
-                    TipoExtra.EVENTO
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                    empresa,
-                    evento.listaEventoExtraVariable,
-                    evento.inicio,
-                    TipoExtra.VARIABLE_EVENTO
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Evento obtenido correctamente",
+                data = evento
             )
         )
     }
 
-    @GetMapping("/getEventoCatering/{id}")
-    fun getEventoCatering(@PathVariable("id") id: Long): EventoCateringDTO? {
-        val evento = eventoService.findById(id)
-        val empresa = empresaService.get(evento.empresa.id)!!
+    /**
+     * Obtiene el presupuesto de un evento
+     */
+    @GetMapping("/{eventoId}/presupuesto")
+    fun getPresupuesto(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<Double>> {
+        val presupuesto = eventoService.getPresupuesto(eventoId)
 
-        return evento.toEventoCateringDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                    empresa,
-                    evento.listaExtra,
-                    evento.inicio,
-                    TipoExtra.TIPO_CATERING
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                    empresa,
-                    evento.listaEventoExtraVariable,
-                    evento.inicio,
-                    TipoExtra.VARIABLE_CATERING
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Presupuesto obtenido correctamente",
+                data = presupuesto
             )
         )
     }
 
-    @GetMapping("/getEventoHora/{id}")
-    fun getEventoHora(@PathVariable("id") id: Long): EventoHoraDTO? {
-        return eventoService.findById(id).toEventoHoraDto()
-    }
+    /**
+     * Obtiene información de extras de un evento
+     */
+    @GetMapping("/{eventoId}/extra")
+    fun getEventoExtra(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<EventoExtraDTO>> {
+        val eventoExtra = eventoService.getEventoExtra(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
 
-    // TODO unificar EventoVerDto con EventoReservaDto
-    @GetMapping("/getEventoVer/{id}")
-    fun getEventoVer(@PathVariable("id") id: Long): EventoVerDTO? {
-        val evento = eventoService.findById(id)
-        val empresa = empresaService.get(evento.empresa.id)!!
-
-        return evento.toEventoVerDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                    empresa,
-                    evento.listaExtra,
-                    evento.inicio,
-                    TipoExtra.EVENTO
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                    empresa,
-                    evento.listaEventoExtraVariable,
-                    evento.inicio,
-                    TipoExtra.VARIABLE_EVENTO
-            ),
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                    empresa,
-                    evento.listaExtra,
-                    evento.inicio,
-                    TipoExtra.TIPO_CATERING
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                    empresa,
-                    evento.listaEventoExtraVariable,
-                    evento.inicio,
-                    TipoExtra.VARIABLE_CATERING
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Información de extras obtenida correctamente",
+                data = eventoExtra
             )
         )
     }
 
-    @PostMapping("/editEventoHora")
-    fun editEventoHora(@RequestBody eventoHoraDto: EventoHoraDTO): EventoHoraDTO? {
-        val evento = eventoService.findById(eventoHoraDto.id)
+    /**
+     * Obtiene información de catering de un evento
+     */
+    @GetMapping("/{eventoId}/catering")
+    fun getEventoCatering(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<EventoCateringDTO>> {
+        val eventoCatering = eventoService.getEventoCatering(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
 
-        evento.inicio = eventoHoraDto.inicio
-        evento.fin = eventoHoraDto.fin
-
-        eventoService.save(evento)
-
-        return evento.toEventoHoraDto()
-    }
-
-    //TODO Refactorizar
-    @PostMapping("/editEventoExtra")
-    fun editEventoExtra(@RequestBody eventoExtraDto: EventoExtraDTO): Long? {
-        val evento = eventoService.findById(eventoExtraDto.id)
-
-        val listaExtra = mutableSetOf<Extra>()
-        listaExtra.addAll(
-            extraService.fromListaExtraDtoToListaExtra(
-                eventoExtraDto.listaExtra.toList()
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Información de catering obtenida correctamente",
+                data = eventoCatering
             )
         )
+    }
 
-        // TODO revisar el delete
-        // Elimina la lista de extraVariable que sean variable evento y no catering
-        evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }.forEach {
-            extraVariableService.delete(it.id)
-        }
+    /**
+     * Obtiene información de horarios de un evento
+     */
+    @GetMapping("/{eventoId}/hora")
+    fun getEventoHora(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<EventoHoraDTO>> {
+        val eventoHora = eventoService.getEventoHora(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
 
-        // Seteo listaExtraVariable
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoExtraDto.listaExtraVariable.toList()
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Información de horarios obtenida correctamente",
+                data = eventoHora
             )
         )
-
-        // Guarda la lista de extraVariable
-        listaEventoExtraVariable.forEach {
-            it.evento = evento
-            extraVariableService.save(it)
-        }
-
-        // Agrega a la lista los extras catering que no deben de ser modificados
-        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING })
-        evento.listaExtra = listaExtra
-
-        // Agrega a la lista los extras variables catering que no deben de ser modificados
-        listaEventoExtraVariable.addAll(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING })
-        evento.listaEventoExtraVariable = listaEventoExtraVariable
-
-        evento.extraOtro = eventoExtraDto.extraOtro
-        evento.descuento = eventoExtraDto.descuento
-
-        eventoService.save(evento)
-
-        return evento.id
     }
 
-    //TODO Refactorizar
-    @PostMapping("/editEventoCatering")
-    fun editEventoCatering(@RequestBody eventoCateringDto: EventoCateringDTO): EventoHoraDTO? {
-        val evento = eventoService.findById(eventoCateringDto.id)
+    /**
+     * Obtiene los estados disponibles para eventos
+     */
+    @GetMapping("/estados")
+    fun getAllEstado(): ResponseEntity<CustomResponse<List<String>>> {
+        val estados = eventoService.getAllEstado()
 
-        val listaExtra = mutableSetOf<Extra>()
-        listaExtra.addAll(
-            extraService.fromListaExtraDtoToListaExtra(
-                eventoCateringDto.listaExtraTipoCatering.toList()
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Estados obtenidos correctamente",
+                data = estados
             )
         )
+    }
 
-        // TODO revisar el delete
-        // Elimina la lista de extraVariable
-        evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.forEach {
-            extraVariableService.delete(it.id)
-        }
+    /**
+     * Obtiene los estados disponibles para crear nuevos eventos
+     */
+    @GetMapping("/estados/nuevo")
+    fun getAllEstadoForSaveEvento(): ResponseEntity<CustomResponse<List<String>>> {
+        val estados = eventoService.getAllEstadoForSaveEvento()
 
-        // Seteo listaExtraVariable
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoCateringDto.listaExtraCateringVariable.toList()
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Estados para nuevo evento obtenidos correctamente",
+                data = estados
             )
         )
-
-        // Guarda la lista de extraVariable
-        listaEventoExtraVariable.forEach {
-            it.evento = evento
-            extraVariableService.save(it)
-        }
-
-        // Agrega a la lista los extras evento que no deben de ser modificados
-        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO })
-        evento.listaExtra = listaExtra
-
-        // Agrega a la lista los extras variables evento que no deben de ser modificados
-        listaEventoExtraVariable.addAll(evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO })
-        evento.listaEventoExtraVariable = listaEventoExtraVariable
-
-        evento.cateringOtro = eventoCateringDto.cateringOtro
-        evento.cateringOtroDescripcion = eventoCateringDto.cateringOtroDescripcion
-
-        eventoService.save(evento)
-
-        return EventoHoraDTO(evento.id, evento.nombre, evento.codigo, evento.inicio, evento.fin)
     }
 
-    @PutMapping("/getListaEventoByDiaAndEmpresaId")
-    fun getListaEventoByDiaAndEmpresaId(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDTO): List<String> {
+    // ==================== EVENTOS POR EMPRESA ====================
 
-        val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.findById(eventoBuscarFechaDto.empresaId), eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+    /**
+     * Obtiene todos los eventos de una empresa paginados
+     */
+    @GetMapping("/empresa/{empresaId}/{pageNumber}")
+    fun getAllEventoByEmpresaId(
+        @PathVariable empresaId: Long,
+        @PathVariable pageNumber: Int
+    ): ResponseEntity<CustomResponse<List<EventoDTO>>> {
+        val eventos = eventoService.getAllEventoByEmpresaId(empresaId, pageNumber)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Eventos obtenidos correctamente",
+                data = eventos
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad de eventos de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/cantidad")
+    fun getCantidadEventos(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = eventoService.cantEventos(empresaId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de eventos obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    /**
+     * Obtiene eventos de una empresa filtrados por nombre o código
+     */
+    @GetMapping("/empresa/{empresaId}/buscar/{pageNumber}/{buscar}")
+    fun getAllEventoByFilterName(
+        @PathVariable empresaId: Long,
+        @PathVariable pageNumber: Int,
+        @PathVariable buscar: String
+    ): ResponseEntity<CustomResponse<List<EventoDTO>>> {
+        val eventos = eventoService.getAllEventoByFilterName(empresaId, pageNumber, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Eventos filtrados obtenidos correctamente",
+                data = eventos
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad de eventos filtrados
+     */
+    @GetMapping("/empresa/{empresaId}/buscar/{buscar}/cantidad")
+    fun getCantidadEventosFiltrados(
+        @PathVariable empresaId: Long,
+        @PathVariable buscar: String
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = eventoService.cantEventosFiltrados(empresaId, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    /**
+     * Obtiene eventos de una empresa en una fecha específica
+     */
+    @GetMapping("/empresa/{empresaId}/fecha/{fecha}")
+    fun getAllEventosByFecha(
+        @PathVariable empresaId: Long,
+        @PathVariable fecha: String
+    ): ResponseEntity<CustomResponse<List<EventoDTO>>> {
+        // Guardar fecha en el service para usar en el método
+        eventoService.asignarFechaFiltro(fecha)
+        val eventos = eventoService.getAllEventosByFecha(empresaService.findById(empresaId))
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Eventos de la fecha obtenidos correctamente",
+                data = eventos
+            )
+        )
+    }
+
+    /**
+     * Obtiene eventos para la agenda/calendario de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/agenda")
+    fun getAllEventosForAgendaByEmpresaId(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<List<EventoAgendaDTO>>> {
+        val eventos = eventoService.getAllEventosForAgendaByEmpresaId(empresaId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Eventos de agenda obtenidos correctamente",
+                data = eventos
+            )
+        )
+    }
+
+    // ==================== EVENTOS POR USUARIO ====================
+
+    /**
+     * Obtiene eventos de un usuario/cliente en una empresa
+     */
+    @PutMapping("/usuario-empresa")
+    fun getEventosByUsuarioAndEmpresa(
+        @RequestBody usuarioEmpresa: UsuarioEmpresaDTO
+    ): ResponseEntity<CustomResponse<List<String>>> {
+        val eventos = eventoService.getEventosByUsuarioAndEmpresa(
+            usuarioEmpresa.usuarioId,
+            usuarioEmpresa.empresaId
         )
 
-        val listaFecha: MutableList<String> = mutableListOf()
-
-        if (listaEvento.isNotEmpty()) {
-            for (evento in listaEvento) {
-                val fecha = StringBuilder()
-
-                // En caso de que sea el dia siguiente le agrega la fecha tambien no solo la hora
-                if (evento.inicio.plusDays(1).dayOfMonth == evento.fin.dayOfMonth) {
-                    fecha.append(
-                        evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime()
-                            .toString() + " del dia " + evento.fin.toLocalDate().toString()
-                    )
-                } else {
-                    fecha.append(
-                        evento.inicio.toLocalTime().toString() + " hasta " + evento.fin.toLocalTime().toString()
-                    )
-                }
-
-                fecha.append(" (" + evento.tipoEvento.nombre + ")")
-                listaFecha.add(fecha.toString())
-
-                // Ordena la lista de mas temprano a mas tarde
-                listaFecha.sort()
-            }
-        }
-        return listaFecha
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Eventos del usuario obtenidos correctamente",
+                data = eventos
+            )
+        )
     }
 
-    @PutMapping("/horarioDisponible")
-    fun horarioDisponible(@RequestBody eventoBuscarFechaDto: EventoBuscarFechaDTO): Boolean {
-
-        val listaEvento: List<Evento> = eventoService.findAllByInicioBetweenAndListaEmpresa(
-            empresaService.findById(eventoBuscarFechaDto.empresaId), eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta
+    /**
+     * Obtiene la cantidad de eventos de un usuario en una empresa
+     */
+    @PutMapping("/usuario-empresa/cantidad")
+    fun getCantEventosByUsuarioAndEmpresa(
+        @RequestBody usuarioEmpresa: UsuarioEmpresaDTO
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = eventoService.getCantEventosByUsuarioAndEmpresa(
+            usuarioEmpresa.usuarioId,
+            usuarioEmpresa.empresaId
         )
 
-        return eventoService.getHorarioDisponible(listaEvento, eventoBuscarFechaDto.desde, eventoBuscarFechaDto.hasta)
-    }
-
-    @PutMapping("/reenviarMail/{id}")
-    fun reenviarMail(@PathVariable("id") id: Long, @RequestBody empresaId: Long): Boolean {
-
-        try {
-            val evento = eventoService.findById(id)
-            val empresa = empresaService.findById(empresaId)
-
-            emailService.enviarMailComprabanteReserva(evento, "sido reservado (reenvio)", empresa)
-            return true
-        } catch (e: Exception) {
-            throw NotFoundException("No se pudo reenviar mail")
-        }
-    }
-
-    @PostMapping("/editEventoAnotaciones/{id}")
-    fun editEventoAnotaciones(@PathVariable("id") id: Long, @RequestBody anotaciones: String): String {
-        val evento = eventoService.findById(id)
-        evento.anotaciones = anotaciones
-
-        return eventoService.save(evento).anotaciones
-    }
-
-    @PostMapping("/editEventoCantidadAdultos")
-    fun editEventoCantidadAdultos(@RequestBody eventoDto: EventoVerDTO): Int {
-        val evento = eventoService.findById(eventoDto.id)
-        evento.capacidad.capacidadAdultos  = eventoDto.capacidad.capacidadAdultos
-
-        return eventoService.save(evento).capacidad.capacidadAdultos
-    }
-
-    @PostMapping("/editEventoCantidadNinos")
-    fun editEventoCantidadNinos(@RequestBody eventoDto: EventoVerDTO): Int {
-        val evento = eventoService.findById(eventoDto.id)
-        evento.capacidad.capacidadNinos = eventoDto.capacidad.capacidadNinos
-
-        return eventoService.save(evento).capacidad.capacidadNinos
-    }
-
-    @PostMapping("/editEventoNombre/{id}")
-    fun editEventoCantidadNombre(@PathVariable("id") id: Long, @RequestBody nombre: String): String {
-        val evento = eventoService.findById(id)
-        evento.nombre = nombre
-
-        return eventoService.save(evento).nombre
-    }
-
-    @GetMapping("/getPresupuesto/{id}")
-    fun editEventoCantidadNombre(@PathVariable("id") id: Long): Double {
-        return eventoService.findById(id).getPresupuestoTotal()
-    }
-
-    @PutMapping("/getEventosByUsuarioAndEmpresa")
-    fun getEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDTO): List<EventoConUsuarioDTO> {
-        return eventoService.getEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto)
-    }
-
-    @PutMapping("/getCantEventosByUsuarioAndEmpresa")
-    fun getCantEventosByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto : UsuarioEmpresaDTO): Int {
-        return eventoService.getCantEventosByUsuarioIdAndEmpresaId(usuarioEmpresaDto)
-    }
-
-    @PutMapping("/recorrerEspecificaciones/{id}")
-    fun recorrerEspecificaciones(@PathVariable("id") empresaId : Long, @RequestBody eventoReservaDto : EventoReservaDTO): EventoReservaDTO {
-        val empresa =  empresaService.get(empresaId)!!
-        val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)!!
-        val listaExtra = mutableSetOf<Extra>()
-
-        listaExtra.addAll(
-                extraService.fromListaExtraDtoToListaExtra(
-                        eventoReservaDto.listaExtraTipoCatering.toList()
-                )
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de eventos obtenida correctamente",
+                data = cantidad
+            )
         )
+    }
 
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-                extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                        eventoReservaDto.listaExtraCateringVariable.toList()
-                )
+    // ==================== TIPOS DE EVENTO ====================
+
+    /**
+     * Obtiene todos los tipos de evento de una empresa filtrados por duración
+     */
+    @GetMapping("/tipos-evento/duracion/{duracion}/{empresaId}")
+    fun getAllTipoEventoByEmpresaIdAndDuracion(
+        @PathVariable empresaId: Long,
+        @PathVariable duracion: String
+    ): ResponseEntity<CustomResponse<List<TipoEventoDTO>>> {
+        val empresa = empresaService.findById(empresaId)
+        val tiposEvento = empresa.listaTipoEvento
+            .filter { it.fechaBaja == null && it.duracion.name == duracion }
+            .map { it.toDTO() }
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Tipos de evento obtenidos correctamente",
+                data = tiposEvento
+            )
         )
-
-        val encargado =  usuarioService.findById(eventoReservaDto.encargadoId)!!
-
-        val evento = eventoService.fromEventoReservaDtoToEvento(eventoReservaDto, tipoEvento, listaExtra, listaEventoExtraVariable, encargado,  empresa)
-
-        empresa.recorrerEspecificaciones(evento)
-
-        return evento.toEventoReservaDto(
-                extraService.fromListaExtraToListaExtraDtoByFilter(
-                        empresa,
-                        evento.listaExtra,
-                        evento.inicio,
-                        TipoExtra.EVENTO
-                ),
-                extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                        empresa,
-                        evento.listaEventoExtraVariable,
-                        evento.inicio,
-                        TipoExtra.VARIABLE_EVENTO
-                ),
-                extraService.fromListaExtraToListaExtraDtoByFilter(
-                        empresa,
-                        evento.listaExtra,
-                        evento.inicio,
-                        TipoExtra.TIPO_CATERING
-                ),
-                extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                        empresa,
-                        evento.listaEventoExtraVariable,
-                        evento.inicio,
-                        TipoExtra.VARIABLE_CATERING
-                ))
     }
 
-    @GetMapping("/generarEstadoDeCuenta/{id}")
-    fun generarEstadoDeCuenta(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
-        val pago = eventoService.get(id)!!
-        val pdfBytes = pdfService.generarEstadoDeCuenta(pago)
+    // ==================== DISPONIBILIDAD ====================
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_PDF
-        headers.setContentDispositionFormData("attachment", "estado_de_cuenta.pdf")
+    /**
+     * Obtiene los horarios disponibles para una fecha específica
+     */
+    @PutMapping("/disponibilidad/horarios")
+    fun getListaEventoByDiaAndEmpresaId(
+        @RequestBody eventoBuscarFecha: EventoBuscarFechaDTO
+    ): ResponseEntity<CustomResponse<List<String>>> {
+        val horarios = eventoService.getListaEventoByDiaAndEmpresaId(eventoBuscarFecha)
 
-        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Horarios disponibles obtenidos correctamente",
+                data = horarios
+            )
+        )
     }
 
-    @GetMapping("/descargarEvento/{id}")
-    fun descargarEvento(@PathVariable("id") id: Long): ResponseEntity<ByteArray> {
-        val pago = eventoService.get(id)!!
-        val pdfBytes = pdfService.generarComprobanteEvento(pago)
+    /**
+     * Valida si un horario está disponible para un evento
+     */
+    @PutMapping("/disponibilidad/validar")
+    fun getHorarioDisponible(
+        @RequestBody eventoBuscarFecha: EventoBuscarFechaDTO
+    ): ResponseEntity<CustomResponse<Boolean>> {
+        val disponible = eventoService.getHorarioDisponible(eventoBuscarFecha)
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_PDF
-        headers.setContentDispositionFormData("attachment", "comprobante_de_evento.pdf")
-
-        return ResponseEntity(pdfBytes, headers, HttpStatus.OK)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Validación completada",
+                data = disponible
+            )
+        )
     }
 
-    @GetMapping("/getAllEventosForAgendaByEmpresaId/{id}")
-    fun getAllEventosForAgendaByEmpresaId(@PathVariable("id") id: Long): List<EventoAgendaDTO> {
-        return eventoService.getAllEventosForAgendaByEmpresaId(id)
+    // ==================== CRUD ====================
+
+    /**
+     * Crea o actualiza un evento
+     */
+    @PostMapping
+    fun saveEvento(
+        @RequestBody evento: Evento
+    ): ResponseEntity<CustomResponse<Evento>> {
+        val eventoGuardado = eventoService.save(evento)
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            CustomResponse(
+                message = "Evento guardado correctamente",
+                data = eventoGuardado
+            )
+        )
     }
 
-    @GetMapping("/getAllEventosForAgendaByFecha")
-    fun getAllEventosForAgendaByFecha(@RequestParam("fecha") fecha : String, @RequestParam("empresaId") empresaId : Long): List<EventoDTO> {
-        return eventoService.getAllEventosForAgendaByFecha(fecha, empresaId)
+    // ==================== ACTUALIZAR INFORMACIÓN ====================
+
+    /**
+     * Actualiza los horarios de un evento
+     */
+    @PutMapping("/{eventoId}/hora")
+    fun editEventoHora(
+        @PathVariable eventoId: Long,
+        @RequestBody evento: EventoHoraDTO
+    ): ResponseEntity<CustomResponse<EventoHoraDTO>> {
+        evento.id = eventoId
+        val eventoActualizado = eventoService.editEventoHora(evento)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Horarios actualizados correctamente",
+                data = eventoActualizado
+            )
+        )
     }
 
+    /**
+     * Actualiza los extras de un evento
+     */
+    @PutMapping("/{eventoId}/extra")
+    fun editEventoExtra(
+        @PathVariable eventoId: Long,
+        @RequestBody evento: EventoExtraDTO
+    ): ResponseEntity<CustomResponse<EventoExtraDTO>> {
+        evento.id = eventoId
+        val eventoActualizado = eventoService.editEventoExtra(evento)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras actualizados correctamente",
+                data = eventoActualizado
+            )
+        )
+    }
+
+    /**
+     * Actualiza la información de catering de un evento
+     */
+    @PutMapping("/{eventoId}/catering")
+    fun editEventoCatering(
+        @PathVariable eventoId: Long,
+        @RequestBody evento: EventoCateringDTO
+    ): ResponseEntity<CustomResponse<EventoCateringDTO>> {
+        evento.id = eventoId
+        val eventoActualizado = eventoService.editEventoCatering(evento)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Catering actualizado correctamente",
+                data = eventoActualizado
+            )
+        )
+    }
+
+    /**
+     * Actualiza las anotaciones de un evento
+     */
+    @PutMapping("/{eventoId}/anotaciones")
+    fun editEventoAnotaciones(
+        @PathVariable eventoId: Long,
+        @RequestBody anotacion: String
+    ): ResponseEntity<CustomResponse<String>> {
+        val anotacionActualizada = eventoService.editEventoAnotaciones(anotacion, eventoId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Anotaciones actualizadas correctamente",
+                data = anotacionActualizada
+            )
+        )
+    }
+
+    /**
+     * Actualiza la cantidad de niños en un evento
+     */
+    @PutMapping("/{eventoId}/capacidad/ninos")
+    fun editEventoCantNinos(
+        @PathVariable eventoId: Long,
+        @RequestBody cantNinos: Int
+    ): ResponseEntity<CustomResponse<Int>> {
+        val eventoVer = eventoService.getEventoVer(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
+
+        eventoVer.capacidad.capacidadNinos = cantNinos
+        val cantActualizada = eventoService.editEventoCantNinos(eventoVer)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de niños actualizada correctamente",
+                data = cantActualizada
+            )
+        )
+    }
+
+    /**
+     * Actualiza la cantidad de adultos en un evento
+     */
+    @PutMapping("/{eventoId}/capacidad/adultos")
+    fun editEventoCantAdultos(
+        @PathVariable eventoId: Long,
+        @RequestBody cantAdultos: Int
+    ): ResponseEntity<CustomResponse<Int>> {
+        val eventoVer = eventoService.getEventoVer(eventoId)
+            ?: throw NotFoundException("Evento no encontrado")
+
+        eventoVer.capacidad.capacidadAdultos = cantAdultos
+        val cantActualizada = eventoService.editEventoCantAdultos(eventoVer)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de adultos actualizada correctamente",
+                data = cantActualizada
+            )
+        )
+    }
+
+    /**
+     * Actualiza el nombre de un evento
+     */
+    @PutMapping("/{eventoId}/nombre")
+    fun editEventoNombre(
+        @PathVariable eventoId: Long,
+        @RequestBody nombre: String
+    ): ResponseEntity<CustomResponse<String>> {
+        val nombreActualizado = eventoService.editEventoNombre(nombre, eventoId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Nombre actualizado correctamente",
+                data = nombreActualizado
+            )
+        )
+    }
+
+    /**
+     * Actualiza las especificaciones de un evento
+     */
+    @PutMapping("/empresa/{empresaId}/especificaciones")
+    fun recorrerEspecificaciones(
+        @PathVariable empresaId: Long,
+        @RequestBody evento: Evento
+    ): ResponseEntity<CustomResponse<Any>> {
+        val especificaciones = eventoService.recorrerEspecificaciones(evento)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Especificaciones procesadas correctamente",
+                data = especificaciones
+            )
+        )
+    }
+
+    // ==================== COMUNICACIÓN ====================
+
+    /**
+     * Reenvia el email confirmatorio de un evento al cliente
+     */
+    @PostMapping("/{eventoId}/reenviar-mail")
+    fun reenviarMail(
+        @PathVariable eventoId: Long,
+        @RequestParam empresaId: Long
+    ): ResponseEntity<CustomResponse<String>> {
+        val resultado = eventoService.reenviarMail(eventoId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Email reenviado correctamente",
+                data = if (resultado) "OK" else "FALLO"
+            )
+        )
+    }
+
+    // ==================== DESCARGAS ====================
+
+    /**
+     * Descarga el comprobante/presupuesto de un evento en PDF
+     */
+    @GetMapping("/{eventoId}/comprobante/pdf")
+    fun descargarEvento(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<ByteArray> {
+        eventoService.asignarEventoId(eventoId)
+        val archivo = eventoService.descargarEvento()
+
+        return ResponseEntity.ok()
+            .header("Content-Disposition", "attachment; filename=\"evento_$eventoId.pdf\"")
+            .header("Content-Type", "application/pdf")
+            .body(archivo)
+    }
+
+    /**
+     * Descarga el estado de cuenta de un evento en PDF
+     */
+    @GetMapping("/{eventoId}/estado-cuenta/pdf")
+    fun generarEstadoDeCuentaPDF(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<ByteArray> {
+        eventoService.asignarEventoId(eventoId)
+        val archivo = eventoService.generarEstadoDeCuentaPDF()
+
+        return ResponseEntity.ok()
+            .header("Content-Disposition", "attachment; filename=\"estado_cuenta_$eventoId.pdf\"")
+            .header("Content-Type", "application/pdf")
+            .body(archivo)
+    }
+
+    // ==================== ELIMINAR ====================
+
+    /**
+     * Elimina un evento (soft delete)
+     */
+    @DeleteMapping("/{eventoId}")
+    fun deleteEvento(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<CustomResponse<String>> {
+        eventoService.delete(eventoId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Evento eliminado correctamente",
+                data = "OK"
+            )
+        )
+    }
 }

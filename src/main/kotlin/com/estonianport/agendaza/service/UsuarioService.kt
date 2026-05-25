@@ -6,6 +6,7 @@ import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -37,18 +38,40 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return usuarioRepository.findById(id).orElse(null)
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = ["usuarioByUsername"], key = "#username")
+    fun getByUsername(username: String): Usuario? {
+        return usuarioRepository.getByUsername(username)
+    }
+
     // ==================== DTOs ====================
 
     @Transactional(readOnly = true)
-    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto {
+    @Cacheable(value = ["usuarioDtoByEmail"], key = "#email")
+    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto? {
         return usuarioRepository.getUsuarioDtoByEmail(email)
-            ?: throw NoSuchElementException("No se encontró un usuario con el email proporcionado")
     }
 
     @Transactional(readOnly = true)
-    fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO {
+    @Cacheable(value = ["usuarioDtoByUsername"], key = "#username")
+    fun getUsuarioDtoByUsername(username: String): UsuarioResponseDto {
+        return usuarioRepository.getUsuarioDtoByUsername(username)
+            ?: throw NoSuchElementException("No se encontró un usuario con el username proporcionado")
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = ["usuarioPerfil"], key = "#usuarioId")
+    fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO? {
         return usuarioRepository.getUsuarioPerfil(usuarioId)
-            ?: throw NoSuchElementException("Usuario no encontrado")
+    }
+
+    /**
+     * Obtiene la información de un usuario en el contexto de una empresa
+     * Principalmente para obtener su cargo en esa empresa
+     */
+    @Transactional(readOnly = true)
+    fun getUsuarioOfEmpresa(usuarioId: Long, empresaId: Long): UsuarioEditCargoDTO? {
+        return usuarioRepository.getUsuarioOfEmpresa(usuarioId, empresaId)
     }
 
     // ==================== EMPLEADOS ====================
@@ -105,9 +128,17 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     // ==================== SAVE/UPDATE ====================
 
     @Transactional
-    @CacheEvict(value = ["usuarioByUsername"], key = "#entity.username")
+    @CacheEvict(value = ["usuarioByUsername"], key = "#entity.username", allEntries = true)
     override fun save(entity: Usuario): Usuario {
         return usuarioRepository.save(entity)
+    }
+
+    // ==================== DELETE ====================
+
+    @Transactional
+    @CacheEvict(value = ["usuarioPerfil"], key = "#id")
+    override fun delete(id: Long) {
+        super.delete(id)
     }
 
     // ==================== VALIDACIONES ====================
@@ -121,5 +152,4 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     fun existsByCelular(celular: Long): Boolean {
         return usuarioRepository.existsByCelular(celular)
     }
-
 }

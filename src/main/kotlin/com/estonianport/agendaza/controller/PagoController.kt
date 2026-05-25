@@ -108,7 +108,7 @@ class PagoController {
 
     @GetMapping("/getEventoForEditEventoPago/{eventoId}")
     fun getEventoForEditEventoPago(@PathVariable("eventoId") eventoId: Long): EventoPagoDTO {
-        return pagoService.getEventoForEditEventoPago(eventoService.get(eventoId)!!)
+        return pagoService.getEventoForEditEventoPago(eventoService.findById(eventoId))
     }
 
     @GetMapping("/getAllPagoFromEvento/{eventoId}")
@@ -131,7 +131,7 @@ class PagoController {
 
         try {
             val pago = pagoService.get(pagoId)!!
-            val evento = eventoService.get(eventoId)!!
+            val evento = eventoService.findById(eventoId)
             val empresa = empresaService.get(empresaId)!!
 
             emailService.enviarEmailPago(pago, evento,empresa)
@@ -143,7 +143,7 @@ class PagoController {
 
     @GetMapping("/descargarEstadoCuenta/{evento_id}")
     fun descargarEstadoCuenta(@PathVariable("evento_id") eventoId: Long): ResponseEntity<ByteArray> {
-        val evento = eventoService.get(eventoId)!!
+        val evento = eventoService.findById(eventoId)
         val pdfBytes = pdfService.generarEstadoDeCuenta(evento)
 
         val headers = HttpHeaders()
@@ -155,7 +155,7 @@ class PagoController {
     fun enviarEmailEstadoCuenta(@PathVariable("evento_id") eventoId: Long, @PathVariable("empresa_id") empresaId: Long): Boolean {
 
         try {
-            val evento = eventoService.get(eventoId)!!
+            val evento = eventoService.findById(eventoId)
             val empresa = empresaService.get(empresaId)!!
 
             emailService.enviarEmailEstadoCuenta(evento,empresa)

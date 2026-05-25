@@ -22,7 +22,7 @@ data class UsuarioResponseDto(
     val id: Long,
     val nombre: String,
     val apellido: String,
-    val username: String,
+    val username: String?,
     val email: String,
     val celular: Long
 )
