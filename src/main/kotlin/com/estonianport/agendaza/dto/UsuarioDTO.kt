@@ -14,7 +14,7 @@ class UsuarioEditCargoDTO(var id : Long, var empresaId : Long, var cargo : TipoC
 
 class UsuarioEditPasswordDTO(var id : Long, var password: String) {}
 
-class UsuarioAbmDTO(var id: Long, var nombre: String, var apellido: String, var username: String) {}
+class UsuarioAbmDTO(var id: Long, var nombre: String, var apellido: String, var username: String?) {}
 
 class UsuarioEmpresaDTO(var usuarioId: Long, var empresaId: Long) {}
 

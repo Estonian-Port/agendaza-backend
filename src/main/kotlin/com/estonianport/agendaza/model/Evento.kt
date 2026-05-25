@@ -32,7 +32,7 @@ class Evento(
     var nombre: String,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "tipo_evento_id")
     var tipoEvento: TipoEvento,
 
     @Column
@@ -42,7 +42,7 @@ class Evento(
     var fin: LocalDateTime,
 
     @ManyToOne(cascade = [CascadeType.ALL])
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "capacidad_id")
     var capacidad: Capacidad,
 
     @Column
@@ -59,8 +59,8 @@ class Evento(
     )
     var listaExtra: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
-    var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
+    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    var listaEventoExtraVariable: MutableSet<EventoExtraVariable> = mutableSetOf(),
 
     @Column
     var cateringOtro : Double,
@@ -69,11 +69,11 @@ class Evento(
     var cateringOtroDescripcion : String,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "encargado_id")
     var encargado: Usuario,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "cliente_id")
     var cliente: Usuario,
 
     @Column
@@ -87,7 +87,7 @@ class Evento(
     var anotaciones: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "empresa_id")
     var empresa : Empresa){
 
     @ManyToMany(fetch = FetchType.LAZY)

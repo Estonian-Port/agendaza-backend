@@ -20,8 +20,6 @@ import java.time.LocalDate
     name = "usuario",
     indexes = [
         Index(name = "idx_usuario_username", columnList = "username", unique = true),
-        Index(name = "idx_usuario_email", columnList = "email", unique = true),
-        Index(name = "idx_usuario_celular", columnList = "celular", unique = true),
         Index(name = "idx_usuario_email_baja", columnList = "email,fecha_baja"),
         Index(name = "idx_usuario_celular_baja", columnList = "celular,fecha_baja")
     ]
@@ -38,17 +36,17 @@ class Usuario(
     @Column(nullable = false)
     var apellido: String,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var celular: Long,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var email: String) {
 
-    @Column(nullable = false, unique = true)
-    var username: String = ""
+    @Column(nullable = true)
+    var username: String? = null
 
-    @Column(nullable = false)
-    var password: String = ""
+    @Column(nullable = true)
+    var password: String? = null
 
     @Column
     var fechaNacimiento: LocalDate = LocalDate.now()

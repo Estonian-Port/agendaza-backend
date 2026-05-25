@@ -11,11 +11,11 @@ class UserDetailImpl(var usuario : Usuario) : UserDetails{
         return Collections.emptyList()
     }
 
-    override fun getPassword(): String {
+    override fun getPassword(): String? {
         return usuario.password
     }
 
-    override fun getUsername(): String {
+    override fun getUsername(): String? {
         return usuario.username
     }
 

@@ -24,7 +24,15 @@ import java.util.stream.IntStream
 import kotlin.collections.ArrayList
 
 @Service
-class EventoService : GenericServiceImpl<Evento, Long>() {
+class EventoService : GenericServiceImpl<Evento, Long>(
+    private val eventoRepository: EventoRepository,
+    private val empresaService: EmpresaService,
+    private val capacidadService: CapacidadService,
+    private val tipoEventoService: TipoEventoService,
+    private val extraService: ExtraService,
+    private val extraVariableService: ExtraVariableService,
+    private val usuarioService: UsuarioService,
+    private val emailService: EmailService) {
 
     @Autowired
     lateinit var eventoRepository: EventoRepository
@@ -210,4 +218,118 @@ class EventoService : GenericServiceImpl<Evento, Long>() {
         return eventoRepository.getByCodigoAndEmpresaId(codigo, empresaId)
     }
 
+    @Transactional
+    fun registrarReserva(dto: EventoReservaDTO): Long {
+        val empresa = empresaService.findById(dto.empresaId)
+
+        // 1. Lógica delegada del Código (Limpieza del TODO)
+        if (dto.codigo.isNullOrBlank()) {
+            dto.codigo = generateCodigoForEventoOfEmpresa(empresa)
+        }
+
+        // 2. Reutilización de Capacidad
+        val capacidad = capacidadService.reutilizarCapacidad(dto.capacidad)
+
+        // 3. Unificación de Extras (Reducción de las listas del DTO)
+        val listaExtra = mutableSetOf<Extra>().apply {
+            addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra))
+            addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering))
+        }
+
+        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>().apply {
+            addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable))
+            addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable))
+        }
+
+        // 4. Procesar y Normalizar al Cliente según las nuevas reglas del negocio
+        val cliente = procesarYNormalizarCliente(dto.cliente)
+
+        // 5. Construcción de la Entidad Evento
+        val tipoEvento = tipoEventoService.get(dto.tipoEventoId) ?: throw IllegalArgumentException("Tipo Evento no encontrado")
+        val encargado = usuarioService.findById(dto.encargadoId) ?: throw IllegalArgumentException("Encargado no encontrado")
+
+        val evento = Evento(
+            id = dto.id,
+            nombre = dto.nombre.trim().lowercase(), // Lo guardamos normalizado
+            tipoEvento = tipoEvento,
+            inicio = dto.inicio,
+            fin = dto.fin,
+            capacidad = capacidad,
+            extraOtro = dto.extraOtro,
+            descuento = dto.descuento,
+            listaExtra = listaExtra,
+            listaEventoExtraVariable = mutableSetOf(), // Inicialmente vacío para asociarlo vía cascade
+            cateringOtro = dto.cateringOtro,
+            cateringOtroDescripcion = dto.cateringOtroDescripcion,
+            encargado = encargado,
+            cliente = cliente,
+            codigo = dto.codigo,
+            estado = dto.estado,
+            anotaciones = dto.anotaciones,
+            empresa = empresa
+        )
+
+        // El Secreto del Cascade: Vinculamos las variables al evento ANTES de guardar
+        listaEventoExtraVariable.forEach { variable ->
+            variable.evento = evento
+            evento.listaEventoExtraVariable.add(variable)
+        }
+
+        // 6. Guardado unificado (Guarda Evento y sus EventoExtraVariable por cascade)
+        val eventoSaved = eventoRepository.save(evento)
+
+        // 7. Notificación asíncrona / controlada por excepciones
+        enviarMailComprobanteSeguro(eventoSaved, empresa)
+
+        return eventoSaved.id
+    }
+
+    private fun procesarYNormalizarCliente(clienteInput: Usuario): Usuario {
+        // Si ya viene con ID, lo buscamos directo
+        if (clienteInput.id != 0L) {
+            return usuarioService.get(clienteInput.id) ?: throw IllegalArgumentException("Cliente no encontrado")
+        }
+
+        // Normalizamos los datos de contacto recibidos antes de comparar
+        val emailNormalizado = clienteInput.email.trim().lowercase()
+        val celularNormalizado = clienteInput.celular // Asumiendo que el frontend ya manda 10 dígitos
+
+        // Aplicamos las reglas de limpieza que usamos en los scripts SQL para nuevos registros
+        clienteInput.nombre = clienteInput.nombre.trim().lowercase()
+        clienteInput.apellido = clienteInput.apellido.trim().lowercase()
+        clienteInput.email = emailNormalizado
+
+        // Clientes nuevos entran sin credenciales (NULL) tal como definimos
+        clienteInput.username = null
+        clienteInput.password = null
+
+        return when {
+            emailNormalizado.isNotBlank() && usuarioService.existsByEmail(emailNormalizado) -> {
+                usuarioService.getByEmail(emailNormalizado)!!
+            }
+            usuarioService.existsByCelular(celularNormalizado) -> {
+                usuarioService.getByCelular(celularNormalizado)!!
+            }
+            else -> {
+                usuarioService.save(clienteInput)
+            }
+        }
+    }
+
+    private fun enviarMailComprobanteSeguro(evento: Evento, empresa: Empresa) {
+        try {
+            if (emailService.isEmailValid(evento.cliente.email)) {
+                emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa)
+            }
+        } catch (e: Exception) {
+            // TODO: Cambiar por tu logger del sistema (ej: log.error("...", e))
+            println("Fallo al enviar el mail de comprobante para el evento ${evento.id}: ${e.message}")
+        }
+    }
+
+    private fun generateCodigoForEventoOfEmpresa(empresa: Empresa): String {
+        // Tu lógica actual de generación de código...
+        return "COD-" + System.currentTimeMillis()
+    }
+}
 }
