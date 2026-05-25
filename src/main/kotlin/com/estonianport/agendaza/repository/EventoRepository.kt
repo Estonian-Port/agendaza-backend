@@ -44,6 +44,25 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         empresa: Empresa
     ): List<EventoDTO>
 
+    /**
+     * Verifica si hay superposición de horarios directamente en la BD.
+     * Retorna TRUE si encuentra al menos un evento que se solape con los márgenes dados.
+     */
+    @Query(
+        """
+        SELECT COUNT(e) > 0 
+        FROM Evento e 
+        WHERE e.empresa.id = :empresaId 
+        AND e.fechaBaja IS NULL
+        AND (e.inicio < :finMargen AND e.fin > :inicioMargen)
+        """
+    )
+    fun existeSuperposicionDeHorarios(
+        empresaId: Long,
+        inicioMargen: LocalDateTime,
+        finMargen: LocalDateTime
+    ): Boolean
+
     // ==================== BÚSQUEDAS Y LISTADOS ====================
 
     /**
@@ -214,6 +233,20 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         """
     )
     fun getByCodigoAndEmpresaId(codigo: String, empresaId: Long): Evento
+
+    /**
+     * Busca que el código no exista ya en la empresa
+     */
+    @Query(
+        """
+        SELECT COUNT(e) > 0 
+        FROM Evento e 
+        WHERE e.codigo = :codigo 
+        AND e.empresa = :empresa 
+        AND e.fechaBaja IS NULL
+        """
+    )
+    fun existCodigoInEmpresa(codigo: String, empresa: Empresa): Boolean
 
     // ==================== ESTADÍSTICAS ====================
 

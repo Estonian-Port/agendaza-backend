@@ -262,7 +262,7 @@ class EventoController {
     @PutMapping("/usuario-empresa")
     fun getEventosByUsuarioAndEmpresa(
         @RequestBody usuarioEmpresa: UsuarioEmpresaDTO
-    ): ResponseEntity<CustomResponse<List<String>>> {
+    ): ResponseEntity<CustomResponse<List<EventoConUsuarioDTO>>> {
         val eventos = eventoService.getEventosByUsuarioAndEmpresa(
             usuarioEmpresa.usuarioId,
             usuarioEmpresa.empresaId
@@ -364,7 +364,7 @@ class EventoController {
     fun saveEvento(
         @RequestBody evento: Evento
     ): ResponseEntity<CustomResponse<Evento>> {
-        val eventoGuardado = eventoService.save(evento)
+        val eventoGuardado = eventoService.registrarReserva(evento)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CustomResponse(
@@ -402,7 +402,7 @@ class EventoController {
     fun editEventoExtra(
         @PathVariable eventoId: Long,
         @RequestBody evento: EventoExtraDTO
-    ): ResponseEntity<CustomResponse<EventoExtraDTO>> {
+    ): ResponseEntity<CustomResponse<Long>> {
         evento.id = eventoId
         val eventoActualizado = eventoService.editEventoExtra(evento)
 
@@ -421,7 +421,7 @@ class EventoController {
     fun editEventoCatering(
         @PathVariable eventoId: Long,
         @RequestBody evento: EventoCateringDTO
-    ): ResponseEntity<CustomResponse<EventoCateringDTO>> {
+    ): ResponseEntity<CustomResponse<Long>> {
         evento.id = eventoId
         val eventoActualizado = eventoService.editEventoCatering(evento)
 
@@ -519,9 +519,9 @@ class EventoController {
     @PutMapping("/empresa/{empresaId}/especificaciones")
     fun recorrerEspecificaciones(
         @PathVariable empresaId: Long,
-        @RequestBody evento: Evento
+        @RequestBody evento: EventoReservaDTO
     ): ResponseEntity<CustomResponse<Any>> {
-        val especificaciones = eventoService.recorrerEspecificaciones(evento)
+        val especificaciones = eventoService.recorrerEspecificaciones(evento, empresaId)
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -541,7 +541,7 @@ class EventoController {
         @PathVariable eventoId: Long,
         @RequestParam empresaId: Long
     ): ResponseEntity<CustomResponse<String>> {
-        val resultado = eventoService.reenviarMail(eventoId)
+        val resultado = eventoService.reenviarMail(eventoId, empresaId)
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -561,7 +561,7 @@ class EventoController {
         @PathVariable eventoId: Long
     ): ResponseEntity<ByteArray> {
         eventoService.asignarEventoId(eventoId)
-        val archivo = eventoService.descargarEvento()
+        val archivo = eventoService.descargarEvento(eventoId)
 
         return ResponseEntity.ok()
             .header("Content-Disposition", "attachment; filename=\"evento_$eventoId.pdf\"")
