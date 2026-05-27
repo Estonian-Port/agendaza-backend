@@ -74,7 +74,7 @@ class EventoService(
         val empresa = empresaService.findById(dto.empresaId)
 
         // 1. Lógica delegada del Código (Limpieza del TODO)
-        if (dto.codigo.isNullOrBlank()) {
+        if (dto.codigo.isBlank()) {
             dto.codigo = generateCodigoForEventoOfEmpresa(empresa)
         }
 
