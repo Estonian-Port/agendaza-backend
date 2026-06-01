@@ -75,7 +75,7 @@ data class EventoVerDTO(
     val listaExtraTipoCatering: List<ExtraDTO>,
     val listaExtraCateringVariable: List<EventoExtraVariableDTO>,
     val encargado: UsuarioAbmDTO,
-    val cliente: Usuario,
+    val cliente: UsuarioResponseDto,
     val presupuesto: Double,
     val estado: Estado,
     val anotaciones: String
@@ -132,7 +132,7 @@ data class EventoConUsuarioDTO(
     val usuarioId: Long,
     val usuarioNombre: String,
     val usuarioApellido: String,
-    val usuarioUsername: String
+    val usuarioUsername: String?
 ) : Serializable
 
 // ==================== DTOs para Búsqueda ====================

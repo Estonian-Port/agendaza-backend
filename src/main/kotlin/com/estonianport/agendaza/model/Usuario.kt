@@ -65,13 +65,5 @@ class Usuario(
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
-    fun toUsuarioAbmDto(): UsuarioAbmDTO {
-        return UsuarioAbmDTO(id, nombre, apellido, username)
-    }
-
-    fun toClienteDto(): ClienteDTO {
-        return ClienteDTO(id, nombre, apellido, email, celular)
-    }
-
     fun isActive(): Boolean = fechaBaja == null
 }

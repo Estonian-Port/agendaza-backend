@@ -2,6 +2,7 @@ package com.estonianport.agendaza.dto
 
 import com.estonianport.agendaza.model.enums.TipoCargo
 import com.estonianport.agendaza.model.Usuario
+import java.io.Serializable
 import java.time.LocalDate
 
 class UsuarioDTO(var usuario: Usuario, var empresaId : Long, var cargo : TipoCargo?){}
@@ -25,4 +26,19 @@ data class UsuarioResponseDto(
     val username: String?,
     val email: String,
     val celular: Long
-)
+) : Serializable
+
+fun Usuario.toUsuarioResponseDto(): UsuarioResponseDto {
+    return UsuarioResponseDto(
+        id = this.id,
+        nombre = this.nombre,
+        apellido = this.apellido,
+        username = this.username,
+        email = this.email,
+        celular = this.celular
+    )
+}
+
+fun Usuario.toUsuarioAbmDto(): UsuarioAbmDTO {
+    return UsuarioAbmDTO(id, nombre, apellido, username)
+}

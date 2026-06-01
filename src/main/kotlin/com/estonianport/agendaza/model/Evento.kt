@@ -151,7 +151,7 @@ class Evento(
                        listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDTO{
         return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
             descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
-            listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
+            listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
     }
 
     fun toEventoReservaDto(

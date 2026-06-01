@@ -43,14 +43,13 @@ class CargoController(
     fun getCargoByUsuarioAndEmpresa(
         @PathVariable usuarioId: Long,
         @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<UsuarioEditCargoDTO>> {
+    ): ResponseEntity<CustomResponse<TipoCargo>> {
         val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
-        val dto = UsuarioEditCargoDTO(usuarioId, empresaId, cargo.tipoCargo)
 
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Cargo obtenido correctamente",
-                data = dto
+                data = cargo.tipoCargo
             )
         )
     }
