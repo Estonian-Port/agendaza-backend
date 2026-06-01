@@ -54,6 +54,25 @@ class UsuarioController {
     // ==================== BÚSQUEDAS ====================
 
     /**
+     * Obtiene un usuario específico por su ID
+     */
+    @GetMapping("/{usuarioId}")
+    fun getUsuarioById(
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+
+        val usuario = usuarioService.findById(usuarioId)
+            ?: throw NotFoundException("Usuario con ID $usuarioId no encontrado")
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuario.toUsuarioResponseDto()
+            )
+        )
+    }
+
+    /**
      * Obtiene un usuario por su email
      * Busca tanto en usuarios como en clientes
      */

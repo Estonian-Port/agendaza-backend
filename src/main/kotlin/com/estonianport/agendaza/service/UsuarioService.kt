@@ -38,12 +38,6 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
         return usuarioRepository.findById(id).orElse(null)
     }
 
-    @Transactional(readOnly = true)
-    @Cacheable(value = ["usuarioByUsername"], key = "#username")
-    fun getByUsername(username: String): Usuario? {
-        return usuarioRepository.getByUsername(username)
-    }
-
     // ==================== DTOs ====================
 
     @Transactional(readOnly = true)
