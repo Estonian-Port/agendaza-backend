@@ -356,92 +356,63 @@ class EventoService(
     }
 
     @Transactional
-    @CacheEvict(value = ["eventoExtra"], key = "#evento.id")
+    @CacheEvict(value = ["eventoExtra"], key = "#eventoDTO.id")
     fun editEventoExtra(eventoDTO: EventoExtraDTO): Long {
         val evento = findById(eventoDTO.id)
 
-        val listaExtra = mutableSetOf<Extra>()
-        listaExtra.addAll(
-            extraService.fromListaExtraDtoToListaExtra(eventoDTO.listaExtra)
-        )
+        // 1. Convertimos los DTOs que vienen del front a entidades
+        val nuevosExtras = extraService.fromListaExtraDtoToListaExtra(eventoDTO.listaExtra)
+        val nuevasVariables = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoDTO.listaExtraVariable)
 
-        // Eliminar extras variables de evento
-        evento.listaEventoExtraVariable
-            .filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
-            .forEach { extraVariableService.delete(it.id) }
+        // 2. ACTUALIZAR EXTRAS NORMALES
+        evento.listaExtra.removeAll { it.tipoExtra != TipoExtra.TIPO_CATERING }
 
-        // Procesar nuevas variables
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoDTO.listaExtraVariable)
-        )
+        // Agregamos los nuevos que vinieron del front
+        evento.listaExtra.addAll(nuevosExtras)
 
-        // Guardar nuevas variables
-        listaEventoExtraVariable.forEach {
-            it.evento = evento
-            extraVariableService.save(it)
-        }
+        // 3. ACTUALIZAR EXTRAS VARIABLES
+        evento.listaEventoExtraVariable.removeAll { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
 
-        // Mantener extras de catering
-        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING })
+        // Le asignamos el evento padre a las nuevas variables y las agregamos a la colección
+        nuevasVariables.forEach { it.evento = evento }
+        evento.listaEventoExtraVariable.addAll(nuevasVariables)
 
-        // Mantener variables de catering
-        listaEventoExtraVariable.addAll(
-            evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
-        )
-
-        evento.listaExtra = listaExtra
-        evento.listaEventoExtraVariable = listaEventoExtraVariable
+        // 4. Actualizar campos básicos
         evento.extraOtro = eventoDTO.extraOtro
         evento.descuento = eventoDTO.descuento
 
+        // 5. Guardar
         return save(evento).id
     }
 
     @Transactional
-    @CacheEvict(value = ["eventoCatering"], key = "#evento.id")
+    @CacheEvict(value = ["eventoCatering"], key = "#eventoCateringDto.id")
     fun editEventoCatering(eventoCateringDto: EventoCateringDTO): Long {
         val evento = findById(eventoCateringDto.id)
 
-        val listaExtra = mutableSetOf<Extra>()
-        listaExtra.addAll(
-            extraService.fromListaExtraDtoToListaExtra(eventoCateringDto.listaExtraTipoCatering.toList())
-        )
+        // 1. Convertimos los DTOs que vienen del front a entidades
+        val nuevosExtrasCatering = extraService.fromListaExtraDtoToListaExtra(eventoCateringDto.listaExtraTipoCatering.toList())
+        val nuevasVariablesCatering = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoCateringDto.listaExtraCateringVariable.toList())
 
-        // Eliminar variables de catering
-        evento.listaEventoExtraVariable
-            .filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
-            .forEach { extraVariableService.delete(it.id) }
+        // 2. ACTUALIZAR EXTRAS NORMALES
+        evento.listaExtra.removeAll { it.tipoExtra != TipoExtra.EVENTO }
 
-        // Procesar nuevas variables
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoCateringDto.listaExtraCateringVariable.toList()
-            )
-        )
+        // Agregamos los nuevos de catering
+        evento.listaExtra.addAll(nuevosExtrasCatering)
 
-        // Guardar nuevas variables
-        listaEventoExtraVariable.forEach {
-            it.evento = evento
-            extraVariableService.save(it)
-        }
+        // 3. ACTUALIZAR EXTRAS VARIABLES
+        evento.listaEventoExtraVariable.removeAll { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
 
-        // Mantener extras de evento
-        listaExtra.addAll(evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO })
+        // Le asignamos el evento padre a las nuevas variables y las agregamos
+        nuevasVariablesCatering.forEach { it.evento = evento }
+        evento.listaEventoExtraVariable.addAll(nuevasVariablesCatering)
 
-        // Mantener variables de evento
-        listaEventoExtraVariable.addAll(
-            evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
-        )
-
-        evento.listaExtra = listaExtra
-        evento.listaEventoExtraVariable = listaEventoExtraVariable
+        // 4. Actualizar campos básicos
         evento.cateringOtro = eventoCateringDto.cateringOtro
         evento.cateringOtroDescripcion = eventoCateringDto.cateringOtroDescripcion
 
-        save(evento)
-        return evento.id
+        // 5. Guardar
+        return save(evento).id
     }
 
     @Transactional

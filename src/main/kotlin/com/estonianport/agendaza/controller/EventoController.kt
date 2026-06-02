@@ -379,14 +379,12 @@ class EventoController {
 
     /**
      * Actualiza los extras de un evento
-     * PUT /v1/eventos/123/extra
+     * PUT /v1/eventos/extra
      */
-    @PutMapping("/{eventoId}/extra")
+    @PutMapping("/extra")
     fun editEventoExtra(
-        @PathVariable eventoId: Long,
         @RequestBody evento: EventoExtraDTO
     ): ResponseEntity<CustomResponse<Long>> {
-        evento.id = eventoId
         val eventoActualizado = eventoService.editEventoExtra(evento)
 
         return ResponseEntity.ok(
@@ -399,14 +397,12 @@ class EventoController {
 
     /**
      * Actualiza la información de catering de un evento
-     * PUT /v1/eventos/123/catering
+     * PUT /v1/eventos/catering
      */
-    @PutMapping("/{eventoId}/catering")
+    @PutMapping("catering")
     fun editEventoCatering(
-        @PathVariable eventoId: Long,
         @RequestBody evento: EventoCateringDTO
     ): ResponseEntity<CustomResponse<Long>> {
-        evento.id = eventoId
         val eventoActualizado = eventoService.editEventoCatering(evento)
 
         return ResponseEntity.ok(
