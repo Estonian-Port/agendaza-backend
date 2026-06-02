@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -65,7 +66,10 @@ class EventoService(
      * Registra una nueva reserva de evento con todas sus validaciones y relaciones
      */
     @Transactional
-    @CacheEvict(value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "eventoAgenda"], allEntries = true)
+    @CacheEvict(
+        value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "eventoAgenda", "agendaEventos"],
+        key = "#dto.empresaId"
+    )
     fun registrarReserva(dto: EventoReservaDTO): Long {
         val empresa = empresaService.findById(dto.empresaId)
 
@@ -498,21 +502,50 @@ class EventoService(
     // ==================== VALIDACIONES ====================
 
     /**
-     * Obtiene horarios disponibles para un período en una empresa
-     * @param eventoBuscarFecha DTO con empresa, desde, hasta
+     * Obtiene los rangos de horarios disponibles (huecos libres) para una fecha específica.
+     * Toma en cuenta un margen de 1 hora antes y después de cada evento ocupado.
      */
     @Transactional(readOnly = true)
     fun getHorariosDisponibles(eventoBuscarFecha: EventoBuscarFechaDTO): List<String> {
-        val eventos = eventoRepository.findAllByInicioBetweenAndEmpresa(
-            eventoBuscarFecha.desde,
-            eventoBuscarFecha.hasta,
-            empresaService.findById(eventoBuscarFecha.empresaId)
-        )
 
-        //TODO
-        // Implementar lógica de horarios disponibles
-        // Esta es la lógica que se encontraba en el viejo servicio
-        return emptyList() // Reemplazar con implementación real
+        // 1. Definimos los límites del día que estamos consultando
+        val inicioDia = eventoBuscarFecha.desde.toLocalDate().atStartOfDay()
+        val finDia = eventoBuscarFecha.desde.toLocalDate().atTime(LocalTime.MAX)
+
+        // 2. Buscamos los eventos de ese día (usando tu métod.o del repo que devuelve DTOs)
+        val eventosDelDia = eventoRepository.findAllByInicioBetweenAndEmpresa(
+            inicioDia,
+            finDia,
+            eventoBuscarFecha.empresaId
+        ).sortedBy { it.inicio } // Fundamental que estén ordenados
+
+        val horariosDisponibles = mutableListOf<String>()
+        var punteroTiempo = inicioDia
+
+        // 3. Iteramos para encontrar los huecos libres
+        for (evento in eventosDelDia) {
+            // Aplicamos tu regla de negocio: 1 hora de margen antes y después
+            val inicioOcupado = evento.inicio.minusHours(1)
+            val finOcupado = evento.fin.plusHours(1)
+
+            // Si el puntero de tiempo actual es anterior al inicio del evento, hay un hueco libre
+            if (punteroTiempo.isBefore(inicioOcupado)) {
+                horariosDisponibles.add("${punteroTiempo.toLocalTime()} - ${inicioOcupado.toLocalTime()}")
+            }
+
+            // Movemos el puntero al final del evento (si es mayor al puntero actual por superposición)
+            if (punteroTiempo.isBefore(finOcupado)) {
+                punteroTiempo = finOcupado
+            }
+        }
+
+        // 4. Agregamos el último hueco del día si quedó tiempo después del último evento
+        if (punteroTiempo.isBefore(finDia)) {
+            val horaFinalString = if (punteroTiempo.toLocalDate().isBefore(finDia.toLocalDate())) "23:59" else "23:59"
+            horariosDisponibles.add("${punteroTiempo.toLocalTime()} - $horaFinalString")
+        }
+
+        return horariosDisponibles
     }
 
     /**
@@ -582,10 +615,8 @@ class EventoService(
         return Estado.entries.map { it.name }
     }
 
-    //TODO
     fun getAllEstadoForSaveEvento(): List<String> {
-        // Filtrar si hay ciertos estados no permitidos para nuevos eventos
-        return Estado.entries.map { it.name }
+        return mutableListOf(Estado.COTIZADO.name, Estado.RESERVADO.name)
     }
 
     // ===================== MÉTODOS AUXILIARES DE CONVERSIÓN =============================

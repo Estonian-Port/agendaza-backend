@@ -37,11 +37,21 @@ interface EventoRepository : CrudRepository<Evento, Long> {
      * Busca eventos en un rango de fechas para una empresa específica
      * Utilizado para validar disponibilidad de horarios
      */
-    @EntityGraph(attributePaths = ["tipoEvento"])
+    @Query(
+        """
+    SELECT new com.estonianport.agendaza.dto.EventoDTO(
+        e.id, e.nombre, e.codigo, e.inicio, e.fin, e.tipoEvento.nombre
+    )
+    FROM Evento e 
+    WHERE e.empresa.id = :empresaId 
+    AND e.inicio BETWEEN :inicio AND :fin
+    AND e.fechaBaja IS NULL
+    """
+    )
     fun findAllByInicioBetweenAndEmpresa(
         inicio: LocalDateTime,
         fin: LocalDateTime,
-        empresa: Empresa
+        empresaId: Long // Cambié Empresa por empresaId para mayor eficiencia
     ): List<EventoDTO>
 
     /**

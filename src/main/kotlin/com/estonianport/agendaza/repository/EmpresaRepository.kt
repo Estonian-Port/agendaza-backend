@@ -3,8 +3,11 @@ package com.estonianport.agendaza.repository
 import com.estonianport.agendaza.dto.CantidadesPanelAdminDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
+import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Especificacion
+import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.enums.Duracion
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import java.util.*
@@ -57,4 +60,21 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             " AND pf.fechaBaja IS NULL")
     fun getAllPrecioConFechaByTipoEventoId(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO>
 
+    @Query(
+        """
+        SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(
+            te.id, 
+            te.nombre, 
+            te.cantidadDuracion, 
+            te.duracion, 
+            te.capacidad, 
+            te.empresa.id
+        ) 
+        FROM TipoEvento te 
+        WHERE te.empresa.id = :empresaId 
+        AND te.duracion = :duracion 
+        AND te.fechaBaja IS NULL
+        """
+    )
+    fun findByEmpresaIdAndDuracion(empresaId: Long, duracion: Duracion): List<TipoEventoDTO>
 }

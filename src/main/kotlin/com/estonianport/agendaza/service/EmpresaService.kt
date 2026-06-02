@@ -2,9 +2,12 @@ package com.estonianport.agendaza.service
 
 import GenericServiceImpl
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.repository.*
+import org.apache.coyote.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -107,5 +110,17 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     fun getAllPrecioConFechaByTipoEvento(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO> {
         return empresaRepository.getAllPrecioConFechaByTipoEventoId(empresaId, tipoEventoId)
+    }
+
+    @Transactional(readOnly = true)
+    fun getTiposEventoByDuracion(empresaId: Long, duracionStr: String): List<TipoEventoDTO> {
+
+        val duracionEnum = try {
+            Duracion.valueOf(duracionStr)
+        } catch (e: IllegalArgumentException) {
+            throw BusinessException("La duración '$duracionStr' no es válida")
+        }
+
+        return empresaRepository.findByEmpresaIdAndDuracion(empresaId, duracionEnum)
     }
 }

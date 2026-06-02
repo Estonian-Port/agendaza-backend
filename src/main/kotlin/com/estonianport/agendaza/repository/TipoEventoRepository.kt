@@ -4,6 +4,7 @@ import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
+import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

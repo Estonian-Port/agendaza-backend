@@ -150,18 +150,16 @@ class EmpresaController {
 
     /**
      * Obtiene todos los tipos de evento de una empresa filtrados por duración
+     * GET /v1/empresas/{empresaId}/tipos-evento?duracion=CORTA
      */
-    @PutMapping("/{empresaId}/tipos-evento/duracion")
+    @GetMapping("/{empresaId}/tipos-evento")
     fun getAllTipoEventoByEmpresaIdAndDuracion(
         @PathVariable empresaId: Long,
-        @RequestBody duracion: String
+        @RequestParam duracion: String
     ): ResponseEntity<CustomResponse<List<TipoEventoDTO>>> {
-        val empresa = empresaService.get(empresaId)
-            ?: throw NotFoundException("Empresa no encontrada")
 
-        val tiposEvento = empresa.listaTipoEvento
-            .filter { it.fechaBaja == null && it.duracion.name == duracion }
-            .map { it.toDTO() }
+        // Toda la lógica y el acceso a datos se delegó al service
+        val tiposEvento = empresaService.getTiposEventoByDuracion(empresaId, duracion)
 
         return ResponseEntity.ok(
             CustomResponse(
