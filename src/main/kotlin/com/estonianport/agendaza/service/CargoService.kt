@@ -20,10 +20,6 @@ class CargoService : GenericServiceImpl<Cargo, Long>() {
     override val dao: CrudRepository<Cargo, Long>
         get() = cargoRepository
 
-    fun findAllByUsuario(usuario : Usuario) : List<Cargo>{
-        return cargoRepository.findAllByUsuario(usuario)
-    }
-
     fun findById(id : Long) : Cargo{
         return cargoRepository.findById(id).get()
     }
@@ -34,10 +30,6 @@ class CargoService : GenericServiceImpl<Cargo, Long>() {
 
     fun getCargoByEmpresaIdAndUsuarioId(empresaId : Long, usuarioId : Long) : Cargo {
         return cargoRepository.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
-    }
-
-    fun getTipoCargoByEmpresaIdAndUsuarioId(empresaId : Long, usuarioId : Long) : TipoCargo {
-        return cargoRepository.getTipoCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
     }
 
     fun delete(empresaId: Long, usuarioId: Long) {

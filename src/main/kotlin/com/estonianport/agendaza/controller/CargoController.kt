@@ -148,11 +148,7 @@ class CargoController(
         @PathVariable usuarioId: Long,
         @PathVariable empresaId: Long
     ): ResponseEntity<CustomResponse<String>> {
-        // En el viejo usabas cargoService.delete(empresaId, usuarioId).
-        // Si tu nuevo service ahora pide el ID del Cargo, esta lógica que armaste es la correcta:
-        val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
-        cargoService.delete(cargo.id)
-
+        cargoService.delete(empresaId, usuarioId)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Cargo eliminado correctamente",
