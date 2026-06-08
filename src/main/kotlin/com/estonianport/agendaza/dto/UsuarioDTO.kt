@@ -17,8 +17,6 @@ class UsuarioEditPasswordDTO(var id : Long, var password: String) {}
 
 class UsuarioAbmDTO(var id: Long, var nombre: String, var apellido: String, var username: String?) {}
 
-class UsuarioEmpresaDTO(var usuarioId: Long, var empresaId: Long) {}
-
 data class UsuarioResponseDto(
     val id: Long,
     val nombre: String,

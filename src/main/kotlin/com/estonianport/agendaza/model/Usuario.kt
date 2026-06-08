@@ -58,12 +58,7 @@ class Usuario(
     var fechaBaja: LocalDate? = null
 
     @JsonIgnore
-    @OneToMany(mappedBy = "cliente", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var listaEventosContratados: MutableSet<Evento> = mutableSetOf()
-
-    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
-    fun isActive(): Boolean = fechaBaja == null
 }

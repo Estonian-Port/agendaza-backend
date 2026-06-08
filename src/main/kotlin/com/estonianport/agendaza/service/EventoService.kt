@@ -26,6 +26,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Service
 class EventoService(
@@ -143,38 +144,42 @@ class EventoService(
      * Procesa y normaliza datos del cliente, evitando duplicados
      */
     private fun procesarYNormalizarCliente(clienteInput: Usuario): Usuario {
-        // Si viene con ID, buscarlo directamente
         if (clienteInput.id != 0L) {
             return usuarioService.get(clienteInput.id)
                 ?: throw IllegalArgumentException("Cliente no encontrado")
         }
 
-        // Normalizar datos
-        val emailNormalizado = clienteInput.email.trim().lowercase()
-        val celularNormalizado = clienteInput.celular
+        // 1. Limpiamos lo que llega
+        val emailLimpio = clienteInput.email.trim().lowercase()
+        val celularInput = clienteInput.celular
+
+        // 2. Buscamos coincidencias REALES primero (ignorando vacíos)
+        if (emailLimpio.isNotBlank() && usuarioService.existsByEmail(emailLimpio)) {
+            return usuarioService.getByEmail(emailLimpio)!!
+        }
+
+        if (celularInput > 0 && usuarioService.existsByCelular(celularInput)) {
+            return usuarioService.getByCelular(celularInput)!!
+        }
+
+        // 3. Si no existe, preparamos el cliente nuevo aplicando las reglas de tu SQL
+        val emailParaGuardar = emailLimpio.ifBlank {
+            "sin-email-${UUID.randomUUID()}@agendaza.com"
+        }
+
+        val nombreParaGuardar = clienteInput.nombre.trim().lowercase().ifBlank { "cliente" }
+        val apellidoParaGuardar = clienteInput.apellido.trim().lowercase().ifBlank { "cliente" }
 
         clienteInput.apply {
-            nombre = nombre.trim().lowercase()
-            apellido = apellido.trim().lowercase()
-            email = emailNormalizado
+            nombre = nombreParaGuardar
+            apellido = apellidoParaGuardar
+            email = emailParaGuardar
+            celular = celularInput
             username = null
             password = null
         }
 
-        // Buscar cliente existente
-        return when {
-            emailNormalizado.isNotBlank() && usuarioService.existsByEmail(emailNormalizado) -> {
-                usuarioService.getByEmail(emailNormalizado)!!
-            }
-
-            usuarioService.existsByCelular(celularNormalizado) -> {
-                usuarioService.getByCelular(celularNormalizado)!!
-            }
-
-            else -> {
-                usuarioService.save(clienteInput)
-            }
-        }
+        return usuarioService.save(clienteInput)
     }
 
     /**
