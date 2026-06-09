@@ -35,5 +35,5 @@ interface ClausulaRepository : CrudRepository<Clausula, Long> {
     fun getAllAgregar(empresaId: Long): List<GenericItemDTO>
 
     @Query("SELECT COUNT(c) FROM Clausula c JOIN c.listaEmpresa e WHERE e.id = :id")
-    fun countByEmpresaId(id: Long): Long
+    fun countByEmpresaId(id: Long): Int
 }

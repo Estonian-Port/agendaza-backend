@@ -507,50 +507,31 @@ class EventoService(
     // ==================== VALIDACIONES ====================
 
     /**
-     * Obtiene los rangos de horarios disponibles (huecos libres) para una fecha específica.
-     * Toma en cuenta un margen de 1 hora antes y después de cada evento ocupado.
+     * Obtiene una lista de strings con los horarios de los eventos ya reservados para un día.
      */
     @Transactional(readOnly = true)
-    fun getHorariosDisponibles(eventoBuscarFecha: EventoBuscarFechaDTO): List<String> {
+    fun getEventosOcupadosDelDia(empresaId: Long, fechaEvento: LocalDateTime): List<String> {
 
-        // 1. Definimos los límites del día que estamos consultando
-        val inicioDia = eventoBuscarFecha.desde.toLocalDate().atStartOfDay()
-        val finDia = eventoBuscarFecha.desde.toLocalDate().atTime(LocalTime.MAX)
+        // 1. Definimos los límites del día
+        val inicioDia = fechaEvento.toLocalDate().atStartOfDay()
+        val finDia = fechaEvento.toLocalDate().atTime(LocalTime.MAX)
 
-        // 2. Buscamos los eventos de ese día (usando tu métod.o del repo que devuelve DTOs)
+        // 2. Buscamos los eventos de ese día usando tu Repo (que ya devuelve EventoDTO)
         val eventosDelDia = eventoRepository.findAllByInicioBetweenAndEmpresa(
             inicioDia,
             finDia,
-            eventoBuscarFecha.empresaId
-        ).sortedBy { it.inicio } // Fundamental que estén ordenados
+            empresaId
+        ).sortedBy { it.inicio } // Ordenamos cronológicamente de forma segura
 
-        val horariosDisponibles = mutableListOf<String>()
-        var punteroTiempo = inicioDia
-
-        // 3. Iteramos para encontrar los huecos libres
-        for (evento in eventosDelDia) {
-            // Aplicamos tu regla de negocio: 1 hora de margen antes y después
-            val inicioOcupado = evento.inicio.minusHours(1)
-            val finOcupado = evento.fin.plusHours(1)
-
-            // Si el puntero de tiempo actual es anterior al inicio del evento, hay un hueco libre
-            if (punteroTiempo.isBefore(inicioOcupado)) {
-                horariosDisponibles.add("${punteroTiempo.toLocalTime()} - ${inicioOcupado.toLocalTime()}")
-            }
-
-            // Movemos el puntero al final del evento (si es mayor al puntero actual por superposición)
-            if (punteroTiempo.isBefore(finOcupado)) {
-                punteroTiempo = finOcupado
+        // 3. Mapeamos directamente a la lista de Strings con interpolación
+        return eventosDelDia.map { evento ->
+            // Chequeamos si el evento termina en un día distinto al que empezó
+            if (!evento.inicio.toLocalDate().isEqual(evento.fin.toLocalDate())) {
+                "${evento.inicio.toLocalTime()} hasta ${evento.fin.toLocalTime()} del dia ${evento.fin.toLocalDate()} (${evento.nombre})"
+            } else {
+                "${evento.inicio.toLocalTime()} hasta ${evento.fin.toLocalTime()} (${evento.nombre})"
             }
         }
-
-        // 4. Agregamos el último hueco del día si quedó tiempo después del último evento
-        if (punteroTiempo.isBefore(finDia)) {
-            val horaFinalString = if (punteroTiempo.toLocalDate().isBefore(finDia.toLocalDate())) "23:59" else "23:59"
-            horariosDisponibles.add("${punteroTiempo.toLocalTime()} - $horaFinalString")
-        }
-
-        return horariosDisponibles
     }
 
     /**
@@ -558,12 +539,8 @@ class EventoService(
      * @param eventoBuscarFecha DTO con empresa, desde, hasta
      */
     @Transactional(readOnly = true)
-    fun getHorarioDisponible(eventoBuscarFecha: EventoBuscarFechaDTO): Boolean {
-        return eventoRepository.existeSuperposicionDeHorarios(
-            eventoBuscarFecha.empresaId,
-            eventoBuscarFecha.desde,
-            eventoBuscarFecha.hasta
-        ).not()
+    fun getHorarioDisponible(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): Boolean {
+        return !eventoRepository.existeSuperposicionDeHorarios(empresaId, desde, hasta)
     }
 
     // ==================== DESCARGAS PDF ====================

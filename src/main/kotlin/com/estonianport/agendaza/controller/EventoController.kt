@@ -7,9 +7,11 @@ import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.EmpresaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/v1/eventos")
@@ -296,36 +298,32 @@ class EventoController {
     // ==================== VALIDACIONES ====================
 
     /**
-     * Obtiene horarios disponibles para una fecha específica
-     * POST /v1/eventos/disponibilidad/horarios
-     *
-     * Body: { "empresaId": 1, "desde": "2024-05-27T10:00:00", "hasta": "2024-05-27T23:59:59" }
+     * Obtiene la lista de eventos ocupados para un día específico
+     * GET /v1/eventos/empresa/{empresaId}/ocupacion-del-dia?fechaEvento=2026-04-05T00:00:00
      */
-    @PostMapping("/disponibilidad/horarios")
+    @GetMapping("/empresa/{empresaId}/ocupacion-del-dia")
     fun getListaEventoByDiaAndEmpresaId(
-        @RequestBody eventoBuscarFecha: EventoBuscarFechaDTO
+        @PathVariable empresaId: Long,
+        @RequestParam fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<List<String>>> {
-        val horarios = eventoService.getHorariosDisponibles(eventoBuscarFecha)
+
+        val listaEventosOcupados = eventoService.getEventosOcupadosDelDia(empresaId, fechaEvento)
 
         return ResponseEntity.ok(
             CustomResponse(
-                message = "Horarios disponibles obtenidos correctamente",
-                data = horarios
+                message = "Eventos del día obtenidos correctamente",
+                data = listaEventosOcupados
             )
         )
     }
 
-    /**
-     * Valida si un horario específico está disponible para una empresa
-     * POST /v1/eventos/disponibilidad/validar
-     *
-     * Body: { "empresaId": 1, "desde": "2024-05-27T10:00:00", "hasta": "2024-05-27T12:00:00" }
-     */
-    @PostMapping("/disponibilidad/validar")
+    @GetMapping("/disponibilidad/validar")
     fun validarHorarioDisponible(
-        @RequestBody eventoBuscarFecha: EventoBuscarFechaDTO
+        @RequestParam empresaId: Long,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) desde: LocalDateTime,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) hasta: LocalDateTime
     ): ResponseEntity<CustomResponse<Boolean>> {
-        val disponible = eventoService.getHorarioDisponible(eventoBuscarFecha)
+        val disponible = eventoService.getHorarioDisponible(empresaId, desde, hasta)
 
         return ResponseEntity.ok(
             CustomResponse(

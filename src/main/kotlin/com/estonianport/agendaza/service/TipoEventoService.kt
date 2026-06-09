@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import GenericServiceImpl
+import com.estonianport.agendaza.common.toEndOfMonth
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
@@ -207,13 +208,13 @@ class TipoEventoService(
 
         // Upsert de los precios nuevos
         listaPrecioConFechaDTO.forEach { dto ->
-            val fechaHasta = dto.hasta.plusMonths(1).minusSeconds(1)
+            val fechaHasta = dto.hasta.toEndOfMonth()
 
             precioConFechaTipoEventoService.save(
                 PrecioConFechaTipoEvento(
                     dto.id,
                     dto.precio,
-                    dto.desde, // La fecha pasa directa, sin el minusHours(3)
+                    dto.desde,
                     fechaHasta,
                     empresa,
                     tipoEvento

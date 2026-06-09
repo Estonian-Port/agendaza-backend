@@ -2,7 +2,6 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
-import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
@@ -290,7 +289,7 @@ class TipoEventoController(
      * @param empresaId ID de la empresa
      * @param tipoEventoId ID del tipo de evento
      */
-    @GetMapping("/empresa/{empresaId}/{tipoEventoId}/precios")
+    @GetMapping("/{tipoEventoId}/empresa/{empresaId}/precios")
     fun getAllPrecioConFechaByTipoEventoId(
         @PathVariable empresaId: Long,
         @PathVariable tipoEventoId: Long
@@ -310,11 +309,11 @@ class TipoEventoController(
      * @param tipoEventoId ID del tipo de evento
      * @param fechaEvento Fecha del evento
      */
-    @PutMapping("/empresa/{empresaId}/{tipoEventoId}/precio-por-fecha")
+    @GetMapping("/{tipoEventoId}/empresa/{empresaId}/precio-por-fecha")
     fun getPrecioByTipoEventoIdAndFecha(
         @PathVariable empresaId: Long,
         @PathVariable tipoEventoId: Long,
-        @RequestBody fechaEvento: LocalDateTime
+        @RequestParam fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<Double>> {
         val precio = tipoEventoService.getPrecio(empresaId, tipoEventoId, fechaEvento)
         return ResponseEntity.ok(
@@ -331,7 +330,7 @@ class TipoEventoController(
      * @param tipoEventoId ID del tipo de evento
      * @param listaPrecioConFechaDTO Lista de precios con fechas a guardar
      */
-    @PostMapping("/empresa/{empresaId}/{tipoEventoId}/precios")
+    @PostMapping("/{tipoEventoId}/empresa/{empresaId}/precios")
     fun saveTipoEventoPrecio(
         @PathVariable empresaId: Long,
         @PathVariable tipoEventoId: Long,

@@ -1,7 +1,5 @@
 package com.estonianport.agendaza.controller
 
-import com.estonianport.agendaza.common.emailService.EmailService
-import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.response.CustomResponse

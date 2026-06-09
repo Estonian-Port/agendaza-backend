@@ -54,5 +54,5 @@ interface PagoRepository : CrudRepository<Pago, Long> {
     fun getEventoForSavePago(eventoId: Long, fechaAhora: LocalDateTime): PagoDTO?
 
     @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = :id AND p.fechaBaja IS NULL")
-    fun countActivosByEmpresaId(id: Long): Long
+    fun countActivosByEmpresaId(id: Long): Int
 }

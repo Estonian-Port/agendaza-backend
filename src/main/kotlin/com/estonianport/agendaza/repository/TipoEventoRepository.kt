@@ -64,5 +64,5 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     fun getTipoEventoConPrecio(empresaId: Long, tipoEventoId: Long, fechaEvento: LocalDateTime): TipoEventoPrecioDTO?
 
     @Query("SELECT COUNT(te) FROM TipoEvento te WHERE te.empresa.id = :id AND te.fechaBaja IS NULL")
-    fun countActivosByEmpresaId(id: Long): Long
+    fun countActivosByEmpresaId(id: Long): Int
 }

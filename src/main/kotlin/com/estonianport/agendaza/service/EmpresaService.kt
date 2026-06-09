@@ -77,8 +77,8 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         val cargos = cargoRepository.countActivosByEmpresaId(id)
         val tiposEvento = tipoEventoRepository.countActivosByEmpresaId(id)
 
-        val extrasEvento = extraRepository.countActivosByEmpresaIdAndTipos(id, listOf("EVENTO", "VARIABLE_EVENTO"))
-        val extrasCatering = extraRepository.countActivosByEmpresaIdAndTipos(id, listOf("TIPO_CATERING", "VARIABLE_CATERING"))
+        val extrasEvento = extraRepository.countEvento(id)
+        val extrasCatering = extraRepository.countCatering(id)
 
         val pagos = pagoRepository.countActivosByEmpresaId(id)
         val eventos = eventoRepository.countActivosByEmpresaId(id)

@@ -144,6 +144,7 @@ data class EventoBuscarFechaDTO(
     val hasta: LocalDateTime
 ) : Serializable
 
+
 // ==================== DTOs para Ediciones Parciales (PATCH) ====================
 
 /**

@@ -1,182 +1,309 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
-import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.model.PrecioConFechaExtra
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.PrecioConFechaExtraService
 import com.estonianport.agendaza.service.TipoEventoService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
+@RequestMapping("/v1/extras")
 @CrossOrigin("*")
-class ExtraController {
+class ExtraController(
+    private val extraService: ExtraService,
+    private val tipoEventoService: TipoEventoService,
+    private val empresaService: EmpresaService,
+    private val precioConFechaExtraService: PrecioConFechaExtraService
+) {
 
-    @Autowired
-    lateinit var extraService: ExtraService
+    // ==================== METADATA / ENUMS ====================
 
-    @Autowired
-    lateinit var tipoEventoService : TipoEventoService
+    /**
+     * Retorna los TipoExtra válidos para el módulo Evento
+     */
+    @GetMapping("/tipos/evento")
+    fun getTiposEvento(): ResponseEntity<CustomResponse<Set<TipoExtra>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Tipos de extra de evento obtenidos correctamente",
+                data = setOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
+            )
+        )
 
-    @Autowired
-    lateinit var empresaService: EmpresaService
+    /**
+     * Retorna los TipoExtra válidos para el módulo Catering
+     */
+    @GetMapping("/tipos/catering")
+    fun getTiposCatering(): ResponseEntity<CustomResponse<Set<TipoExtra>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Tipos de extra de catering obtenidos correctamente",
+                data = setOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
+            )
+        )
 
-    @Autowired
-    lateinit var precioConFechaExtraService : PrecioConFechaExtraService
+    // ==================== OBTENER EXTRA ====================
 
-    @GetMapping("/getAllExtraEvento")
-    fun getAllEvento(): List<ExtraDTO> {
-        return extraService.getAllEvento()
-    }
-
-    @GetMapping("/getAllExtraCatering")
-    fun getAllCatering(): List<ExtraDTO> {
-        return extraService.getAllCatering()
-    }
-    @GetMapping("/getExtra/{id}")
-    fun get(@PathVariable("id") id: Long): ExtraDTO {
+    /**
+     * Obtiene un extra por su ID con sus tipos de evento asociados
+     */
+    @GetMapping("/{id}")
+    fun getExtra(@PathVariable id: Long): ResponseEntity<CustomResponse<ExtraDTO>> {
         val extra = extraService.get(id)!!
-        val extraDto = extra.toDTO()
-
-        extraDto.listaTipoEventoId = tipoEventoService.getAllByExtra(extraDto.id).map { it.id }.toMutableSet()
-        return extraDto
-    }
-
-    @PostMapping("/saveExtra")
-    fun save(@RequestBody extraDTO: ExtraDTO): ExtraDTO {
-
-        var extra : Extra = if(extraDTO.id != 0L){
-            extraService.get(extraDTO.id)!!
-        }else{
-            Extra(0, extraDTO.nombre, extraDTO.tipoExtra)
+        val extraDTO = extra.toDTO().apply {
+            listaTipoEventoId = tipoEventoService.getAllByExtra(id).map { it.id }.toMutableSet()
         }
-
-        extra.listaTipoEvento = extraDTO.listaTipoEventoId.map { tipoEventoService.get(it)!! }.toMutableSet()
-
-        extra = extraService.save(extra)
-
-        val empresa = empresaService.get(extraDTO.empresaId)!!
-
-        empresa.listaExtra.add(extra)
-        empresaService.save(empresa)
-
-        return extra.toDTO()
+        return ResponseEntity.ok(
+            CustomResponse(message = "Extra obtenido correctamente", data = extraDTO)
+        )
     }
 
-    @DeleteMapping("/deleteExtra/{extraId}/{empresaId}")
-    fun delete(@PathVariable("extraId") extraId: Long, @PathVariable("empresaId") empresaId: Long): ResponseEntity<ExtraDTO> {
+    /**
+     * Lista paginada de extras tipo Evento de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/evento")
+    fun getPageEvento(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de evento obtenidos correctamente",
+                data = extraService.getPageEvento(empresaId, page)
+            )
+        )
+
+    /**
+     * Lista paginada de extras tipo Evento filtrados por nombre
+     */
+    @GetMapping("/empresa/{empresaId}/evento/buscar")
+    fun getPageEventoByNombre(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam buscar: String
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de evento filtrados correctamente",
+                data = extraService.getPageEventoByNombre(empresaId, page, buscar)
+            )
+        )
+
+    /**
+     * Cantidad total de extras tipo Evento de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/evento/count")
+    fun countEvento(@PathVariable empresaId: Long): ResponseEntity<CustomResponse<Int>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de extras de evento obtenida correctamente",
+                data = extraService.countEvento(empresaId)
+            )
+        )
+
+    /**
+     * Cantidad de extras tipo Evento filtrados por nombre
+     */
+    @GetMapping("/empresa/{empresaId}/evento/count/buscar")
+    fun countEventoByNombre(
+        @PathVariable empresaId: Long,
+        @RequestParam buscar: String
+    ): ResponseEntity<CustomResponse<Int>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad filtrada de extras de evento obtenida correctamente",
+                data = extraService.countEventoByNombre(empresaId, buscar)
+            )
+        )
+
+    /**
+     * Lista paginada de extras tipo Catering de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/catering")
+    fun getPageCatering(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de catering obtenidos correctamente",
+                data = extraService.getPageCatering(empresaId, page)
+            )
+        )
+
+    /**
+     * Lista paginada de extras tipo Catering filtrados por nombre
+     */
+    @GetMapping("/empresa/{empresaId}/catering/buscar")
+    fun getPageCateringByNombre(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam buscar: String
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de catering filtrados correctamente",
+                data = extraService.getPageCateringByNombre(empresaId, page, buscar)
+            )
+        )
+
+    /**
+     * Cantidad total de extras tipo Catering de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/catering/count")
+    fun countCatering(@PathVariable empresaId: Long): ResponseEntity<CustomResponse<Int>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad de extras de catering obtenida correctamente",
+                data = extraService.countCatering(empresaId)
+            )
+        )
+
+    /**
+     * Cantidad de extras tipo Catering filtrados por nombre
+     */
+    @GetMapping("/empresa/{empresaId}/catering/count/buscar")
+    fun countCateringByNombre(
+        @PathVariable empresaId: Long,
+        @RequestParam buscar: String
+    ): ResponseEntity<CustomResponse<Int>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad filtrada de extras de catering obtenida correctamente",
+                data = extraService.countCateringByNombre(empresaId, buscar)
+            )
+        )
+
+    /**
+     * Todos los extras tipo Evento activos del sistema (sin filtro de empresa)
+     */
+    @GetMapping("/evento")
+    fun getAllEvento(): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(message = "Extras de evento obtenidos correctamente", data = extraService.getAllEvento())
+        )
+
+    /**
+     * Todos los extras tipo Catering activos del sistema (sin filtro de empresa)
+     */
+    @GetMapping("/catering")
+    fun getAllCatering(): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(message = "Extras de catering obtenidos correctamente", data = extraService.getAllCatering())
+        )
+
+    /**
+     * Extras tipo Evento que aún no pertenecen a la empresa (para agregar)
+     */
+    @GetMapping("/empresa/{empresaId}/evento/agregar")
+    fun getExtraEventoAgregar(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de evento disponibles para agregar",
+                data = extraService.getAllExtraEventoAgregar(empresaId)
+            )
+        )
+
+    /**
+     * Extras tipo Catering que aún no pertenecen a la empresa (para agregar)
+     */
+    @GetMapping("/empresa/{empresaId}/catering/agregar")
+    fun getExtraCateringAgregar(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras de catering disponibles para agregar",
+                data = extraService.getAllExtraCateringAgregar(empresaId)
+            )
+        )
+
+    // ==================== PRECIO ====================
+
+    /**
+     * Precios con fechas vigentes de un extra para una empresa
+     */
+    @GetMapping("/{extraId}/empresa/{empresaId}/precios")
+    fun getPreciosByExtra(
+        @PathVariable empresaId: Long,
+        @PathVariable extraId: Long
+    ): ResponseEntity<CustomResponse<List<PrecioConFechaDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Precios del extra obtenidos correctamente",
+                data = empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
+            )
+        )
+
+    /**
+     * Extras con su precio vigente filtrados por tipo de evento, empresa y fecha
+     */
+    @GetMapping("/empresa/{empresaId}/tipo-evento/{tipoEventoId}/precio")
+    fun getExtrasConPrecio(
+        @PathVariable empresaId: Long,
+        @PathVariable tipoEventoId: Long,
+        @RequestParam fechaEvento: LocalDateTime,
+        @RequestParam tipoExtra: TipoExtra
+    ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extras con precio obtenidos correctamente",
+                data = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tipoExtra)
+            )
+        )
+
+    // ==================== ABM ====================
+
+    /**
+     * Crea o actualiza un extra y lo asocia a la empresa
+     */
+    @PostMapping
+    fun save(@RequestBody extraDTO: ExtraDTO): ResponseEntity<CustomResponse<ExtraDTO>> =
+        ResponseEntity.ok(
+            CustomResponse(
+                message = "Extra guardado correctamente",
+                data = extraService.saveExtra(extraDTO, tipoEventoService)
+            )
+        )
+
+    /**
+     * Guarda los precios vigentes de un extra para una empresa.
+     * Da de baja lógicamente los que no estén en la nueva lista.
+     */
+    @PostMapping("/{extraId}/empresa/{empresaId}/precios")
+    fun savePrecios(
+        @PathVariable empresaId: Long,
+        @PathVariable extraId: Long,
+        @RequestBody listaPrecioDTO: MutableSet<PrecioConFechaDTO>
+    ): ResponseEntity<CustomResponse<String>> {
+        extraService.savePreciosConFecha(empresaId, extraId, listaPrecioDTO)
+        return ResponseEntity.ok(
+            CustomResponse(message = "Precios guardados correctamente", data = "OK")
+        )
+    }
+
+    /**
+     * Elimina (soft-delete) la relación entre un extra y una empresa
+     */
+    @DeleteMapping("/{extraId}/empresa/{empresaId}")
+    fun delete(
+        @PathVariable extraId: Long,
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<String>> {
         extraService.deleteExtra(extraId, empresaId)
-        return ResponseEntity<ExtraDTO>(HttpStatus.OK)
-    }
-
-    @GetMapping("/getAllEventoTipoExtra")
-    fun getAllEventoTipoExtra(): MutableSet<TipoExtra> {
-        return mutableSetOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    }
-
-    @GetMapping("/getAllCateringTipoExtra")
-    fun getAllCateringTipoExtra(): MutableSet<TipoExtra> {
-        return mutableSetOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    }
-
-    @PostMapping("/saveExtraPrecio/{empresaId}/{extraId}")
-    fun saveTipoEventoPrecio(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long, @RequestBody listaPrecioConFechaDTO : MutableSet<PrecioConFechaDTO>): ResponseEntity<PrecioConFechaDTO> {
-        val extra = extraService.get(extraId)!!
-        val empresa = empresaService.get(empresaId)!!
-
-        val listaPrecio = empresa.listaPrecioConFechaExtra.filter { it.extra.id == extra.id }
-
-        listaPrecio.forEach{
-            if(!listaPrecioConFechaDTO.any { precioConFechaNuevo -> precioConFechaNuevo.id == it.id }){
-                val precioViejo = precioConFechaExtraService.get(it.id)!!
-                precioViejo.fechaBaja = LocalDate.now()
-                precioConFechaExtraService.save(precioViejo)
-            }
-        }
-
-        listaPrecioConFechaDTO.forEach{
-
-            // Busca el ultimo dia del mes del hasta
-            val fechaHasta = it.hasta.plusMonths(1).minusDays(1).plusHours(20).plusMinutes(59).plusSeconds(59)
-
-            precioConFechaExtraService.save(
-                PrecioConFechaExtra(
-                it.id,
-                it.precio,
-                it.desde.minusHours(3),
-                fechaHasta,
-                empresa,
-                extra
-            )
-            )
-        }
-
-        return ResponseEntity<PrecioConFechaDTO>(HttpStatus.OK)
-    }
-
-    @GetMapping("/getAllExtra/{id}/{pageNumber}")
-    fun getAllExtra(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
-        return extraService.extras(id,pageNumber)
-    }
-
-    @GetMapping("/getAllExtraFilter/{id}/{pageNumber}/{buscar}")
-    fun getAllExtraFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
-        return extraService.extrasFiltrados(id, pageNumber, buscar)
-    }
-
-    @GetMapping("/cantExtras/{id}")
-    fun cantExtras(@PathVariable("id") id: Long) =  extraService.contadorDeExtras(id)
-
-    @GetMapping("/cantExtrasFiltrados/{id}/{buscar}")
-    fun cantExtrasFiltrados(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) {
-        extraService.contadorDeExtrasFiltrados(id,buscar)
-    }
-
-    @GetMapping("/getAllExtraCatering/{id}/{pageNumber}")
-    fun getAllExtraCatering(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int): List<ExtraDTO> {
-        return extraService.extrasCatering(id,pageNumber)
-    }
-
-    @GetMapping("/getAllExtraCateringFilter/{id}/{pageNumber}/{buscar}")
-    fun getAllExtraCateringFilter(@PathVariable("id") id: Long, @PathVariable("pageNumber") pageNumber : Int, @PathVariable("buscar") buscar : String): List<ExtraDTO> {
-        return extraService.extrasCateringFiltrados(id, pageNumber, buscar)
-    }
-
-    @GetMapping("/cantExtraCatering/{id}")
-    fun cantExtraCatering(@PathVariable("id") id: Long) : Int {
-        return extraService.contadorDeExtrasCatering(id)
-    }
-
-    @GetMapping("/cantExtraCateringFilter/{id}/{buscar}")
-    fun cantExtraCateringFilter(@PathVariable("id") id: Long, @PathVariable("buscar") buscar : String) : Int {
-        return extraService.contadorDeExtrasCateringFilter(id,buscar)
-    }
-
-    @GetMapping("/getAllPrecioConFechaByExtraId/{empresaId}/{extraId}")
-    fun getAllPrecioConFechaByExtraId(@PathVariable("empresaId") empresaId: Long, @PathVariable("extraId") extraId: Long): List<PrecioConFechaDTO> {
-        return empresaService.getAllPrecioConFechaByExtraId(empresaId, extraId)
-    }
-
-    @GetMapping("/getAllExtraEventoAgregar/{empresaId}")
-    fun getAllExtraEventoAgregar(@PathVariable("empresaId") empresaId: Long): List<ExtraDTO> {
-        return extraService.getAllExtraEventoAgregar(empresaId)
-    }
-
-    @GetMapping("/getAllExtraCateringAgregar/{empresaId}")
-    fun getAllExtraCateringAgregar(@PathVariable("empresaId") empresaId: Long): List<ExtraDTO> {
-        return extraService.getAllExtraCaterigAgregar(empresaId)
+        return ResponseEntity.ok(
+            CustomResponse(message = "Extra eliminado correctamente", data = "OK")
+        )
     }
 }

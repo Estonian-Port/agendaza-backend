@@ -51,7 +51,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
     fun findAllByInicioBetweenAndEmpresa(
         inicio: LocalDateTime,
         fin: LocalDateTime,
-        empresaId: Long // Cambié Empresa por empresaId para mayor eficiencia
+        empresaId: Long
     ): List<EventoDTO>
 
     /**
@@ -272,7 +272,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         AND e.fechaBaja IS NULL
         """
     )
-    fun countActivosByEmpresaId(id: Long): Long
+    fun countActivosByEmpresaId(id: Long): Int
 
     /**
      * Cuenta clientes únicos que tienen eventos en una empresa
@@ -286,5 +286,5 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         AND e.cliente.fechaBaja IS NULL
         """
     )
-    fun countClientesByEmpresaId(id: Long): Long
+    fun countClientesByEmpresaId(id: Long): Int
 }

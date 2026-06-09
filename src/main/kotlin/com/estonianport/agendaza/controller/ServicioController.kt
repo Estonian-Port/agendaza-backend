@@ -4,7 +4,6 @@ import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.service.ServicioService
-import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
