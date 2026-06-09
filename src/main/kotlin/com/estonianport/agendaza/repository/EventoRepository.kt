@@ -140,7 +140,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
     // ==================== AGENDA Y CALENDARIO ====================
 
     /**
-     * Obtiene eventos para la vista de agenda (últimos 2 meses hacia adelante)
+     * Obtiene eventos para la vista de agenda (últimos 12 meses hacia adelante)
      * Utilizado para mostrar el calendario de eventos
      */
     @Query(

@@ -562,7 +562,7 @@ class EventoService(
     @Transactional(readOnly = true)
     @Cacheable(value = ["agendaEventos"], key = "#empresaId")
     fun getAllEventosForAgendaByEmpresaId(empresaId: Long): List<EventoAgendaDTO> {
-        val desde = LocalDateTime.now().minusMonths(2)
+        val desde = LocalDateTime.now().minusMonths(12)
         return eventoRepository.getAllEventosForAgendaByEmpresaId(empresaId, desde)
     }
 

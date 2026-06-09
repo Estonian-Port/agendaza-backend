@@ -251,7 +251,8 @@ class EventoController {
     }
 
     /**
-     * Obtiene eventos para la agenda/calendario de una empresa
+     * Obtiene eventos para la agenda/calendario de una empresa de los proximos y
+     * ultimos 12 meses
      * GET /v1/eventos/empresa/1/agenda
      */
     @GetMapping("/empresa/{empresaId}/agenda")
