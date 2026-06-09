@@ -26,47 +26,11 @@ class EmpresaController {
     @GetMapping("/{empresaId}")
     fun getEmpresa(
         @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<Empresa>> {
-        val empresa = empresaService.get(empresaId)
-            ?: throw NotFoundException("Empresa con ID $empresaId no encontrada")
-
+    ): ResponseEntity<CustomResponse<EmpresaDTO>> {
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Empresa obtenida correctamente",
-                data = empresa
-            )
-        )
-    }
-
-    /**
-     * Obtiene una empresa con información ABM (Altas, Bajas, Modificaciones)
-     */
-    @GetMapping("/{empresaId}/abm")
-    fun getEmpresaAbm(
-        @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<Empresa>> {
-        val empresa = empresaService.get(empresaId)
-            ?: throw NotFoundException("Empresa con ID $empresaId no encontrada")
-
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Información ABM de la empresa obtenida correctamente",
-                data = empresa
-            )
-        )
-    }
-
-    /**
-     * Obtiene todas las empresas (sin paginación, solo para admin)
-     */
-    @GetMapping
-    fun getAllEmpresas(): ResponseEntity<CustomResponse<List<Empresa>>> {
-        val empresas = empresaService.getAll()
-
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Todas las empresas obtenidas correctamente",
-                data = empresas ?: emptyList()
+                data = empresaService.getEmpresaDTO(empresaId)
             )
         )
     }

@@ -8,6 +8,7 @@ import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.repository.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
@@ -50,13 +51,24 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
         }
     }
 
-    fun save(empresaDTO: EmpresaDTO): GenericItemDTO{
+    @Cacheable(value = ["empresaDTO"], key = "#id")
+    @Transactional(readOnly = true)
+    fun getEmpresaDTO(id: Long): EmpresaDTO {
+        return empresaRepository.findDTOById(id).orElseThrow {
+            NotFoundException("Empresa con ID $id no encontrada")
+        }
+    }
+
+    @CacheEvict(value = ["empresaDTO"], key = "#empresaDTO.id")
+    fun save(empresaDTO: EmpresaDTO): GenericItemDTO {
         val empresa = empresaRepository.findById(empresaDTO.id).orElseThrow {
-            NotFoundException("Empresa con ID " + empresaDTO.id + "no encontrada.")
+            NotFoundException("Empresa con ID " + empresaDTO.id + " no encontrada.")
         }
 
-        val empresaActualizada = empresa.copy(empresaDTO.nombre, empresaDTO.telefono, empresaDTO.email,
-            empresaDTO.calle, empresaDTO.numero, empresaDTO.municipio)
+        val empresaActualizada = empresa.copy(
+            empresaDTO.nombre, empresaDTO.telefono, empresaDTO.email,
+            empresaDTO.calle, empresaDTO.numero, empresaDTO.municipio
+        )
 
         return empresaRepository.save(empresaActualizada).toGenericItemDTO()
     }
