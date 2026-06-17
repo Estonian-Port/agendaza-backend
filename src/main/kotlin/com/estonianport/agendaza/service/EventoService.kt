@@ -536,7 +536,6 @@ class EventoService(
 
     /**
      * Valida si un horario específico está disponible para una empresa
-     * @param eventoBuscarFecha DTO con empresa, desde, hasta
      */
     @Transactional(readOnly = true)
     fun getHorarioDisponible(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): Boolean {

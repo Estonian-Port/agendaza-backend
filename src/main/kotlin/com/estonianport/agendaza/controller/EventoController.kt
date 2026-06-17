@@ -4,8 +4,6 @@ import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.EmpresaService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
@@ -16,13 +14,9 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/v1/eventos")
 @CrossOrigin("*")
-class EventoController {
-
-    @Autowired
-    lateinit var eventoService: EventoService
-
-    @Autowired
-    lateinit var empresaService: EmpresaService
+class EventoController(
+    private val eventoService: EventoService
+){
 
     // ==================== BÚSQUEDAS BÁSICAS ====================
 

@@ -4,7 +4,6 @@ import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
-import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -47,10 +46,6 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     @Query("SELECT COUNT(t) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId  " +
             "AND t.nombre ILIKE %:buscar% AND t.fechaBaja IS NULL")
     fun getCantidadTipoEventoFiltrados(empresaId : Long, buscar: String) : Int
-
-    @Query("SELECT tee FROM TipoEvento te INNER JOIN te.listaExtra tee WHERE te.id = :tipoEventoId " +
-            "AND tee.tipoExtra = :tipoExtra AND tee.fechaBaja IS NULL")
-    fun getAllExtraByTipoExtra(tipoEventoId: Long, tipoExtra: TipoExtra): List<Extra>
 
     @Query("""SELECT new com.estonianport.agendaza.dto.TipoEventoPrecioDTO(te.id, te.nombre, COALESCE(p.precio, 0))
         FROM TipoEvento te

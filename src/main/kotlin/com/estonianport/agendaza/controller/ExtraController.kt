@@ -4,15 +4,12 @@ import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
-import com.estonianport.agendaza.model.PrecioConFechaExtra
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
-import com.estonianport.agendaza.service.PrecioConFechaExtraService
 import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -22,7 +19,6 @@ class ExtraController(
     private val extraService: ExtraService,
     private val tipoEventoService: TipoEventoService,
     private val empresaService: EmpresaService,
-    private val precioConFechaExtraService: PrecioConFechaExtraService
 ) {
 
     // ==================== METADATA / ENUMS ====================

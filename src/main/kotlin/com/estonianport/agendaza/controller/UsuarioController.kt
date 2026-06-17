@@ -8,32 +8,21 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
-/**
- * Controlador para gestión de usuarios
- * Maneja CRUD, búsquedas, filtrados y relaciones empresa-usuario
- */
 @RestController
 @RequestMapping("/v1/usuarios")
 @CrossOrigin("*")
-class UsuarioController {
-
-    @Autowired
-    lateinit var usuarioService: UsuarioService
-
-    @Autowired
-    lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var cargoService: CargoService
-
-    private val passwordEncoder = BCryptPasswordEncoder()
+class UsuarioController(
+    private val usuarioService: UsuarioService,
+    private val empresaService: EmpresaService,
+    private val cargoService: CargoService,
+    private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder()
+){
 
     // ==================== AUTENTICACIÓN ====================
 
@@ -327,7 +316,7 @@ class UsuarioController {
      */
     @PostMapping
     fun saveUsuario(
-        @RequestBody usuarioDto: UsuarioDTO
+        @RequestBody usuarioDto: UsuarioDTORequest
     ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
         // Si es nuevo, encriptar contraseña
         if (usuarioDto.usuario.id == 0L) {

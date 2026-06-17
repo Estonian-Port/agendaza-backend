@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.persistence.CascadeType
@@ -17,7 +16,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDate
 import java.time.LocalDateTime
 

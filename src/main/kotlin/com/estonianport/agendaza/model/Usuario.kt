@@ -1,7 +1,5 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.ClienteDTO
-import com.estonianport.agendaza.dto.UsuarioAbmDTO
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -56,9 +54,5 @@ class Usuario(
 
     @Column
     var fechaBaja: LocalDate? = null
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var listaCargo: MutableSet<Cargo> = mutableSetOf()
 
 }

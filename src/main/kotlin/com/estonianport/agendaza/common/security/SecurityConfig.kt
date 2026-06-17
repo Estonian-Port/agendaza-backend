@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.common.security
 
-import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager

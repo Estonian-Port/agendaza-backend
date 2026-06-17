@@ -2,7 +2,7 @@ package com.estonianport.agendaza.dto
 
 import java.io.Serializable
 
-class CantidadesPanelAdminDTO(
+data class CantidadesPanelAdminDTO(
     var cantUsuarios: Int = 0,
     var cantTipoEvento: Int = 0,
     var cantExtras: Int = 0,
@@ -12,9 +12,4 @@ class CantidadesPanelAdminDTO(
     var cantCatering: Int = 0,
     var cantServicios: Int = 0,
     var cantClausula: Int = 0
-) : Serializable {
-
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
-}
+) : Serializable

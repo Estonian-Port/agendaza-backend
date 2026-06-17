@@ -11,7 +11,7 @@ abstract class Especificacion(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open var id: Long,
+    var id: Long,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
@@ -29,17 +29,17 @@ class PrecioDePlatoNinos(
         empresa: Empresa,
 
         @Column
-        open var porcentaje: Int) : Especificacion(id, empresa) {
+        var porcentaje: Int) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        var capacidadNinos = evento.capacidad.capacidadNinos
+        val capacidadNinos = evento.capacidad.capacidadNinos
         var precioPlato = 0.0
 
         if(evento.cateringOtro != 0.0){
             precioPlato = evento.cateringOtro
 
         }else if(evento.listaExtra.any { it.tipoExtra == TipoExtra.TIPO_CATERING }){
-            var extra = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING }
+            val extra = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING }
 
             if (extra != null) {
                 precioPlato = evento.empresa.getPrecioOfExtraByFecha(extra, evento.inicio)
@@ -64,16 +64,16 @@ class AgregarExtraNinoSiSuperaCapacidad(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
-        open var extraNino: Extra) : Especificacion(id, empresa) {
+        var extraNino: Extra) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        var capacidadNinosEvento = evento.capacidad.capacidadNinos
-        var capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
+        val capacidadNinosEvento = evento.capacidad.capacidadNinos
+        val capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
 
         if (capacidadNinosEvento > capacidadNinosTipoEvento) {
-            var ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
+            val ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
 
-            var extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
+            val extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
             evento.listaEventoExtraVariable.add(extraEventoVariableNino)
         }
     }
@@ -93,22 +93,22 @@ class AgregarExtraCamareraSiSuperaCapacidad(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
-        open var extraCamarera: Extra,
+        var extraCamarera: Extra,
 
         @Column
         @Enumerated(EnumType.STRING)
         private var duracionEsperada: Duracion): Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        var capacidadAdultosEvento = evento.capacidad.capacidadAdultos
-        var capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
+        val capacidadAdultosEvento = evento.capacidad.capacidadAdultos
+        val capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
 
         // Verifica que la duración del evento coincida con la especificada
         if (evento.tipoEvento.duracion == duracionEsperada) {
             if (capacidadAdultosEvento > capacidadAdultosTipoEvento) {
-                var adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
+                val adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
 
-                var extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
+                val extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
                 evento.listaEventoExtraVariable.add(extraEventoVariableNino)
             }
 

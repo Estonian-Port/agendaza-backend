@@ -1,7 +1,6 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.GenericItemDTO
-import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Clausula
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

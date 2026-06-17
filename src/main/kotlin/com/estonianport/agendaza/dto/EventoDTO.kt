@@ -136,15 +136,6 @@ data class EventoConUsuarioDTO(
     val usuarioUsername: String?
 ) : Serializable
 
-// ==================== DTOs para Búsqueda ====================
-
-data class EventoBuscarFechaDTO(
-    val empresaId: Long,
-    val desde: LocalDateTime,
-    val hasta: LocalDateTime
-) : Serializable
-
-
 // ==================== DTOs para Ediciones Parciales (PATCH) ====================
 
 /**
@@ -155,43 +146,7 @@ data class EventoCapacidadDTO(
     val capacidadNinos: Int
 ) : Serializable
 
-/**
- * DTO para editar el nombre de un evento (PATCH /eventos/{id}/nombre)
- * Nota: Se envía como String simple en el body del request
- */
-
-/**
- * DTO para editar anotaciones (PATCH /eventos/{id}/anotaciones)
- * Nota: Se envía como String simple en el body del request
- */
-
-/**
- * DTO para respuesta de edición de horarios
- */
-data class EventoHoraActualizadoDTO(
-    val eventoId: Long,
-    val inicio: LocalDateTime,
-    val fin: LocalDateTime,
-    val mensaje: String = "Horarios actualizados correctamente"
-) : Serializable
-
 // ==================== Extensiones para Conversión ====================
-
-fun EventoConUsuarioDTO.toEventoUsuarioDto(): EventoUsuarioDTO {
-    return EventoUsuarioDTO(
-        id = id,
-        nombre = nombre,
-        codigo = codigo,
-        usuario = UsuarioAbmDTO(
-            id = usuarioId,
-            nombre = usuarioNombre,
-            apellido = usuarioApellido,
-            username = usuarioUsername
-        )
-    )
-}
-
-
 
 fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
                    listaExtraVariableEvento : List<EventoExtraVariableDTO>,

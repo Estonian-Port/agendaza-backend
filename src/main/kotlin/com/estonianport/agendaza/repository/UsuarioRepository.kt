@@ -3,13 +3,10 @@ package com.estonianport.agendaza.repository
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @Repository
 interface UsuarioRepository : CrudRepository<Usuario, Long> {

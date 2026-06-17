@@ -3,9 +3,7 @@ package com.estonianport.agendaza.controller
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.service.EmpresaService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,10 +11,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/v1/empresas")
 @CrossOrigin("*")
-class EmpresaController {
-
-    @Autowired
-    lateinit var empresaService: EmpresaService
+class EmpresaController(
+    private val empresaService: EmpresaService
+){
 
     // ==================== BÚSQUEDAS ====================
 

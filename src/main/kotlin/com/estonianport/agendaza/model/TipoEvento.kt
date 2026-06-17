@@ -19,7 +19,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDate
 
 @Entity
-open class TipoEvento(
+class TipoEvento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

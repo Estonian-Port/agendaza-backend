@@ -17,7 +17,7 @@ class TokenUtils {
         const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = 5184000
 
         fun createToken(nombre: String, username: String?): String {
-            val expirationDate : Date = Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS)
+            val expirationDate = Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS)
 
             val extra: MutableMap<String, Any> = HashMap()
             extra["nombre"] = nombre

@@ -2,10 +2,7 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
-import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.enums.Concepto
-import com.estonianport.agendaza.model.enums.MedioDePago
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query

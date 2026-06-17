@@ -1,13 +1,10 @@
 package com.estonianport.agendaza.repository
 
-import com.estonianport.agendaza.dto.CantidadesPanelAdminDTO
 import com.estonianport.agendaza.dto.EmpresaDTO
-import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Especificacion
-import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.enums.Duracion
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
