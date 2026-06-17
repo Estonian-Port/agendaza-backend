@@ -20,6 +20,9 @@ class Extra(
     @Enumerated(EnumType.STRING)
     var tipoExtra : TipoExtra){
 
+    @ManyToMany(mappedBy = "listaExtra", fetch = FetchType.LAZY)
+    var listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+
     @Column
     var fechaBaja : LocalDate? = null
 

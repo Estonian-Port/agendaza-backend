@@ -15,6 +15,9 @@ class Servicio(
     @Column
     var nombre: String){
 
+    @ManyToMany(mappedBy = "listaServicio", fetch = FetchType.LAZY)
+    var listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+
     @JsonIgnore
     @ManyToMany
     @JoinTable(

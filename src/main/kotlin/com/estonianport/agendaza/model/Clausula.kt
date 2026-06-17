@@ -14,6 +14,9 @@ class Clausula(
     @Column
     var nombre: String){
 
+    @ManyToMany(mappedBy = "listaClausula", fetch = FetchType.LAZY)
+    var listaEmpresa: MutableSet<Empresa> = mutableSetOf()
+
     @Column
     var fechaBaja : LocalDate? = null
 

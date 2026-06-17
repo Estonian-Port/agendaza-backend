@@ -55,4 +55,8 @@ class Usuario(
     @Column
     var fechaBaja: LocalDate? = null
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var listaCargo: MutableSet<Cargo> = mutableSetOf()
+
 }
