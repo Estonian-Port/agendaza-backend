@@ -18,13 +18,6 @@ data class EventoDTO(
     var tipoEvento: String
 ) : Serializable
 
-data class EventoUsuarioDTO(
-    var id: Long,
-    var nombre: String,
-    var codigo: String,
-    var usuario: UsuarioAbmDTO
-) : Serializable
-
 data class EventoAgendaDTO(
     var id: Long,
     var title: String,

@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.common.toEndOfMonth
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO

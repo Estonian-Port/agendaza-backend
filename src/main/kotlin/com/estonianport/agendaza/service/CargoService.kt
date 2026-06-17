@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.AgendaDTO
 import com.estonianport.agendaza.repository.CargoRepository
 import com.estonianport.agendaza.model.Cargo

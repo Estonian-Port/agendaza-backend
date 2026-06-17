@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException

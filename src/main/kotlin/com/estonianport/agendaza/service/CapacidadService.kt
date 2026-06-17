@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.repository.CapacidadRepository
 import com.estonianport.agendaza.model.Capacidad
 import org.springframework.beans.factory.annotation.Autowired
