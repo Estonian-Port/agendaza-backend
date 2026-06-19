@@ -1,11 +1,9 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.GenericItemDTO
-import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.model.Clausula
 import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.repository.ClausulaRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest

@@ -1,3 +1,5 @@
+package com.estonianport.agendaza.common
+
 import java.io.Serializable
 
 interface GenericService<T : Any, ID : Serializable> {

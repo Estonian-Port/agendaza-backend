@@ -68,7 +68,7 @@ class PdfService {
         recuadro(document, "DESCRIPCIÓN", fontTitulo, true)
         //lineaHorizontal(document)
 
-        document.add(Paragraph("Evento: ${evento.nombre} a realizarse el ${diaEvento} en el horario " +
+        document.add(Paragraph("Evento: ${evento.nombre} a realizarse el $diaEvento en el horario " +
                         "${horaInicio}hrs a ${horaFin}hrs", fontNormal))
         document.add(Paragraph("En ${evento.empresa.nombre}"))
     }
@@ -110,7 +110,7 @@ class PdfService {
             )
         )
 
-        val precioTipoEvento = evento.empresa.listaPrecioConFechaTipoEvento.find { it ->
+        val precioTipoEvento = evento.empresa.listaPrecioConFechaTipoEvento.find {
             it.tipoEvento.id == evento.tipoEvento.id &&
                     YearMonth.from(it.desde) <= eventoAnioMes &&
                     eventoAnioMes <= YearMonth.from(it.hasta)
@@ -365,7 +365,7 @@ class PdfService {
             document.add(Paragraph("IMPORTANTE:", fontSubtitulo))
             lineaHorizontal(document)
 
-            listaClausula.forEach { it ->
+            listaClausula.forEach {
                 document.add(Paragraph("* $it", fontClausula))
             }
         }

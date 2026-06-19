@@ -1,6 +1,6 @@
 package com.estonianport.agendaza.service
 
-import GenericServiceImpl
+import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.repository.PrecioConFechaTipoEventoRepository
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import org.springframework.beans.factory.annotation.Autowired

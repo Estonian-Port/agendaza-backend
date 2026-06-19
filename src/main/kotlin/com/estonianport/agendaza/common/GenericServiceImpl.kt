@@ -1,3 +1,5 @@
+package com.estonianport.agendaza.common
+
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import java.io.Serializable

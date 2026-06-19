@@ -1,168 +1,472 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.enums.TipoCargo
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 @RestController
+@RequestMapping("/v1/usuarios")
 @CrossOrigin("*")
-class UsuarioController {
+class UsuarioController(
+    private val usuarioService: UsuarioService,
+    private val empresaService: EmpresaService,
+    private val cargoService: CargoService,
+    private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder()
+){
 
-    @Autowired
-    lateinit var usuarioService: UsuarioService
+    // ==================== AUTENTICACIÓN ====================
 
-    @Autowired
-    lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var cargoService: CargoService
-
-    @PutMapping("/getUsuarioByEmail")
-    fun getUsuarioByEmail(@RequestBody email : String): Usuario? {
-        return usuarioService.getUsuarioByEmail(email)?:
-            throw NotFoundException("No se encontró el Cliente")
+    /**
+     * Obtiene el usuario logueado desde el token JWT (principal de Spring Security)
+     */
+    @GetMapping("/me")
+    fun getUsuarioLogueado(principal: Principal): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuarioDto = usuarioService.getUsuarioDtoByUsername(principal.name)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuarioDto
+            )
+        )
     }
 
-    @PutMapping("/getUsuarioByCelular")
-    fun getUsuarioByCelular(@RequestBody celular : Long): Usuario? {
-        return usuarioService.getUsuarioByCelular(celular)?:
-            throw NotFoundException("No se encontró el Cliente")
+    // ==================== BÚSQUEDAS ====================
+
+    /**
+     * Obtiene un usuario específico por su ID
+     */
+    @GetMapping("/{usuarioId}")
+    fun getUsuarioById(
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+
+        val usuario = usuarioService.findById(usuarioId)
+            ?: throw NotFoundException("Usuario con ID $usuarioId no encontrado")
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuario.toUsuarioResponseDto()
+            )
+        )
     }
 
-    @GetMapping("/getUsuarioPerfil/{usuarioId}")
-    fun getUsuario(@PathVariable("usuarioId") usuarioId: Long): UsuarioPerfilDTO {
-        return usuarioService.getUsuarioPerfil(usuarioId)
+    /**
+     * Obtiene un usuario por su email
+     * Busca tanto en usuarios como en clientes
+     */
+    @GetMapping("/email")
+    fun getUsuarioByEmail(
+        @RequestParam email: String
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuarioDto = usuarioService.getUsuarioDtoByEmail(email)
+            ?: throw NotFoundException("Usuario con email '$email' no encontrado")
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuarioDto
+            )
+        )
     }
 
-    @GetMapping("/getUsuarioOfEmpresa/{usuarioId}/{empresaId}")
-    fun getUsuario(@PathVariable("usuarioId") usuarioId: Long, @PathVariable("empresaId") empresaId: Long): UsuarioEditCargoDTO {
-        return usuarioService.getUsuarioOfEmpresa(usuarioId, empresaId)
+    /**
+     * Obtiene un usuario por su celular
+     * Principalmente usado para búsqueda de clientes
+     */
+    @GetMapping("/celular")
+    fun getUsuarioByCelular(
+        @RequestParam celular: Long
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuario = usuarioService.getByCelular(celular)
+            ?: throw NotFoundException("Usuario con celular '$celular' no encontrado")
+
+        val usuarioDto = usuario.run {
+            UsuarioResponseDto(id, nombre, apellido, username, email, celular)
+        }
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario obtenido correctamente",
+                data = usuarioDto
+            )
+        )
     }
 
-    //TODO Borrar, reemplazado por cargoController.getCargoByEmpresaAndUsuario()
-    @PutMapping("/getRolByUsuarioIdAndEmpresaId")
-    fun getRolByUsuarioIdAndEmpresaId(@RequestBody usuarioEmpresaDto: UsuarioEmpresaDTO): TipoCargo? {
-        val usuario = usuarioService.get(usuarioEmpresaDto.usuarioId)!!
-        return usuario.listaCargo.find{ it.empresa.id == usuarioEmpresaDto.empresaId}!!.tipoCargo
+    /**
+     * Obtiene el perfil completo de un usuario por su ID
+     */
+    @GetMapping("/{usuarioId}/perfil")
+    fun getPerfilUsuario(
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<UsuarioPerfilDTO>> {
+        val perfil = usuarioService.getUsuarioPerfil(usuarioId)
+            ?: throw NotFoundException("Usuario con ID $usuarioId no encontrado")
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Perfil obtenido correctamente",
+                data = perfil
+            )
+        )
     }
 
-    @PostMapping("/saveUsuario")
-    fun save(@RequestBody usuarioDto: UsuarioDTO): Usuario {
-        // Si llega por primera vez se encripta la contraseña sino se deja igual
-        // para cambiar contraseña se debe usar editPassword
+    /**
+     * Obtiene la información de un usuario en el contexto de una empresa
+     * @param usuarioId ID del usuario
+     * @param empresaId ID de la empresa
+     */
+    @GetMapping("/{usuarioId}/empresa/{empresaId}")
+    fun getUsuarioOfEmpresa(
+        @PathVariable usuarioId: Long,
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<UsuarioEditCargoDTO>> {
+        val usuarioOfEmpresa = usuarioService.getUsuarioOfEmpresa(usuarioId, empresaId)
+            ?: throw NotFoundException("Usuario no encontrado en esta empresa")
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario de empresa obtenido correctamente",
+                data = usuarioOfEmpresa
+            )
+        )
+    }
+
+    /**
+     * Obtiene todas las empresas de un usuario
+     */
+    @GetMapping("/{usuarioId}/empresas")
+    fun getEmpresas(
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<List<EmpresaAbmDTO>>> {
+        val empresas = usuarioService.getAllEmpresaByUsuarioId(usuarioId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Empresas obtenidas correctamente",
+                data = empresas
+            )
+        )
+    }
+
+    // ==================== EMPLEADOS ====================
+
+    /**
+     * Obtiene todos los empleados (usuarios con cargo) de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}")
+    fun getEmpleados(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<UsuarioAbmDTO>>> {
+        val empleados = usuarioService.getAllUsuario(empresaId, page)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Empleados obtenidos correctamente",
+                data = empleados
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad total de empleados de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/cantidad")
+    fun getCantidadEmpleados(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = usuarioService.getCantidadUsuario(empresaId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    /**
+     * Obtiene empleados filtrados por nombre, apellido o username
+     */
+    @GetMapping("/empresa/{empresaId}/buscar/{buscar}")
+    fun getEmpleadosFiltrados(
+        @PathVariable empresaId: Long,
+        @PathVariable buscar: String,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<UsuarioAbmDTO>>> {
+        val empleados = usuarioService.getAllUsuarioFiltrados(empresaId, page, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Empleados filtrados obtenidos correctamente",
+                data = empleados
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad de empleados filtrados
+     */
+    @GetMapping("/empresa/{empresaId}/buscar/{buscar}/cantidad")
+    fun getCantidadEmpleadosFiltrados(
+        @PathVariable empresaId: Long,
+        @PathVariable buscar: String
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = usuarioService.getCantidadFiltrados(empresaId, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    // ==================== CLIENTES ====================
+
+    /**
+     * Obtiene todos los clientes (usuarios sin cargo) de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/clientes")
+    fun getClientes(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<UsuarioAbmDTO>>> {
+        val clientes = usuarioService.getAllCliente(empresaId, page)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Clientes obtenidos correctamente",
+                data = clientes
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad total de clientes de una empresa
+     */
+    @GetMapping("/empresa/{empresaId}/clientes/cantidad")
+    fun getCantidadClientes(
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = usuarioService.getCantidadCliente(empresaId)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    /**
+     * Obtiene clientes filtrados por nombre o apellido
+     */
+    @GetMapping("/empresa/{empresaId}/clientes/buscar/{buscar}")
+    fun getClientesFiltrados(
+        @PathVariable empresaId: Long,
+        @PathVariable buscar: String,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<CustomResponse<List<UsuarioAbmDTO>>> {
+        val clientes = usuarioService.getAllClienteFiltrados(empresaId, page, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Clientes filtrados obtenidos correctamente",
+                data = clientes
+            )
+        )
+    }
+
+    /**
+     * Obtiene la cantidad de clientes filtrados
+     */
+    @GetMapping("/empresa/{empresaId}/clientes/buscar/{buscar}/cantidad")
+    fun getCantidadClientesFiltrados(
+        @PathVariable empresaId: Long,
+        @PathVariable buscar: String
+    ): ResponseEntity<CustomResponse<Int>> {
+        val cantidad = usuarioService.getCantidadClienteFiltrados(empresaId, buscar)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cantidad obtenida correctamente",
+                data = cantidad
+            )
+        )
+    }
+
+    // ==================== CRUD ====================
+
+    /**
+     * Crea o actualiza un usuario
+     * Si es nuevo (id == 0), encripta la contraseña
+     * Si es actualización, mantiene la contraseña existente a menos que se cambie
+     */
+    @PostMapping
+    fun saveUsuario(
+        @RequestBody usuarioDto: UsuarioDTORequest
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        // Si es nuevo, encriptar contraseña
         if (usuarioDto.usuario.id == 0L) {
-            usuarioDto.usuario.password = BCryptPasswordEncoder().encode(usuarioDto.usuario.password)
-        }else{
-            usuarioDto.usuario.password = usuarioService.findById(usuarioDto.usuario.id)!!.password
+            usuarioDto.usuario.password = passwordEncoder.encode(usuarioDto.usuario.password)
+        } else {
+            // Si es actualización, mantener la contraseña existente
+            val usuarioExistente = usuarioService.findById(usuarioDto.usuario.id)
+            usuarioDto.usuario.password = usuarioExistente?.password ?: ""
         }
 
         val usuario = usuarioService.save(usuarioDto.usuario)
 
-        if(usuarioDto.empresaId != 0L && usuarioDto.cargo != null) {
+        // Asignar cargo si se proporciona
+        if (usuarioDto.empresaId != 0L && usuarioDto.cargo != null) {
             val empresa = empresaService.get(usuarioDto.empresaId)
             if (empresa != null) {
-
-                val cargoOld = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
-                // Si tenia un cargo y se cambio, se le modifica
-                if (cargoOld != null) {
-                    cargoOld.tipoCargo = usuarioDto.cargo!!
-                    cargoService.save(cargoOld)
+                val cargoExistente = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
+                if (cargoExistente != null) {
+                    cargoExistente.tipoCargo = usuarioDto.cargo!!
+                    cargoService.save(cargoExistente)
                 } else {
                     cargoService.save(Cargo(0, usuario, empresa, usuarioDto.cargo!!))
                 }
             }
         }
-        return usuario
+
+        val responseDto = UsuarioResponseDto(
+            usuario.id, usuario.nombre, usuario.apellido, usuario.username, usuario.email, usuario.celular
+        )
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            CustomResponse(
+                message = "Usuario guardado correctamente",
+                data = responseDto
+            )
+        )
     }
 
-    @PostMapping("/editPassword")
-    fun editPassword(@RequestBody usuarioEditPasswordDto: UsuarioEditPasswordDTO): Usuario? {
-        val usuario = usuarioService.get(usuarioEditPasswordDto.id)!!
-        usuario.password = BCryptPasswordEncoder().encode(usuarioEditPasswordDto.password)
-        return usuarioService.save(usuario)
+    /**
+     * Crea un nuevo cliente
+     */
+    @PostMapping("/clientes")
+    fun saveCliente(
+        @RequestBody clienteDto: ClienteDTO
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuario = Usuario(
+            clienteDto.id, clienteDto.nombre, clienteDto.apellido,
+            clienteDto.celular, clienteDto.email
+        )
+        val usuarioGuardado = usuarioService.save(usuario)
+
+        val responseDto = UsuarioResponseDto(
+            usuarioGuardado.id, usuarioGuardado.nombre, usuarioGuardado.apellido,
+            usuarioGuardado.username, usuarioGuardado.email, usuarioGuardado.celular
+        )
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            CustomResponse(
+                message = "Cliente guardado correctamente",
+                data = responseDto
+            )
+        )
     }
 
-    @GetMapping("/getUsuarioIdByUsername/{username}")
-    fun getUsuarioIdByUsername(@PathVariable("username") username: String): Long {
-        return usuarioService.getUsuarioIdByUsername(username)
+    // ==================== ACTUALIZAR ====================
+
+    /**
+     * Actualiza la contraseña de un usuario
+     */
+    @PutMapping("/{usuarioId}/password")
+    fun updatePassword(
+        @PathVariable usuarioId: Long,
+        @RequestBody dto: UsuarioEditPasswordDTO
+    ): ResponseEntity<CustomResponse<String>> {
+        val usuario = usuarioService.findById(usuarioId)
+            ?: throw NotFoundException("Usuario no encontrado")
+
+        usuario.password = passwordEncoder.encode(dto.password)
+        usuarioService.save(usuario)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Contraseña actualizada correctamente",
+                data = "OK"
+            )
+        )
     }
 
-    @GetMapping("/getAllEmpresaByUsuarioId/{usuarioId}")
-    fun getAllEmpresaByUsuarioId(@PathVariable("usuarioId") usuarioId: Long): List<EmpresaAbmDTO> {
-        return usuarioService.getAllEmpresaByUsuarioId(usuarioId)
-    }
-
-    @PostMapping("/saveUsuarioCargoOfEmpresa")
-    fun saveUsuarioCargoOfEmpresa(@RequestBody usuarioEditCargoDTO: UsuarioEditCargoDTO): Long {
-        val cargo : Cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(usuarioEditCargoDTO.empresaId, usuarioEditCargoDTO.id)
+    /**
+     * Actualiza el cargo de un usuario en una empresa
+     * Se delegó a CargoController pero se mantiene aquí por compatibilidad
+     */
+    @PutMapping("/{usuarioId}/cargo")
+    fun updateCargo(
+        @PathVariable usuarioId: Long,
+        @RequestBody usuarioEditCargoDTO: UsuarioEditCargoDTO
+    ): ResponseEntity<CustomResponse<Long>> {
+        val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(
+            usuarioEditCargoDTO.empresaId, usuarioId
+        )
         cargo.tipoCargo = usuarioEditCargoDTO.cargo
-        return cargoService.save(cargo).id
+        val cargoGuardado = cargoService.save(cargo)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cargo actualizado correctamente",
+                data = cargoGuardado.id
+            )
+        )
     }
 
-    @GetMapping("/getAllUsuario/{empresaId}/{pageNumber}")
-    fun getAllUsuario(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsuario(empresaId, pageNumber)
+    // ==================== ELIMINAR ====================
+
+    /**
+     * Elimina un usuario (soft delete)
+     */
+    @DeleteMapping("/{usuarioId}")
+    fun deleteUsuario(
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<String>> {
+        val usuario = usuarioService.findById(usuarioId)
+            ?: throw NotFoundException("Usuario no encontrado")
+
+        usuarioService.delete(usuario.id)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Usuario eliminado correctamente",
+                data = "OK"
+            )
+        )
     }
 
-    @GetMapping("/getCantidadUsuario/{empresaId}")
-    fun getCantidadUsuario(@PathVariable("empresaId") empresaId: Long) : Int{
-        return usuarioService.getCantidadUsuario(empresaId)
-    }
+    /**
+     * Elimina el cargo de un usuario en una empresa
+     * Se delegó a CargoController pero se mantiene aquí por compatibilidad
+     */
+    @DeleteMapping("/{usuarioId}/cargo/{empresaId}")
+    fun deleteCargo(
+        @PathVariable usuarioId: Long,
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<String>> {
+        val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
+        cargoService.delete(cargo.id)
 
-    @GetMapping("/getAllUsuarioFiltrados/{empresaId}/{pageNumber}/{buscar}")
-    fun getAllUsuarioByFilterName(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
-        return usuarioService.getAllUsuarioFiltrados(empresaId, pageNumber, buscar)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cargo eliminado correctamente",
+                data = "OK"
+            )
+        )
     }
-
-    @GetMapping("/getCantidadUsuarioFiltrados/{empresaId}/{buscar}")
-    fun getCantidadUsuarioFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) : Int {
-        return usuarioService.getCantidadUsuarioFiltrados(empresaId,buscar)
-    }
-
-    @GetMapping("/getAllCliente/{empresaId}/{pageNumber}")
-    fun getAllCliente(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int): List<UsuarioAbmDTO> {
-        return usuarioService.getAllCliente(empresaId, pageNumber)
-    }
-
-    @GetMapping("/getCantidadCliente/{empresaId}")
-    fun getCantidadCliente(@PathVariable("empresaId") empresaId: Long) : Int{
-        return usuarioService.getCantidadCliente(empresaId)
-    }
-
-    @GetMapping("/getAllClienteFiltrados/{empresaId}/{pageNumber}/{buscar}")
-    fun getAllClienteFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("pageNumber") pageNumber: Int, @PathVariable("buscar") buscar: String): List<UsuarioAbmDTO> {
-        return usuarioService.getAllClienteFiltrados(empresaId, pageNumber, buscar)
-    }
-
-    @GetMapping("/getCantidadClienteFiltrados/{empresaId}/{buscar}")
-    fun getCantidadClienteFiltrados(@PathVariable("empresaId") empresaId: Long, @PathVariable("buscar") buscar : String) : Int {
-        return usuarioService.getCantidadClienteFiltrados(empresaId,buscar)
-    }
-
-    @PostMapping("/saveCliente")
-    fun saveCliente(@RequestBody clienteDto: ClienteDTO): ClienteDTO {
-        var usuario = Usuario(clienteDto.id, clienteDto.nombre,clienteDto.apellido,clienteDto.celular,clienteDto.email)
-        return usuarioService.save(usuario).toClienteDto()
-    }
-
-    @GetMapping("/getListaAgendaByUsuarioId/{id}")
-    fun getListaAgendaByUsuarioId(@PathVariable("id") usuarioId: Long): List<AgendaDTO> {
-        return cargoService.getListaCargosByUsuarioId(usuarioId)
-    }
-
 }
