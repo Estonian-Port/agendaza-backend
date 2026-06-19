@@ -1,7 +1,5 @@
 package com.estonianport.agendaza.common.security
 
-import com.estonianport.agendaza.service.UsuarioService
-import com.estonianport.centro_sis.common.security.TokenUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -10,17 +8,13 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.io.IOException
 
-class JWTAuthenticationFilter(
-    private val usuarioService: UsuarioService
-) : UsernamePasswordAuthenticationFilter() {
+class JWTAuthenticationFilter() : UsernamePasswordAuthenticationFilter() {
 
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse?): Authentication? {
         val authCredentials = try {
             ObjectMapper().readValue(request.reader, AuthCredentials::class.java)
         } catch (e: Exception) {
-            // Si el JSON es inválido o el body está vacío, evitamos que siga
             throw AuthenticationServiceException("Error en parseo de las credenciales de acceso", e)
         }
 
@@ -39,8 +33,6 @@ class JWTAuthenticationFilter(
 
     override fun successfulAuthentication(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?, authResult: Authentication?) {
         val userDetails : UserDetailImpl = authResult?.principal as UserDetailImpl
-
-        //val email = authResult?.name ?: return usuarioService.actualizarFechaUltimoAcceso(email, LocalDate.now())
 
         val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
 

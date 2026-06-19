@@ -45,11 +45,6 @@ abstract class Empresa(
     @Column
     var municipio: String) {
 
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    var listaEvento : MutableSet<Evento> = mutableSetOf()
-
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     var listaEmpleados: MutableSet<Cargo> = mutableSetOf()
@@ -65,10 +60,6 @@ abstract class Empresa(
     @JsonIgnore
     @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
     var listaEspecificacion: MutableList<Especificacion> = mutableListOf()
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY)
-    var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
     @JsonIgnore
     @ManyToMany
@@ -209,7 +200,7 @@ class Prestador(
 
     @Column
     @Enumerated(EnumType.STRING)
-    open var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
+    var tipoPrestador : TipoPrestador) : Empresa(id, nombre, telefono, email, calle, numero, municipio){
 
     @Transient
     override fun getContacto(): List<String> {

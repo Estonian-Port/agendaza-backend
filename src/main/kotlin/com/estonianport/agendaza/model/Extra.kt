@@ -40,7 +40,7 @@ class Extra(
     }
 
     fun toExtraPrecioDTO(empresa: Empresa, fechaEvento: LocalDateTime): ExtraDTO {
-        var extraDTO = ExtraDTO(id, nombre, tipoExtra)
+        val extraDTO = ExtraDTO(id, nombre, tipoExtra)
         extraDTO.precio = empresa.getPrecioOfExtraByFecha(this, fechaEvento)
         return extraDTO
     }

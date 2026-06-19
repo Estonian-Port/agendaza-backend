@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.common.security
 
-import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -22,8 +21,8 @@ class SecurityConfig(
 ) {
 
     @Bean
-    fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager, usuarioService: UsuarioService): SecurityFilterChain {
-        val jwtAuthenticationFilter = JWTAuthenticationFilter(usuarioService)
+    fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager): SecurityFilterChain {
+        val jwtAuthenticationFilter = JWTAuthenticationFilter()
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
         jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler())

@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoExtra
 import jakarta.persistence.CascadeType
@@ -17,7 +16,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.PrimaryKeyJoinColumn
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -32,7 +30,7 @@ class Evento(
     var nombre: String,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "tipo_evento_id")
     var tipoEvento: TipoEvento,
 
     @Column
@@ -42,7 +40,7 @@ class Evento(
     var fin: LocalDateTime,
 
     @ManyToOne(cascade = [CascadeType.ALL])
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "capacidad_id")
     var capacidad: Capacidad,
 
     @Column
@@ -59,8 +57,8 @@ class Evento(
     )
     var listaExtra: MutableSet<Extra>,
 
-    @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY)
-    var listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
+    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    var listaEventoExtraVariable: MutableSet<EventoExtraVariable> = mutableSetOf(),
 
     @Column
     var cateringOtro : Double,
@@ -69,11 +67,11 @@ class Evento(
     var cateringOtroDescripcion : String,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "encargado_id")
     var encargado: Usuario,
 
     @ManyToOne
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "cliente_id")
     var cliente: Usuario,
 
     @Column
@@ -87,7 +85,7 @@ class Evento(
     var anotaciones: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "empresa_id")
     var empresa : Empresa){
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -115,7 +113,7 @@ class Evento(
                 extraOtro
 
         if(descuento != 0L){
-            presupuesto -= (presupuesto * (descuento / 100))
+            presupuesto -= (presupuesto * (descuento / 100.0))
         }
         return presupuesto
     }
@@ -140,55 +138,4 @@ class Evento(
     fun getMontoFaltante(): Double {
         return getPresupuestoTotal() - getTotalAbonado()
     }
-
-    fun toDto() : EventoDTO{
-        return EventoDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre)
-    }
-
-    fun toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
-                       listaExtraVariableEvento : List<EventoExtraVariableDTO>,
-                       listaExtraCatering : List<ExtraDTO>,
-                       listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDTO{
-        return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidad, extraOtro,
-            descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
-            listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente, this.getPresupuestoTotal(), estado, anotaciones)
-    }
-
-    fun toEventoReservaDto(
-            listaExtraEvento: List<ExtraDTO>,
-            listaExtraVariableEvento: List<EventoExtraVariableDTO>,
-            listaExtraCatering: List<ExtraDTO>,
-            listaExtraVariableCatering: List<EventoExtraVariableDTO>
-    ): EventoReservaDTO {
-        return EventoReservaDTO(id, nombre, capacidad, codigo, inicio, fin, tipoEvento.id,
-                empresa.id, extraOtro, descuento, listaExtraEvento, listaExtraVariableEvento,
-                cateringOtro, cateringOtroDescripcion, listaExtraCatering, listaExtraVariableCatering,
-                cliente, encargado.id, estado, anotaciones
-        )
-    }
-
-    fun toEventoHoraDto(): EventoHoraDTO {
-     return EventoHoraDTO(id, nombre, codigo, inicio, fin)
-    }
-
-    fun toEventoCateringDto(listaExtra: List<ExtraDTO>,
-                            listaExtraVariable: List<EventoExtraVariableDTO>): EventoCateringDTO {
-    return EventoCateringDTO(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
-        listaExtraVariable, tipoEvento.id, inicio, capacidad)
-    }
-
-    fun toEventoExtraDto(listaExtra: List<ExtraDTO>,
-                         listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDTO {
-        return EventoExtraDTO(id, nombre, codigo, extraOtro, descuento, listaExtra,
-            listaExtraVariable, empresa.toTipoEventoPrecioDTO(inicio, tipoEvento), inicio)
-    }
-
-    fun toEventoPagoDto(): EventoPagoDTO {
-        return EventoPagoDTO(id, nombre, codigo, getPresupuestoTotal())
-    }
-
-    fun toEventoUsuarioDto(evento: Evento): EventoUsuarioDTO {
-        return EventoUsuarioDTO(evento.id, evento.nombre, evento.codigo, evento.cliente.toUsuarioAbmDto())
-    }
-
 }

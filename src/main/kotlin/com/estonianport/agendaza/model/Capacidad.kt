@@ -17,4 +17,4 @@ class Capacidad(
     var capacidadAdultos : Int,
 
     @Column(name = "capacidad_ninos")
-    var capacidadNinos : Int){}
+    var capacidadNinos : Int)

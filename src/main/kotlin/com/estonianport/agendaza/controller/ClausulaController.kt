@@ -2,10 +2,8 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.model.Clausula
-import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.service.ClausulaService
 import com.estonianport.agendaza.service.EmpresaService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -20,13 +18,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/clausula")
 @CrossOrigin("*")
-class ClausulaController {
-
-    @Autowired
-    lateinit var clausulaService: ClausulaService
-
-    @Autowired
-    lateinit var empresaService: EmpresaService
+class ClausulaController(
+    private val clausulaService: ClausulaService,
+    private val empresaService: EmpresaService
+){
 
     @GetMapping("/get/{id}")
     fun get(@PathVariable("id") id: Long): GenericItemDTO {

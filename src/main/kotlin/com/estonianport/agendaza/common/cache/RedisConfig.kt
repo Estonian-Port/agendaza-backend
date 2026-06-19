@@ -21,7 +21,7 @@ class RedisConfig {
     fun cacheManager(connectionFactory: RedisConnectionFactory): RedisCacheManager {
         val objectMapper = ObjectMapper().apply {
             registerKotlinModule()
-            registerModule(JavaTimeModule()) // <-- AGREGA ESTA LÍNEA (Enseña a Jackson a manejar LocalDateTime)
+            registerModule(JavaTimeModule())
 
             activateDefaultTyping(
                 polymorphicTypeValidator,
