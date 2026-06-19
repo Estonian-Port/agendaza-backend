@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprobante de Estado de cuenta</title>
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -132,6 +134,28 @@
         .highlight {
             color: #5caad2;
             font-weight: bold;
+        }
+        /* --- ESTILOS PARA MODO OSCURO --- */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212 !important;
+            }
+            table.main-container {
+                background-color: #1e1e1e !important;
+            }
+            .main-title, .block-title {
+                color: #ffffff !important;
+            }
+            .subtitle, .block-text {
+                color: #dddddd !important;
+            }
+            .section {
+                border-top: 1px solid #333333 !important;
+            }
+            .footer {
+                background-color: #2a2a2a !important;
+                color: #aaaaaa !important;
+            }
         }
     </style>
 </head>

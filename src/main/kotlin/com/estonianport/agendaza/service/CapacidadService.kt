@@ -16,20 +16,11 @@ class CapacidadService : GenericServiceImpl<Capacidad, Long>() {
     override val dao: CrudRepository<Capacidad, Long>
         get() = capacidadRepository
 
-    fun reutilizarCapacidad(capacidad : Capacidad) : Capacidad{
-        val listaCapacidad: MutableList<Capacidad>? = this.getAll()
-
-        // TODO refactor
-        // Reutilizar capacidades ya guardadas
-        if (listaCapacidad != null && listaCapacidad.size != 0) {
-            for (capacidadDDBB in listaCapacidad) {
-                if (capacidadDDBB.capacidadAdultos == capacidad.capacidadAdultos
-                    && capacidadDDBB.capacidadNinos == capacidad.capacidadNinos) {
-                    return capacidadDDBB
-                }
-            }
-        }
-        return capacidad
+    fun reutilizarCapacidad(capacidad: Capacidad): Capacidad {
+        return capacidadRepository.findByCapacidadAdultosAndCapacidadNinos(
+            capacidad.capacidadAdultos,
+            capacidad.capacidadNinos
+        ) ?: capacidad
     }
 
 }
