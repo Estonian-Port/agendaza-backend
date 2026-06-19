@@ -65,7 +65,7 @@ data class EventoVerDTO(
     val listaExtra: List<ExtraDTO>,
     val listaExtraVariable: List<EventoExtraVariableDTO>,
     val cateringOtro: Double,
-    val cateringOtroDescription: String,
+    val cateringOtroDescripcion: String,
     val listaExtraTipoCatering: List<ExtraDTO>,
     val listaExtraCateringVariable: List<EventoExtraVariableDTO>,
     val encargado: UsuarioAbmDTO,
@@ -140,6 +140,17 @@ data class EventoCapacidadDTO(
 ) : Serializable
 
 // ==================== Extensiones para Conversión ====================
+
+fun Evento.toEventoDto(): EventoDTO {
+    return EventoDTO(
+        id = id,
+        nombre = nombre,
+        codigo = codigo,
+        inicio = inicio,
+        fin = fin,
+        tipoEvento = tipoEvento.nombre
+    )
+}
 
 fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
                    listaExtraVariableEvento : List<EventoExtraVariableDTO>,

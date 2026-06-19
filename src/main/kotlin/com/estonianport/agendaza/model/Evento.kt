@@ -113,7 +113,7 @@ class Evento(
                 extraOtro
 
         if(descuento != 0L){
-            presupuesto -= (presupuesto * (descuento / 100))
+            presupuesto -= (presupuesto * (descuento / 100.0))
         }
         return presupuesto
     }

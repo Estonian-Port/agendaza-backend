@@ -354,7 +354,7 @@ class EventoService(
     // ==================== EDICIONES PARCIALES ====================
 
     @Transactional
-    @CacheEvict(value = ["eventoHora"], key = "#evento.id")
+    @CacheEvict(value = ["eventoHora", "eventoVer", "eventoAgenda"], key = "#evento.id")
     fun editEventoHora(evento: EventoHoraDTO): EventoHoraDTO {
         val eventoExistente = findById(evento.id)
         eventoExistente.inicio = evento.inicio
@@ -365,7 +365,7 @@ class EventoService(
     }
 
     @Transactional
-    @CacheEvict(value = ["eventoExtra"], key = "#eventoDTO.id")
+    @CacheEvict(value = ["eventoExtra", "eventoVer"], key = "#eventoDTO.id")
     fun editEventoExtra(eventoDTO: EventoExtraDTO): Long {
         val evento = findById(eventoDTO.id)
 
@@ -395,7 +395,7 @@ class EventoService(
     }
 
     @Transactional
-    @CacheEvict(value = ["eventoCatering"], key = "#eventoCateringDto.id")
+    @CacheEvict(value = ["eventoCatering", "eventoVer"], key = "#eventoCateringDto.id")
     fun editEventoCatering(eventoCateringDto: EventoCateringDTO): Long {
         val evento = findById(eventoCateringDto.id)
 
@@ -425,14 +425,7 @@ class EventoService(
     }
 
     @Transactional
-    fun editEventoAnotaciones(anotaciones: String, eventoId: Long): String {
-        val evento = findById(eventoId)
-        evento.anotaciones = anotaciones
-
-        return save(evento).anotaciones
-    }
-
-    @Transactional
+    @CacheEvict(value = ["eventoVer", "eventoAgenda"], key = "#eventoId")
     fun editEventoCapacidad(eventoId: Long, capacidad: EventoCapacidadDTO): EventoCapacidadDTO {
         val evento = findById(eventoId)
         evento.capacidad.capacidadAdultos = capacidad.capacidadAdultos
@@ -446,6 +439,7 @@ class EventoService(
     }
 
     @Transactional
+    @CacheEvict(value = ["eventoVer", "eventoAgenda"], key = "#eventoId")
     fun editEventoNombre(nombre: String, eventoId: Long): String {
         val evento = findById(eventoId)
         evento.nombre = nombre
@@ -453,6 +447,14 @@ class EventoService(
         return save(evento).nombre
     }
 
+    @Transactional
+    @CacheEvict(value = ["eventoVer"], key = "#eventoId")
+    fun editEventoAnotaciones(anotaciones: String, eventoId: Long): String {
+        val evento = findById(eventoId)
+        evento.anotaciones = anotaciones
+
+        return save(evento).anotaciones
+    }
     // ==================== PROCESAMIENTO ESPECIAL ====================
 
     @Transactional
