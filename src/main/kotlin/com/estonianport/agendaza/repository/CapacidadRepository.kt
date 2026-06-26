@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param
 interface CapacidadRepository : CrudRepository<Capacidad, Long> {
 
     @Query("SELECT c FROM Capacidad c WHERE c.capacidadAdultos = :adultos AND c.capacidadNinos = :ninos")
-    fun findByCapacidadAdultosAndCapacidadNinos(
-        @Param("adultos") adultos: Int,
-        @Param("ninos") ninos: Int
+    fun findFirstByCapacidadAdultosAndCapacidadNinos(
+        adultos: Int,
+        ninos: Int
     ): Capacidad?
 }

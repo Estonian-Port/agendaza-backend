@@ -17,7 +17,7 @@ class CapacidadService : GenericServiceImpl<Capacidad, Long>() {
         get() = capacidadRepository
 
     fun reutilizarCapacidad(capacidad: Capacidad): Capacidad {
-        return capacidadRepository.findByCapacidadAdultosAndCapacidadNinos(
+        return capacidadRepository.findFirstByCapacidadAdultosAndCapacidadNinos(
             capacidad.capacidadAdultos,
             capacidad.capacidadNinos
         ) ?: capacidad
