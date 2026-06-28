@@ -32,9 +32,11 @@ class TipoEvento(
     @Enumerated(EnumType.STRING)
     var duracion : Duracion,
 
-    @ManyToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
-    @PrimaryKeyJoinColumn
-    var capacidad: Capacidad,
+    @Column(name = "capacidad_adultos")
+    var capacidadAdultos: Int,
+
+    @Column(name = "capacidad_ninos")
+    var capacidadNinos: Int,
 
     @Column
     var cantidadDuracion: LocalTime,
@@ -51,9 +53,4 @@ class TipoEvento(
 
     @Column
     var fechaBaja : LocalDate? = null
-
-    fun toDTO() : TipoEventoDTO {
-        return TipoEventoDTO(id, nombre, LocalTime.of(cantidadDuracion.hour, cantidadDuracion.minute),
-            duracion, capacidad, empresa.id)
-    }
 }

@@ -13,23 +13,23 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     override fun findAll(): List<TipoEvento>
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.listaExtra e " +
+            "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.listaExtra e " +
             "where e.id = :extraId")
     fun getAllByExtra(extraId : Long): MutableList<TipoEventoDTO>
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.listaServicio s " +
+            "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.listaServicio s " +
             "where s.id = :servicioId")
     fun getAllByServicio(servicioId: Long): MutableList<TipoEventoDTO>
 
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
+            "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoByEmpresaId(empresaId: Long) : List<TipoEventoDTO>
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
+            "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoByEmpresaId(empresaId: Long, pageable : Pageable) : Page<TipoEventoDTO>
 
@@ -37,7 +37,7 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
     fun getCantidadTipoEvento(empresaId : Long) : Int
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
-            "t.duracion, t.capacidad, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
+            "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
             "AND t.nombre ILIKE %:buscar% AND t.fechaBaja IS NULL ORDER BY t.id DESC")
     fun getAllTipoEventoFilterNombre(empresaId : Long, buscar : String, pageable : Pageable) : Page<TipoEventoDTO>
 

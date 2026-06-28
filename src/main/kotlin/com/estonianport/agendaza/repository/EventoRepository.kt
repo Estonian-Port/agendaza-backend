@@ -26,7 +26,6 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         "tipoEvento",
         "encargado",
         "cliente",
-        "capacidad",
         "listaExtra",
         "listaEventoExtraVariable",
         "empresa"
@@ -228,7 +227,6 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         "tipoEvento",
         "encargado",
         "cliente",
-        "capacidad",
         "listaExtra",
         "listaEventoExtraVariable",
         "empresa"

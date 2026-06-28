@@ -38,7 +38,6 @@ class EventoService(
     private val usuarioService: UsuarioService,
     private val pdfService: PdfService,
     private val tipoEventoService: TipoEventoService,
-    private val capacidadService: CapacidadService
 ) : GenericServiceImpl<Evento, Long>() {
 
     override val dao: CrudRepository<Evento, Long>
@@ -79,38 +78,36 @@ class EventoService(
             generateCodigoForEventoOfEmpresa(empresa)
         }
 
-        // 2. Reutilizar o crear capacidad
-        val capacidad = capacidadService.reutilizarCapacidad(dto.capacidad)
-
-        // 3. Unificar extras de evento y catering
+        // 2. Unificar extras de evento y catering
         val listaExtra = mutableSetOf<Extra>().apply {
             addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra))
             addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering))
         }
 
-        // 4. Unificar extras variables
+        // 3. Unificar extras variables
         val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>().apply {
             addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable))
             addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable))
         }
 
-        // 5. Procesar cliente
+        // 4. Procesar cliente
         val cliente = procesarYNormalizarCliente(dto.cliente)
 
-        // 6. Obtener referencias necesarias
+        // 5. Obtener referencias necesarias
         val tipoEvento = tipoEventoService.get(dto.tipoEventoId)
             ?: throw IllegalArgumentException("Tipo Evento no encontrado")
         val encargado = usuarioService.findById(dto.encargadoId)
             ?: throw IllegalArgumentException("Encargado no encontrado")
 
-        // 7. Crear entidad evento
+        // 6. Crear entidad evento
         val evento = Evento(
             id = dto.id,
             nombre = dto.nombre.trim().lowercase(),
             tipoEvento = tipoEvento,
             inicio = dto.inicio,
             fin = dto.fin,
-            capacidad = capacidad,
+            capacidadAdultos = dto.capacidadAdultos,
+            capacidadNinos = dto.capacidadNinos,
             extraOtro = dto.extraOtro,
             descuento = dto.descuento,
             listaExtra = listaExtra,
@@ -428,13 +425,13 @@ class EventoService(
     @CacheEvict(value = ["eventoVer", "eventoAgenda"], key = "#eventoId")
     fun editEventoCapacidad(eventoId: Long, capacidad: EventoCapacidadDTO): EventoCapacidadDTO {
         val evento = findById(eventoId)
-        evento.capacidad.capacidadAdultos = capacidad.capacidadAdultos
-        evento.capacidad.capacidadNinos = capacidad.capacidadNinos
+        evento.capacidadAdultos = capacidad.capacidadAdultos
+        evento.capacidadNinos = capacidad.capacidadNinos
 
         val saved = save(evento)
         return EventoCapacidadDTO(
-            capacidadAdultos = saved.capacidad.capacidadAdultos,
-            capacidadNinos = saved.capacidad.capacidadNinos
+            capacidadAdultos = saved.capacidadAdultos,
+            capacidadNinos = saved.capacidadNinos
         )
     }
 
@@ -618,7 +615,8 @@ class EventoService(
             tipoEvento,
             eventoReservaDto.inicio,
             eventoReservaDto.fin,
-            eventoReservaDto.capacidad,
+            eventoReservaDto.capacidadAdultos,
+            eventoReservaDto.capacidadNinos,
             eventoReservaDto.extraOtro,
             eventoReservaDto.descuento,
             listaExtra,

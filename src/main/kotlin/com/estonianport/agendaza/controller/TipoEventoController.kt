@@ -1,11 +1,11 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.dto.EventoCapacidadDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
-import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
@@ -219,7 +219,7 @@ class TipoEventoController(
     @GetMapping("/{id}/capacidad")
     fun getCapacidadByTipoEventoId(
         @PathVariable id: Long
-    ): ResponseEntity<CustomResponse<Capacidad>> {
+    ): ResponseEntity<CustomResponse<EventoCapacidadDTO>> {
         val capacidad = tipoEventoService.getCapacidad(id)
         return ResponseEntity.ok(
             CustomResponse(

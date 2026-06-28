@@ -105,7 +105,7 @@ class PdfService {
         document.add(Paragraph("Descripcion: $cateringDescripcion", fontNormal))
         document.add(
             Paragraph(
-                "Total invitados: ${evento.capacidad.capacidadAdultos} adultos y ${evento.capacidad.capacidadNinos} niños",
+                "Total invitados: ${evento.capacidadAdultos} adultos y ${evento.capacidadNinos} niños",
                 fontNormal
             )
         )
