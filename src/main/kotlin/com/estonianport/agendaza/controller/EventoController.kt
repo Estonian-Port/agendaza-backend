@@ -392,7 +392,7 @@ class EventoController(
      * Actualiza la información de catering de un evento
      * PUT /v1/eventos/catering
      */
-    @PutMapping("catering")
+    @PutMapping("/catering")
     fun editEventoCatering(
         @RequestBody evento: EventoCateringDTO
     ): ResponseEntity<CustomResponse<Long>> {

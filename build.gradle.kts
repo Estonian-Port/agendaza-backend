@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -63,6 +64,14 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.processResources {
+    inputs.property("version", project.version)
+
+    filesMatching("**/banner.txt") {
+        filter<ReplaceTokens>("tokens" to mapOf("APPLICATION_VERSION" to project.version.toString()))
+    }
 }
 
 tasks.jacocoTestReport {

@@ -4,14 +4,12 @@ import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
 import com.estonianport.agendaza.dto.toEventoDto
-import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.repository.EventoRepository
-import com.estonianport.agendaza.service.CapacidadService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.EventoService
 import com.estonianport.agendaza.service.ExtraService
@@ -28,17 +26,14 @@ import java.util.Optional
 
 class EventoServiceTest {
 
-    // ── Mocks ─────────────────────────────────────────────────────────────────
-
-    private val eventoRepository   = mock<EventoRepository>()
-    private val empresaService     = mock<EmpresaService>()
-    private val extraService       = mock<ExtraService>()
+    private val eventoRepository     = mock<EventoRepository>()
+    private val empresaService       = mock<EmpresaService>()
+    private val extraService         = mock<ExtraService>()
     private val extraVariableService = mock<ExtraVariableService>()
-    private val emailService       = mock<EmailService>()
-    private val usuarioService     = mock<UsuarioService>()
-    private val pdfService         = mock<PdfService>()
-    private val tipoEventoService  = mock<TipoEventoService>()
-    private val capacidadService   = mock<CapacidadService>()
+    private val emailService         = mock<EmailService>()
+    private val usuarioService       = mock<UsuarioService>()
+    private val pdfService           = mock<PdfService>()
+    private val tipoEventoService    = mock<TipoEventoService>()
 
     private lateinit var service: EventoService
 
@@ -46,24 +41,22 @@ class EventoServiceTest {
     fun setUp() {
         service = EventoService(
             eventoRepository, empresaService, extraService, extraVariableService,
-            emailService, usuarioService, pdfService, tipoEventoService, capacidadService
+            emailService, usuarioService, pdfService, tipoEventoService
+            // CapacidadService eliminado en el refactor
         )
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun buildEvento(id: Long = 1L, nombre: String = "evento test"): Evento {
         val empresa    = mock<Empresa>()
         val tipoEvento = mock<TipoEvento>().also { whenever(it.id).thenReturn(1L) }
         val encargado  = mock<Usuario>()
-        val cliente    = mock<Usuario>().also {
-            whenever(it.email).thenReturn("cliente@test.com")
-        }
-        val capacidad  = Capacidad(1L, 100, 20)
+        val cliente    = mock<Usuario>().also { whenever(it.email).thenReturn("cliente@test.com") }
+
         return Evento(
             id = id, nombre = nombre, tipoEvento = tipoEvento,
             inicio = LocalDateTime.now(), fin = LocalDateTime.now().plusHours(5),
-            capacidad = capacidad, extraOtro = 0.0, descuento = 0L,
+            capacidadAdultos = 100, capacidadNinos = 20,
+            extraOtro = 0.0, descuento = 0L,
             listaExtra = mutableSetOf(), cateringOtro = 0.0,
             cateringOtroDescripcion = "", encargado = encargado, cliente = cliente,
             codigo = "ABCD", estado = Estado.RESERVADO, anotaciones = "", empresa = empresa
@@ -72,16 +65,13 @@ class EventoServiceTest {
 
     private fun buildEventoDTO(id: Long = 1L, nombre: String = "evento test"): EventoDTO {
         return EventoDTO(
-            id = id,
-            nombre = nombre,
-            codigo = "ABCD",
-            inicio = LocalDateTime.now(),
-            fin = LocalDateTime.now().plusHours(5),
+            id = id, nombre = nombre, codigo = "ABCD",
+            inicio = LocalDateTime.now(), fin = LocalDateTime.now().plusHours(5),
             tipoEvento = "Casamiento"
         )
     }
 
-    // ── findById ─────────────────────────────────────────────────────────────
+    // ── findById ──────────────────────────────────────────────────────────────
 
     @Nested
     inner class FindByIdTest {
@@ -119,6 +109,15 @@ class EventoServiceTest {
             whenever(eventoRepository.existeSuperposicionDeHorarios(1L, desde, hasta)).thenReturn(true)
             assertFalse(service.getHorarioDisponible(1L, desde, hasta))
         }
+
+        @Test
+        fun `empresas distintas no se interfieren entre si`() {
+            whenever(eventoRepository.existeSuperposicionDeHorarios(1L, desde, hasta)).thenReturn(true)
+            whenever(eventoRepository.existeSuperposicionDeHorarios(2L, desde, hasta)).thenReturn(false)
+
+            assertTrue(service.getHorarioDisponible(2L, desde, hasta))
+            assertTrue(service.getHorarioDisponible(1L, desde, hasta).not())
+        }
     }
 
     // ── getEventosOcupadosDelDia ──────────────────────────────────────────────
@@ -131,44 +130,70 @@ class EventoServiceTest {
             whenever(eventoRepository.findAllByInicioBetweenAndEmpresa(any(), any(), any()))
                 .thenReturn(emptyList())
 
-            val result = service.getEventosOcupadosDelDia(1L, LocalDateTime.now())
-            assertTrue(result.isEmpty())
+            assertTrue(service.getEventosOcupadosDelDia(1L, LocalDateTime.now()).isEmpty())
         }
 
         @Test
         fun `formatea correctamente un evento que inicia y termina el mismo dia`() {
             val inicio = LocalDateTime.of(2025, 9, 10, 18, 0)
             val fin    = LocalDateTime.of(2025, 9, 10, 23, 0)
-            val evento = buildEventoDTO(nombre = "boda").also {
-                it.inicio = inicio
-                it.fin    = fin
-            }
+            val dto    = buildEventoDTO(nombre = "boda").also { it.inicio = inicio; it.fin = fin }
 
             whenever(eventoRepository.findAllByInicioBetweenAndEmpresa(any(), any(), any()))
-                .thenReturn(listOf(evento))
+                .thenReturn(listOf(dto))
 
             val result = service.getEventosOcupadosDelDia(1L, inicio)
             assertEquals(1, result.size)
             assertTrue(result[0].contains("18:00"))
             assertTrue(result[0].contains("23:00"))
-            assertFalse(result[0].contains("del dia"))   // mismo día → no agrega texto extra
+            assertFalse(result[0].contains("del dia"))
         }
 
         @Test
         fun `formatea correctamente un evento que termina al dia siguiente`() {
             val inicio = LocalDateTime.of(2025, 9, 10, 22, 0)
             val fin    = LocalDateTime.of(2025, 9, 11,  3, 0)
-            val evento = buildEventoDTO(nombre = "after").also {
-                it.inicio = inicio
-                it.fin    = fin
-            }
+            val dto    = buildEventoDTO(nombre = "after").also { it.inicio = inicio; it.fin = fin }
 
             whenever(eventoRepository.findAllByInicioBetweenAndEmpresa(any(), any(), any()))
-                .thenReturn(listOf(evento))
+                .thenReturn(listOf(dto))
 
             val result = service.getEventosOcupadosDelDia(1L, inicio)
             assertTrue(result[0].contains("del dia"))
             assertTrue(result[0].contains("2025-09-11"))
+        }
+
+        @Test
+        fun `devuelve multiples eventos ordenados cronologicamente`() {
+            val base   = LocalDateTime.of(2025, 9, 10, 0, 0)
+            val dto1   = buildEventoDTO(id = 1L, nombre = "primero").also {
+                it.inicio = base.withHour(10); it.fin = base.withHour(12)
+            }
+            val dto2   = buildEventoDTO(id = 2L, nombre = "segundo").also {
+                it.inicio = base.withHour(16); it.fin = base.withHour(20)
+            }
+
+            // El repo devuelve en orden invertido para validar que el service ordena
+            whenever(eventoRepository.findAllByInicioBetweenAndEmpresa(any(), any(), any()))
+                .thenReturn(listOf(dto2, dto1))
+
+            val result = service.getEventosOcupadosDelDia(1L, base)
+            assertEquals(2, result.size)
+            assertTrue(result[0].contains("10:00"))
+            assertTrue(result[1].contains("16:00"))
+        }
+
+        @Test
+        fun `el nombre del evento aparece en el string formateado`() {
+            val inicio = LocalDateTime.of(2025, 9, 10, 18, 0)
+            val dto    = buildEventoDTO(nombre = "cumpleanos").also {
+                it.inicio = inicio; it.fin = inicio.plusHours(3)
+            }
+
+            whenever(eventoRepository.findAllByInicioBetweenAndEmpresa(any(), any(), any()))
+                .thenReturn(listOf(dto))
+
+            assertTrue(service.getEventosOcupadosDelDia(1L, inicio)[0].contains("cumpleanos"))
         }
     }
 
@@ -190,6 +215,14 @@ class EventoServiceTest {
             assertEquals(2, estados.size)
             assertTrue(estados.contains("COTIZADO"))
             assertTrue(estados.contains("RESERVADO"))
+        }
+
+        @Test
+        fun `getAllEstadoForSaveEvento NO contiene estados de gestion interna`() {
+            val estados = service.getAllEstadoForSaveEvento()
+            // Verificamos que no se cuelan estados que no corresponden al alta
+            assertFalse(estados.contains("CANCELADO"))
+            assertFalse(estados.contains("FINALIZADO"))
         }
     }
 
@@ -214,6 +247,13 @@ class EventoServiceTest {
         fun `delete lanza excepcion si el evento no existe`() {
             whenever(eventoRepository.findById(99L)).thenReturn(Optional.empty())
             assertThrows(IllegalArgumentException::class.java) { service.delete(99L) }
+        }
+
+        @Test
+        fun `delete no llama a save si el evento no existe`() {
+            whenever(eventoRepository.findById(99L)).thenReturn(Optional.empty())
+            runCatching { service.delete(99L) }
+            verify(eventoRepository, never()).save(any())
         }
     }
 }

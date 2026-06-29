@@ -2,13 +2,15 @@ package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.common.toEndOfMonth
+import com.estonianport.agendaza.dto.EventoCapacidadDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.TipoEventoDTO
 import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.dto.TimeDTO
+import com.estonianport.agendaza.dto.toDTO
+import com.estonianport.agendaza.dto.toEventoCapacidadDTO
 import com.estonianport.agendaza.errors.NotFoundException
-import com.estonianport.agendaza.model.Capacidad
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import com.estonianport.agendaza.model.TipoEvento
@@ -27,7 +29,6 @@ import java.time.LocalTime
 @Service
 class TipoEventoService(
     private val tipoEventoRepository: TipoEventoRepository,
-    private val capacidadService: CapacidadService,
     private val empresaService: EmpresaService,
     private val extraService: ExtraService,
     private val precioConFechaTipoEventoService: PrecioConFechaTipoEventoService
@@ -100,10 +101,10 @@ class TipoEventoService(
     }
 
     @Transactional(readOnly = true)
-    fun getCapacidad(id: Long): Capacidad {
+    fun getCapacidad(id: Long): EventoCapacidadDTO {
         return tipoEventoRepository.findById(id)
             .orElseThrow { NotFoundException("TipoEvento no encontrado con id: $id") }
-            .capacidad
+            .toEventoCapacidadDTO()
     }
 
     @Transactional(readOnly = true)
@@ -155,7 +156,6 @@ class TipoEventoService(
     @Transactional
     @CacheEvict(value = ["tipos-evento", "tipos-evento-count"], allEntries = true)
     fun saveTipoEvento(dto: TipoEventoDTO): TipoEventoDTO {
-        val capacidad = capacidadService.reutilizarCapacidad(dto.capacidad)
         val empresa = empresaService.get(dto.empresaId)
             ?: throw NotFoundException("Empresa no encontrada con id: ${dto.empresaId}")
 
@@ -163,7 +163,8 @@ class TipoEventoService(
             dto.id,
             dto.nombre,
             dto.duracion,
-            capacidad,
+            dto.capacidadAdultos,
+            dto.capacidadNinos,
             LocalTime.of(dto.cantidadDuracion.hour, dto.cantidadDuracion.minute),
             empresa
         )

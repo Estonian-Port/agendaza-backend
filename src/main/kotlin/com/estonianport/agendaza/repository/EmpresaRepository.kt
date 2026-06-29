@@ -50,7 +50,8 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             te.nombre, 
             te.cantidadDuracion, 
             te.duracion, 
-            te.capacidad, 
+            te.capacidadAdultos,
+            te.capacidadNinos,
             te.empresa.id
         ) 
         FROM TipoEvento te 

@@ -39,9 +39,11 @@ class Evento(
     @Column
     var fin: LocalDateTime,
 
-    @ManyToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "capacidad_id")
-    var capacidad: Capacidad,
+    @Column(name = "capacidad_adultos")
+    var capacidadAdultos: Int,
+
+    @Column(name = "capacidad_ninos")
+    var capacidadNinos: Int,
 
     @Column
     var extraOtro: Double,
@@ -119,12 +121,12 @@ class Evento(
     }
 
     fun getPresupuestoCatering(): Double{
-        return capacidad.capacidadAdultos *
+        return capacidadAdultos *
                 empresa.getSumOfPrecioByListaExtra(
                     listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
                 empresa.getSumOfPrecioByListaExtraVariable(
                     listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }, inicio) +
-            capacidad.capacidadAdultos * cateringOtro
+            capacidadAdultos * cateringOtro
     }
 
     fun getPresupuestoTotal(): Double{

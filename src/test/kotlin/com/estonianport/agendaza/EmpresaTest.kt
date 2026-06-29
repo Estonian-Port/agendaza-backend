@@ -17,10 +17,6 @@ import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-/**
- * Testea la lógica de búsqueda de precios por fecha en Empresa.
- * Usamos la subclase concreta Salon para instanciar (Empresa es abstract).
- */
 class EmpresaTest {
 
     private lateinit var empresa: Salon
@@ -38,7 +34,7 @@ class EmpresaTest {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun pricioExtra(
+    private fun precioExtra(
         extraId: Long = 10L,
         precio: Double,
         desde: LocalDateTime,
@@ -55,6 +51,23 @@ class EmpresaTest {
         }
     }
 
+    private fun precioTipoEvento(
+        tipoEventoId: Long = 20L,
+        precio: Double,
+        desde: LocalDateTime,
+        hasta: LocalDateTime,
+        fechaBaja: LocalDate? = null
+    ): PrecioConFechaTipoEvento {
+        val teMock = mock<TipoEvento>().also { whenever(it.id).thenReturn(tipoEventoId) }
+        return mock<PrecioConFechaTipoEvento>().also {
+            whenever(it.tipoEvento).thenReturn(teMock)
+            whenever(it.precio).thenReturn(precio)
+            whenever(it.desde).thenReturn(desde)
+            whenever(it.hasta).thenReturn(hasta)
+            whenever(it.fechaBaja).thenReturn(fechaBaja)
+        }
+    }
+
     // ── getPrecioOfExtraByFecha ───────────────────────────────────────────────
 
     @Nested
@@ -62,38 +75,26 @@ class EmpresaTest {
 
         @Test
         fun `devuelve precio cuando fecha esta dentro del rango`() {
-            val precio = pricioExtra(
-                precio = 300.0,
-                desde  = fecha.minusDays(10),
-                hasta  = fecha.plusDays(10)
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(precio = 300.0, desde = fecha.minusDays(10), hasta = fecha.plusDays(10))
             )
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precio)
-
             assertEquals(300.0, empresa.getPrecioOfExtraByFecha(extra, fecha))
         }
 
         @Test
         fun `devuelve 0 cuando no hay precio vigente para la fecha`() {
-            val precio = pricioExtra(
-                precio = 300.0,
-                desde  = fecha.plusDays(1),
-                hasta  = fecha.plusDays(10)
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(precio = 300.0, desde = fecha.plusDays(1), hasta = fecha.plusDays(10))
             )
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precio)
-
             assertEquals(0.0, empresa.getPrecioOfExtraByFecha(extra, fecha))
         }
 
         @Test
         fun `devuelve 0 cuando el precio esta dado de baja`() {
-            val precio = pricioExtra(
-                precio   = 300.0,
-                desde    = fecha.minusDays(10),
-                hasta    = fecha.plusDays(10),
-                fechaBaja = LocalDate.now()
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(precio = 300.0, desde = fecha.minusDays(10), hasta = fecha.plusDays(10),
+                    fechaBaja = LocalDate.now())
             )
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precio)
-
             assertEquals(0.0, empresa.getPrecioOfExtraByFecha(extra, fecha))
         }
 
@@ -105,13 +106,68 @@ class EmpresaTest {
 
         @Test
         fun `devuelve el precio del extra correcto cuando hay varios extras`() {
-            val precioExtra10 = pricioExtra(extraId = 10L, precio = 200.0,
-                desde = fecha.minusDays(5), hasta = fecha.plusDays(5))
-            val precioExtra99 = pricioExtra(extraId = 99L, precio = 999.0,
-                desde = fecha.minusDays(5), hasta = fecha.plusDays(5))
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precioExtra10, precioExtra99)
-
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(extraId = 10L, precio = 200.0, desde = fecha.minusDays(5), hasta = fecha.plusDays(5)),
+                precioExtra(extraId = 99L, precio = 999.0, desde = fecha.minusDays(5), hasta = fecha.plusDays(5))
+            )
             assertEquals(200.0, empresa.getPrecioOfExtraByFecha(extra, fecha))
+        }
+
+        @Test
+        fun `devuelve 0 si el extra no pertenece a esta empresa`() {
+            val otroExtra = mock<Extra>().also { whenever(it.id).thenReturn(999L) }
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(extraId = 10L, precio = 500.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+            )
+            assertEquals(0.0, empresa.getPrecioOfExtraByFecha(otroExtra, fecha))
+        }
+    }
+
+    // ── getPrecioOfTipoEvento ─────────────────────────────────────────────────
+
+    @Nested
+    inner class GetPrecioOfTipoEventoTest {
+
+        @Test
+        fun `devuelve precio cuando fecha esta dentro del rango`() {
+            empresa.listaPrecioConFechaTipoEvento = mutableSetOf(
+                precioTipoEvento(precio = 5000.0, desde = fecha.minusDays(5), hasta = fecha.plusDays(5))
+            )
+            assertEquals(5000.0, empresa.getPrecioOfTipoEvento(20L, fecha))
+        }
+
+        @Test
+        fun `devuelve 0 cuando la lista esta vacia`() {
+            empresa.listaPrecioConFechaTipoEvento = mutableSetOf()
+            assertEquals(0.0, empresa.getPrecioOfTipoEvento(20L, fecha))
+        }
+
+        @Test
+        fun `devuelve 0 cuando el tipo evento esta dado de baja`() {
+            empresa.listaPrecioConFechaTipoEvento = mutableSetOf(
+                precioTipoEvento(precio = 5000.0, desde = fecha.minusDays(5), hasta = fecha.plusDays(5),
+                    fechaBaja = LocalDate.now())
+            )
+            assertEquals(0.0, empresa.getPrecioOfTipoEvento(20L, fecha))
+        }
+
+        @Test
+        fun `devuelve 0 cuando la fecha esta fuera del rango`() {
+            empresa.listaPrecioConFechaTipoEvento = mutableSetOf(
+                precioTipoEvento(precio = 5000.0, desde = fecha.plusDays(1), hasta = fecha.plusDays(10))
+            )
+            assertEquals(0.0, empresa.getPrecioOfTipoEvento(20L, fecha))
+        }
+
+        @Test
+        fun `devuelve el precio del tipo evento correcto entre varios`() {
+            empresa.listaPrecioConFechaTipoEvento = mutableSetOf(
+                precioTipoEvento(tipoEventoId = 20L, precio = 8000.0,
+                    desde = fecha.minusDays(1), hasta = fecha.plusDays(1)),
+                precioTipoEvento(tipoEventoId = 99L, precio = 1000.0,
+                    desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+            )
+            assertEquals(8000.0, empresa.getPrecioOfTipoEvento(20L, fecha))
         }
     }
 
@@ -122,15 +178,10 @@ class EmpresaTest {
 
         @Test
         fun `multiplica precio unitario por cantidad`() {
-            val precio = pricioExtra(
-                precio = 100.0,
-                desde  = fecha.minusDays(1),
-                hasta  = fecha.plusDays(1)
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(precio = 100.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
             )
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precio)
-
-            val extraVariable = EventoExtraVariable(1L, extra, 3) // cantidad 3
-
+            val extraVariable = EventoExtraVariable(1L, extra, 3)
             assertEquals(300.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
         }
 
@@ -138,6 +189,15 @@ class EmpresaTest {
         fun `devuelve 0 si el extra variable no tiene precio en la fecha`() {
             empresa.listaPrecioConFechaExtra = mutableSetOf()
             val extraVariable = EventoExtraVariable(1L, extra, 5)
+            assertEquals(0.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
+        }
+
+        @Test
+        fun `con cantidad 0 devuelve 0 aunque haya precio`() {
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(precio = 500.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+            )
+            val extraVariable = EventoExtraVariable(1L, extra, 0)
             assertEquals(0.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
         }
     }
@@ -151,19 +211,53 @@ class EmpresaTest {
         fun `suma correctamente los precios de una lista de extras`() {
             val extra2 = mock<Extra>().also { whenever(it.id).thenReturn(11L) }
 
-            val precio1 = pricioExtra(extraId = 10L, precio = 500.0,
-                desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
-            val precio2 = pricioExtra(extraId = 11L, precio = 250.0,
-                desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
-            empresa.listaPrecioConFechaExtra = mutableSetOf(precio1, precio2)
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(extraId = 10L, precio = 500.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1)),
+                precioExtra(extraId = 11L, precio = 250.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+            )
 
-            val suma = empresa.getSumOfPrecioByListaExtra(listOf(extra, extra2), fecha)
-            assertEquals(750.0, suma, 0.001)
+            assertEquals(750.0, empresa.getSumOfPrecioByListaExtra(listOf(extra, extra2), fecha), 0.001)
         }
 
         @Test
         fun `devuelve 0 con lista vacia`() {
             assertEquals(0.0, empresa.getSumOfPrecioByListaExtra(emptyList(), fecha))
+        }
+
+        @Test
+        fun `ignora extras sin precio vigente`() {
+            val extra2 = mock<Extra>().also { whenever(it.id).thenReturn(11L) }
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(extraId = 10L, precio = 400.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+                // extra2 (id=11) no tiene precio configurado
+            )
+            assertEquals(400.0, empresa.getSumOfPrecioByListaExtra(listOf(extra, extra2), fecha), 0.001)
+        }
+    }
+
+    // ── getSumOfPrecioByListaExtraVariable ────────────────────────────────────
+
+    @Nested
+    inner class GetSumOfPrecioByListaExtraVariableTest {
+
+        @Test
+        fun `suma correctamente multiples extras variables`() {
+            val extra2 = mock<Extra>().also { whenever(it.id).thenReturn(11L) }
+
+            empresa.listaPrecioConFechaExtra = mutableSetOf(
+                precioExtra(extraId = 10L, precio = 100.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1)),
+                precioExtra(extraId = 11L, precio = 200.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
+            )
+
+            val var1 = EventoExtraVariable(1L, extra,  2)  // 2 * 100 = 200
+            val var2 = EventoExtraVariable(2L, extra2, 3)  // 3 * 200 = 600
+
+            assertEquals(800.0, empresa.getSumOfPrecioByListaExtraVariable(listOf(var1, var2), fecha), 0.001)
+        }
+
+        @Test
+        fun `devuelve 0 con lista vacia`() {
+            assertEquals(0.0, empresa.getSumOfPrecioByListaExtraVariable(emptyList(), fecha))
         }
     }
 
@@ -177,15 +271,35 @@ class EmpresaTest {
             val copia = empresa.copy("Nuevo Nombre", 9876543210L, "nuevo@e.com", "Av", 999, "OtraCiudad")
             assertInstanceOf(Salon::class.java, copia)
             assertEquals("Nuevo Nombre", copia.nombre)
-            assertEquals(empresa.id, copia.id)   // mantiene el mismo ID
+            assertEquals(empresa.id, copia.id)
         }
 
         @Test
-        fun `copy de Prestador devuelve nuevo Prestador`() {
+        fun `copy de Prestador devuelve nuevo Prestador conservando tipoPrestador`() {
             val prestador = Prestador(2L, "P", 111L, "p@p.com", "C", 1, "M", TipoPrestador.DJ)
             val copia = prestador.copy("DJs SRL", 222L, "djs@djs.com", "Ruta", 0, "Capital")
             assertInstanceOf(Prestador::class.java, copia)
             assertEquals("DJs SRL", copia.nombre)
+            assertEquals(TipoPrestador.DJ, (copia as Prestador).tipoPrestador)
+        }
+
+        @Test
+        fun `copy mantiene el mismo id`() {
+            val copia = empresa.copy("Otro", 111L, "a@b.com", "C", 1, "M")
+            assertEquals(1L, copia.id)
+        }
+    }
+
+    // ── toGenericItemDTO ──────────────────────────────────────────────────────
+
+    @Nested
+    inner class ToGenericItemDTOTest {
+
+        @Test
+        fun `toGenericItemDTO devuelve id y nombre correctos`() {
+            val dto = empresa.toGenericItemDTO()
+            assertEquals(1L, dto.id)
+            assertEquals("Salón Test", dto.nombre)
         }
     }
 }

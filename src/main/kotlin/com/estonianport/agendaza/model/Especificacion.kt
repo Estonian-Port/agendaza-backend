@@ -32,7 +32,7 @@ class PrecioDePlatoNinos(
         var porcentaje: Int) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadNinos = evento.capacidad.capacidadNinos
+        val capacidadNinos = evento.capacidadNinos
         var precioPlato = 0.0
 
         if(evento.cateringOtro != 0.0){
@@ -67,8 +67,8 @@ class AgregarExtraNinoSiSuperaCapacidad(
         var extraNino: Extra) : Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadNinosEvento = evento.capacidad.capacidadNinos
-        val capacidadNinosTipoEvento = evento.tipoEvento.capacidad.capacidadNinos
+        val capacidadNinosEvento = evento.capacidadNinos
+        val capacidadNinosTipoEvento = evento.tipoEvento.capacidadNinos
 
         if (capacidadNinosEvento > capacidadNinosTipoEvento) {
             val ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
@@ -100,8 +100,8 @@ class AgregarExtraCamareraSiSuperaCapacidad(
         private var duracionEsperada: Duracion): Especificacion(id, empresa) {
 
     override fun aplicar(evento: Evento) {
-        val capacidadAdultosEvento = evento.capacidad.capacidadAdultos
-        val capacidadAdultosTipoEvento = evento.tipoEvento.capacidad.capacidadAdultos
+        val capacidadAdultosEvento = evento.capacidadAdultos
+        val capacidadAdultosTipoEvento = evento.tipoEvento.capacidadAdultos
 
         // Verifica que la duración del evento coincida con la especificada
         if (evento.tipoEvento.duracion == duracionEsperada) {
