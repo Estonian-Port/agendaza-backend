@@ -129,12 +129,12 @@ abstract class Empresa(
     }
 
     // TODO Pasar a consulta SQL
-    fun getPrecioOfTipoEvento(tipoEventoId: Long, fecha: LocalDateTime): Double{
+    fun getPrecioOfTipoEvento(tipoEventoId: Long, fecha: LocalDateTime): Double {
         return listaPrecioConFechaTipoEvento.find {
             it.tipoEvento.id == tipoEventoId &&
-            it.fechaBaja == null &&
-            it.desde == fecha || it.desde.isBefore(fecha) && it.hasta.isAfter(fecha)
-        }?.precio ?: return 0.0
+                    it.fechaBaja == null &&
+                    (fecha.isEqual(it.desde) || (fecha.isAfter(it.desde) && fecha.isBefore(it.hasta)))
+        }?.precio ?: 0.0
     }
 
     fun copy(nombre: String, telefono: Long, email: String, calle: String, numero: Int, municipio: String
