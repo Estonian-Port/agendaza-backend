@@ -21,7 +21,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("SELECT u FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL")
     fun getByCelular(celular: Long): Usuario?
-    
+
     // Devuelven lista en vez de resultado único: no explotan si hay duplicados viejos en la base
     @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByEmail(email: String): List<Usuario>

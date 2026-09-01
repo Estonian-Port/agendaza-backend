@@ -69,13 +69,13 @@ class UsuarioServiceTest {
         @Test
         fun `devuelve usuario cuando existe`() {
             val usuario = buildUsuario()
-            whenever(usuarioRepository.getByEmail("test@test.com")).thenReturn(usuario)
+            whenever(usuarioRepository.findAllByEmail("test@test.com")).thenReturn(listOf(usuario))
             assertEquals(usuario, service.getByEmail("test@test.com"))
         }
 
         @Test
         fun `devuelve null cuando no existe`() {
-            whenever(usuarioRepository.getByEmail("noexiste@test.com")).thenReturn(null)
+            whenever(usuarioRepository.findAllByEmail("noexiste@test.com")).thenReturn(emptyList())
             assertNull(service.getByEmail("noexiste@test.com"))
         }
     }
@@ -107,13 +107,13 @@ class UsuarioServiceTest {
         @Test
         fun `devuelve usuario por celular`() {
             val usuario = buildUsuario()
-            whenever(usuarioRepository.getByCelular(1234567890L)).thenReturn(usuario)
+            whenever(usuarioRepository.findAllByCelular(1234567890L)).thenReturn(listOf(usuario))
             assertEquals(usuario, service.getByCelular(1234567890L))
         }
 
         @Test
         fun `devuelve null si no existe el celular`() {
-            whenever(usuarioRepository.getByCelular(0L)).thenReturn(null)
+            whenever(usuarioRepository.findAllByCelular(0L)).thenReturn(emptyList())
             assertNull(service.getByCelular(0L))
         }
     }
