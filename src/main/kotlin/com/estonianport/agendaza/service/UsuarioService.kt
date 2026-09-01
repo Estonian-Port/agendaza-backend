@@ -25,12 +25,12 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
 
     @Transactional(readOnly = true)
     fun getByEmail(email: String): Usuario? {
-        return usuarioRepository.getByEmail(email)
+        return usuarioRepository.findAllByEmail(email).firstOrNull()
     }
 
     @Transactional(readOnly = true)
     fun getByCelular(celular: Long): Usuario? {
-        return usuarioRepository.getByCelular(celular)
+        return usuarioRepository.findAllByCelular(celular).firstOrNull()
     }
 
     @Transactional(readOnly = true)

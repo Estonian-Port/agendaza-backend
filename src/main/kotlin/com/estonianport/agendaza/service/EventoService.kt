@@ -146,24 +146,19 @@ class EventoService(
                 ?: throw IllegalArgumentException("Cliente no encontrado")
         }
 
-        // 1. Limpiamos lo que llega
         val emailLimpio = clienteInput.email.trim().lowercase()
         val celularInput = clienteInput.celular
 
-        // 2. Buscamos coincidencias REALES primero (ignorando vacíos)
-        if (emailLimpio.isNotBlank() && usuarioService.existsByEmail(emailLimpio)) {
-            return usuarioService.getByEmail(emailLimpio)!!
+        if (emailLimpio.isNotBlank()) {
+            usuarioService.getByEmail(emailLimpio)?.let { return it }
+        }
+        if (celularInput > 0) {
+            usuarioService.getByCelular(celularInput)?.let { return it }
         }
 
-        if (celularInput > 0 && usuarioService.existsByCelular(celularInput)) {
-            return usuarioService.getByCelular(celularInput)!!
-        }
-
-        // 3. Si no existe, preparamos el cliente nuevo aplicando las reglas de tu SQL
         val emailParaGuardar = emailLimpio.ifBlank {
             "sin-email-${UUID.randomUUID()}@agendaza.com"
         }
-
         val nombreParaGuardar = clienteInput.nombre.trim().lowercase().ifBlank { "cliente" }
         val apellidoParaGuardar = clienteInput.apellido.trim().lowercase().ifBlank { "cliente" }
 
@@ -176,8 +171,14 @@ class EventoService(
             password = null
         }
 
-        return usuarioService.save(clienteInput)
-    }
+        return try {
+            usuarioService.save(clienteInput)
+        } catch (ex: DataIntegrityViolationException) {
+            val existente = (if (emailLimpio.isNotBlank()) usuarioService.getByEmail(emailLimpio) else null)
+                ?: (if (celularInput > 0) usuarioService.getByCelular(celularInput) else null)
+
+            existente ?: throw ex
+        }
 
     /**
      * Envía email de comprobante de forma segura, sin romper la transacción

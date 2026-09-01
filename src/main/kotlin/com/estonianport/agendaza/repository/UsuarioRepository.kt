@@ -16,11 +16,12 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.username = :username")
     fun getByUsername(username: String): Usuario?
 
-    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL")
-    fun getByEmail(email: String): Usuario?
+    // Devuelven lista en vez de resultado único: no explotan si hay duplicados viejos en la base
+    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
+    fun findAllByEmail(email: String): List<Usuario>
 
-    @Query("SELECT u FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL")
-    fun getByCelular(celular: Long): Usuario?
+    @Query("SELECT u FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL ORDER BY u.id ASC")
+    fun findAllByCelular(celular: Long): List<Usuario>
 
     // ==================== DTOs PARA RESPUESTAS ====================
 
@@ -172,10 +173,10 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     // ==================== VALIDACIONES ====================
 
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.email = :email")
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL")
     fun existsByEmail(email: String): Boolean
 
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.celular = :celular")
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL")
     fun existsByCelular(celular: Long): Boolean
 
 }
