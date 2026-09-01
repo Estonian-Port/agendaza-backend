@@ -17,6 +17,7 @@ import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.CrudRepository
@@ -179,7 +180,8 @@ class EventoService(
 
             existente ?: throw ex
         }
-
+    }
+    
     /**
      * Envía email de comprobante de forma segura, sin romper la transacción
      */
