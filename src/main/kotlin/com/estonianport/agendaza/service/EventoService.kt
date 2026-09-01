@@ -181,7 +181,7 @@ class EventoService(
             existente ?: throw ex
         }
     }
-    
+
     /**
      * Envía email de comprobante de forma segura, sin romper la transacción
      */
