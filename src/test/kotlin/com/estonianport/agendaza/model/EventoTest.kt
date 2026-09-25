@@ -1,12 +1,5 @@
-package com.estonianport.agendaza
+package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.model.Empresa
-import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.EventoExtraVariable
-import com.estonianport.agendaza.model.Extra
-import com.estonianport.agendaza.model.Pago
-import com.estonianport.agendaza.model.TipoEvento
-import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.junit.jupiter.api.Assertions.*

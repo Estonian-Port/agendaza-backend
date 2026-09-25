@@ -10,7 +10,7 @@ object CodeGeneratorUtil {
             val base26chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
             val sb = StringBuilder(4)
             for (i in 0..3) {
-                sb.append(base26chars[random.nextInt(24)])
+                sb.append(base26chars[random.nextInt(base26chars.size)])
             }
             return sb.toString()
         }

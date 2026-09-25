@@ -1,13 +1,18 @@
-package com.estonianport.agendaza
+package com.estonianport.agendaza.service
 
+import com.estonianport.agendaza.dto.UsuarioAbmDTO
+import com.estonianport.agendaza.dto.UsuarioPerfilDTO
+import com.estonianport.agendaza.dto.UsuarioResponseDto
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.repository.UsuarioRepository
-import com.estonianport.agendaza.service.UsuarioService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import java.time.LocalDate
 import java.util.Optional
 
 class UsuarioServiceTest {
@@ -116,5 +121,51 @@ class UsuarioServiceTest {
             whenever(usuarioRepository.findAllByCelular(0L)).thenReturn(emptyList())
             assertNull(service.getByCelular(0L))
         }
+    }
+
+    @Test
+    fun `getUsuarioDtoByEmail devuelve el DTO del repositorio`() {
+        val esperado = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L)
+        whenever(usuarioRepository.getUsuarioDtoByEmail("test@test.com")).thenReturn(esperado)
+
+        assertEquals(esperado, service.getUsuarioDtoByEmail("test@test.com"))
+    }
+
+    @Test
+    fun `getUsuarioDtoByUsername lanza excepcion cuando no existe`() {
+        whenever(usuarioRepository.getUsuarioDtoByUsername("inexistente")).thenReturn(null)
+
+        val error = assertThrows(NoSuchElementException::class.java) {
+            service.getUsuarioDtoByUsername("inexistente")
+        }
+
+        assertEquals("No se encontró un usuario con el username proporcionado", error.message)
+    }
+
+    @Test
+    fun `getUsuarioPerfil devuelve el perfil del repositorio`() {
+        val perfil = UsuarioPerfilDTO(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L, LocalDate.of(1990, 1, 2))
+        whenever(usuarioRepository.getUsuarioPerfil(1L)).thenReturn(perfil)
+
+        assertEquals(perfil, service.getUsuarioPerfil(1L))
+    }
+
+    @Test
+    fun `getAllUsuario pagina y devuelve los usuarios de la empresa`() {
+        val usuarios = listOf(UsuarioAbmDTO(1L, "Juan", "Pérez", "juan"))
+        whenever(usuarioRepository.getAllUsuario(eq(5L), any())).thenReturn(PageImpl(usuarios))
+
+        assertEquals(usuarios, service.getAllUsuario(5L, 2))
+        verify(usuarioRepository).getAllUsuario(5L, PageRequest.of(2, 10))
+    }
+
+    @Test
+    fun `getAllClienteFiltrados pasa empresa busqueda y pagina`() {
+        val clientes = listOf(UsuarioAbmDTO(2L, "Ana", "López", null))
+        whenever(usuarioRepository.getAllClienteFiltrados(eq(7L), eq("ana"), any()))
+            .thenReturn(PageImpl(clientes))
+
+        assertEquals(clientes, service.getAllClienteFiltrados(7L, 1, "ana"))
+        verify(usuarioRepository).getAllClienteFiltrados(7L, "ana", PageRequest.of(1, 10))
     }
 }

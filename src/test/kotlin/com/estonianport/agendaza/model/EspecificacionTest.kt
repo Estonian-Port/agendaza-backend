@@ -1,6 +1,5 @@
-package com.estonianport.agendaza
+package com.estonianport.agendaza.model
 
-import com.estonianport.agendaza.model.*
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.junit.jupiter.api.Assertions.*

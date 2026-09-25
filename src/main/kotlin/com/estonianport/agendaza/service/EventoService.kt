@@ -5,6 +5,8 @@ import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.errors.BusinessException
+import com.estonianport.agendaza.errors.GlobalExceptionHandler
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
@@ -15,6 +17,7 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.dao.DataIntegrityViolationException
@@ -44,12 +47,14 @@ class EventoService(
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
 
+    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+
     /**
      * Busca un evento por ID y lanza excepción si no existe
      */
     fun findById(id: Long): Evento {
         return eventoRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Evento no encontrado con el ID: $id")
+            NotFoundException("Evento no encontrado con el ID: $id")
         }
     }
 
@@ -96,9 +101,9 @@ class EventoService(
 
         // 5. Obtener referencias necesarias
         val tipoEvento = tipoEventoService.get(dto.tipoEventoId)
-            ?: throw IllegalArgumentException("Tipo Evento no encontrado")
+            ?: throw NotFoundException("Tipo Evento no encontrado")
         val encargado = usuarioService.findById(dto.encargadoId)
-            ?: throw IllegalArgumentException("Encargado no encontrado")
+            ?: throw NotFoundException("Encargado no encontrado")
 
         // 6. Crear entidad evento
         val evento = Evento(
@@ -138,13 +143,10 @@ class EventoService(
         return eventoSaved.id
     }
 
-    /**
-     * Procesa y normaliza datos del cliente, evitando duplicados
-     */
     private fun procesarYNormalizarCliente(clienteInput: Usuario): Usuario {
         if (clienteInput.id != 0L) {
             return usuarioService.get(clienteInput.id)
-                ?: throw IllegalArgumentException("Cliente no encontrado")
+                ?: throw NotFoundException("Cliente no encontrado")
         }
 
         val emailLimpio = clienteInput.email.trim().lowercase()
@@ -160,6 +162,13 @@ class EventoService(
         val emailParaGuardar = emailLimpio.ifBlank {
             "sin-email-${UUID.randomUUID()}@agendaza.com"
         }
+
+        val celularParaGuardar = if (celularInput > 0) {
+            celularInput
+        } else {
+            generarCelularFantasmaUnico()
+        }
+
         val nombreParaGuardar = clienteInput.nombre.trim().lowercase().ifBlank { "cliente" }
         val apellidoParaGuardar = clienteInput.apellido.trim().lowercase().ifBlank { "cliente" }
 
@@ -167,7 +176,7 @@ class EventoService(
             nombre = nombreParaGuardar
             apellido = apellidoParaGuardar
             email = emailParaGuardar
-            celular = celularInput
+            celular = celularParaGuardar
             username = null
             password = null
         }
@@ -183,16 +192,30 @@ class EventoService(
     }
 
     /**
-     * Envía email de comprobante de forma segura, sin romper la transacción
+     * Genera un número fantasma 999XXXXXXX y válida contra la BD que no exista antes de devolverlo.
+     */
+    private fun generarCelularFantasmaUnico(): Long {
+        var candidato: Long
+        do {
+            candidato = "999${System.currentTimeMillis().toString().takeLast(7)}".toLong()
+        } while (usuarioService.getByCelular(candidato) != null)
+
+        return candidato
+    }
+
+    /**
+     * Envía email de comprobante
      */
     private fun enviarMailComprobanteSeguro(evento: Evento, empresa: Empresa) {
         try {
             if (emailService.isEmailValid(evento.cliente.email)) {
                 emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa)
+            }else{
+                logger.warn("Mail no enviado a ${evento.cliente.email} de evento codigo: ${evento.codigo}")
             }
+
         } catch (e: Exception) {
-            // Log del error sin romper la transacción
-            println("Fallo al enviar el mail de comprobante para el evento ${evento.id}: ${e.message}")
+            logger.error("Fallo al enviar el mail de comprobante de evento codigo: ${evento.codigo} error: ${e.message} ", e)
         }
     }
 
@@ -460,9 +483,9 @@ class EventoService(
     @Transactional
     fun recorrerEspecificaciones(eventoReservaDto: EventoReservaDTO, empresaId: Long): EventoReservaDTO {
         val empresa = empresaService.get(empresaId)
-            ?: throw IllegalArgumentException("Empresa no encontrada")
+            ?: throw NotFoundException("Empresa no encontrada")
         val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)
-            ?: throw IllegalArgumentException("Tipo evento no encontrado")
+            ?: throw NotFoundException("Tipo evento no encontrado")
 
         val listaExtra = mutableSetOf<Extra>()
         listaExtra.addAll(
@@ -477,7 +500,7 @@ class EventoService(
         )
 
         val encargado = usuarioService.findById(eventoReservaDto.encargadoId)
-            ?: throw IllegalArgumentException("Encargado no encontrado")
+            ?: throw NotFoundException("Encargado no encontrado")
 
         val evento = fromEventoReservaDtoToEvento(
             eventoReservaDto,

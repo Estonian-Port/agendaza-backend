@@ -5,6 +5,7 @@ import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.repository.PagoRepository
@@ -94,8 +95,8 @@ class PagoService(
         val pago = Pago(
             pagoDTO.id,
             pagoDTO.monto,
-            pagoDTO.concepto ?: throw IllegalArgumentException("El concepto no puede ser nulo"),
-            pagoDTO.medioDePago ?: throw IllegalArgumentException("El medio de pago no puede ser nulo"),
+            pagoDTO.concepto ?: throw BusinessException("El concepto no puede ser nulo"),
+            pagoDTO.medioDePago ?: throw BusinessException("El medio de pago no puede ser nulo"),
             fecha,
             evento,
             encargado,

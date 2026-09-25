@@ -1,21 +1,15 @@
-package com.estonianport.agendaza
+package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
-import com.estonianport.agendaza.dto.toEventoDto
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.repository.EventoRepository
-import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.ExtraService
-import com.estonianport.agendaza.service.ExtraVariableService
-import com.estonianport.agendaza.service.TipoEventoService
-import com.estonianport.agendaza.service.UsuarioService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -86,7 +80,7 @@ class EventoServiceTest {
         @Test
         fun `findById lanza excepcion cuando no existe`() {
             whenever(eventoRepository.findById(99L)).thenReturn(Optional.empty())
-            assertThrows(IllegalArgumentException::class.java) { service.findById(99L) }
+            assertThrows(NotFoundException::class.java) { service.findById(99L) }
         }
     }
 
@@ -246,7 +240,7 @@ class EventoServiceTest {
         @Test
         fun `delete lanza excepcion si el evento no existe`() {
             whenever(eventoRepository.findById(99L)).thenReturn(Optional.empty())
-            assertThrows(IllegalArgumentException::class.java) { service.delete(99L) }
+            assertThrows(NotFoundException::class.java) { service.delete(99L) }
         }
 
         @Test
@@ -255,5 +249,42 @@ class EventoServiceTest {
             runCatching { service.delete(99L) }
             verify(eventoRepository, never()).save(any())
         }
+    }
+
+    @Test
+    fun `getAllEventosByFecha consulta el rango completo del dia`() {
+        val fecha = LocalDateTime.of(2026, 9, 25, 0, 0)
+        val esperado = listOf(
+            EventoDTO(1L, "fiesta", "ABCD", fecha.plusHours(18), fecha.plusHours(23), "Fiesta")
+        )
+        whenever(eventoRepository.getAllEventosForAgendaByFecha(
+            LocalDateTime.of(2026, 9, 25, 0, 0),
+            LocalDateTime.of(2026, 9, 25, 23, 59, 59),
+            3L
+        )).thenReturn(esperado)
+
+        assertEquals(esperado, service.getAllEventosByFecha("2026-09-25", 3L))
+    }
+
+    @Test
+    fun `descargarEvento obtiene el evento y delega la generacion del PDF`() {
+        val evento = buildEvento()
+        val pdf = byteArrayOf(1, 2, 3)
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(pdfService.generarComprobanteEvento(evento)).thenReturn(pdf)
+
+        assertArrayEquals(pdf, service.descargarEvento(1L))
+        verify(pdfService).generarComprobanteEvento(evento)
+    }
+
+    @Test
+    fun `reenviarMail envia el comprobante y devuelve true`() {
+        val evento = buildEvento()
+        val empresa = mock<Empresa>()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(empresaService.findById(2L)).thenReturn(empresa)
+
+        assertTrue(service.reenviarMail(1L, 2L))
+        verify(emailService).enviarMailComprabanteReserva(evento, "sido reservado (reenvío)", empresa)
     }
 }

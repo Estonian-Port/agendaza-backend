@@ -24,7 +24,8 @@ class EmailService {
     private val fromEmail = "Agendaza <agendaza@estonianport.com.ar>"
 
     fun isEmailValid(target: String): Boolean {
-        return target.isNotEmpty() && EmailValidator.getInstance().isValid(target)
+        return target.isNotEmpty() && !target.startsWith("sin-email-")
+                && EmailValidator.getInstance().isValid(target)
     }
 
     fun sendEmail(emailBody: Email) {

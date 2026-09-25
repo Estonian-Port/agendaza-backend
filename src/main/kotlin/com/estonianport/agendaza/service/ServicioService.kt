@@ -84,7 +84,8 @@ class ServicioService(
         }
 
         servicio.listaTipoEvento = dto.listaTipoEventoId
-            .map { tipoEventoService.get(it) ?: throw NotFoundException("TipoEvento no encontrado con id: $it") }
+            .map { tipoEventoService.get(it)
+                ?: throw NotFoundException("TipoEvento no encontrado con id: $it") }
             .toMutableSet()
 
         val savedServicio = servicioRepository.save(servicio)

@@ -1,4 +1,4 @@
-package com.estonianport.agendaza
+package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
@@ -9,16 +9,16 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.Salon
 import com.estonianport.agendaza.repository.PagoRepository
-import com.estonianport.agendaza.service.EmpresaService
-import com.estonianport.agendaza.service.EventoService
-import com.estonianport.agendaza.service.PagoService
-import com.estonianport.agendaza.service.UsuarioService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
@@ -150,5 +150,45 @@ class PagoServiceTest {
             assertEquals(10L, result.id)
             verify(pagoRepository).save(any<Pago>())
         }
+    }
+
+    @Test
+    fun `getEventoForSavePago devuelve los datos preparados por el repositorio`() {
+        val esperado = buildPagoDTO()
+        whenever(pagoRepository.getEventoForSavePago(eq(4L), any())).thenReturn(esperado)
+
+        assertEquals(esperado, service.getEventoForSavePago(4L))
+        verify(pagoRepository).getEventoForSavePago(eq(4L), any())
+    }
+
+    @Test
+    fun `getEventoForSavePago lanza NotFoundException cuando el evento no existe`() {
+        whenever(pagoRepository.getEventoForSavePago(eq(99L), any())).thenReturn(null)
+
+        assertThrows(NotFoundException::class.java) { service.getEventoForSavePago(99L) }
+    }
+
+    @Test
+    fun `pagos pagina resultados y convierte cada pago a DTO`() {
+        val pago = mock<Pago>()
+        val dto = buildPagoDTO(id = 8L)
+        whenever(pagoRepository.findAll(eq(2L), any())).thenReturn(PageImpl(listOf(pago)))
+        whenever(pago.toDTO()).thenReturn(dto)
+
+        assertEquals(listOf(dto), service.pagos(2L, 1))
+        verify(pagoRepository).findAll(2L, PageRequest.of(1, 10))
+    }
+
+    @Test
+    fun `enviarEmailPago envia el pago y devuelve true`() {
+        val pago = mock<Pago>()
+        val evento = mock<Evento>()
+        val empresa: Empresa = Salon(1L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
+        whenever(pagoRepository.findById(5L)).thenReturn(Optional.of(pago))
+        whenever(eventoService.findById(6L)).thenReturn(evento)
+        whenever(empresaService.get(1L)).thenReturn(empresa)
+
+        assertTrue(service.enviarEmailPago(5L, 6L, 1L))
+        verify(emailService).enviarEmailPago(pago, evento, empresa)
     }
 }

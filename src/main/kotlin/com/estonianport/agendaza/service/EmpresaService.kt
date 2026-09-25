@@ -47,7 +47,7 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
 
     fun findById(id: Long): Empresa {
         return empresaRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Empresa no encontrada con el ID: $id")
+            NotFoundException("Empresa no encontrada con el ID: $id")
         }
     }
 
@@ -126,11 +126,7 @@ class EmpresaService : GenericServiceImpl<Empresa, Long>() {
     @Transactional(readOnly = true)
     fun getTiposEventoByDuracion(empresaId: Long, duracionStr: String): List<TipoEventoDTO> {
 
-        val duracionEnum = try {
-            Duracion.valueOf(duracionStr)
-        } catch (e: IllegalArgumentException) {
-            throw BusinessException("La duración '$duracionStr' no es válida")
-        }
+        val duracionEnum = Duracion.fromString(duracionStr)
 
         return empresaRepository.findByEmpresaIdAndDuracion(empresaId, duracionEnum)
     }

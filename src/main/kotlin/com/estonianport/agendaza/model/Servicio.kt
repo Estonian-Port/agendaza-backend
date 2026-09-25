@@ -31,6 +31,8 @@ class Servicio(
     var fechaBaja : LocalDate? = null
 
     fun toDTO(): ServicioDTO {
-        return ServicioDTO(id, nombre)
+        return ServicioDTO(id, nombre).apply {
+            listaTipoEventoId = listaTipoEvento.map { it.id }
+        }
     }
 }
