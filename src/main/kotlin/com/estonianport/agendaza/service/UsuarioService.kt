@@ -2,6 +2,7 @@ package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.*
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,29 +35,40 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     }
 
     @Transactional(readOnly = true)
-    fun findById(id: Long): Usuario? {
-        return usuarioRepository.findById(id).orElse(null)
+    fun findById(id: Long): Usuario {
+        return usuarioRepository.findById(id).orElseThrow {
+            NotFoundException("Usuario no encontrado")
+        }
     }
 
     // ==================== DTOs ====================
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioDtoByEmail"], key = "#email")
-    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto? {
+    fun getUsuarioDtoByEmail(email: String): UsuarioResponseDto {
         return usuarioRepository.getUsuarioDtoByEmail(email)
+            ?: throw NotFoundException("No se encontró un usuario con el email proporcionado")
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = ["usuarioDtoByCelular"], key = "#celular")
+    fun getUsuarioDtoByCelular(celular: Long): UsuarioResponseDto {
+        return usuarioRepository.getUsuarioDtoByCelular(celular)
+            ?: throw NotFoundException("No se encontró un usuario con el celular proporcionado")
     }
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioDtoByUsername"], key = "#username")
     fun getUsuarioDtoByUsername(username: String): UsuarioResponseDto {
         return usuarioRepository.getUsuarioDtoByUsername(username)
-            ?: throw NoSuchElementException("No se encontró un usuario con el username proporcionado")
+            ?: throw NotFoundException("No se encontró un usuario con el username proporcionado")
     }
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioPerfil"], key = "#usuarioId")
     fun getUsuarioPerfil(usuarioId: Long): UsuarioPerfilDTO? {
         return usuarioRepository.getUsuarioPerfil(usuarioId)
+            ?: throw NotFoundException("Usuario no encontrado")
     }
 
     /**
@@ -66,6 +78,8 @@ class UsuarioService : GenericServiceImpl<Usuario, Long>() {
     @Transactional(readOnly = true)
     fun getUsuarioOfEmpresa(usuarioId: Long, empresaId: Long): UsuarioEditCargoDTO? {
         return usuarioRepository.getUsuarioOfEmpresa(usuarioId, empresaId)
+            ?: throw NotFoundException("Usuario no encontrado")
+
     }
 
     // ==================== EMPLEADOS ====================

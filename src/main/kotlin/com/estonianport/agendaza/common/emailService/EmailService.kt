@@ -9,6 +9,7 @@ import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.apache.commons.validator.routines.EmailValidator
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.net.http.HttpClient
@@ -16,11 +17,10 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 @Service
-class EmailService {
-
+class EmailService(
+    @param:Value("\${MAIL_PASS}") private val resendApiKey: String
+) {
     private val httpClient = HttpClient.newHttpClient()
-    private val resendApiKey = System.getenv("MAIL_PASS")
-        ?: throw IllegalStateException("MAIL_PASS no definido")
     private val fromEmail = "Agendaza <agendaza@estonianport.com.ar>"
 
     fun isEmailValid(target: String): Boolean {

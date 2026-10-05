@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.estonianport.agendaza"
-version = "1.0.1"
+version = "1.0.2"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 jacoco {
@@ -64,6 +64,19 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.processResources {
+    inputs.property("version", project.version)
+
+    // Procesa tanto banner.txt como archivos html
+    filesMatching(listOf("**/banner.txt", "**/*.html")) {
+        filter<ReplaceTokens>(
+            "tokens" to mapOf(
+                "APPLICATION_VERSION" to project.version.toString()
+            )
+        )
+    }
 }
 
 tasks.processResources {

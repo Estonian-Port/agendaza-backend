@@ -103,7 +103,6 @@ class EventoService(
         val tipoEvento = tipoEventoService.get(dto.tipoEventoId)
             ?: throw NotFoundException("Tipo Evento no encontrado")
         val encargado = usuarioService.findById(dto.encargadoId)
-            ?: throw NotFoundException("Encargado no encontrado")
 
         // 6. Crear entidad evento
         val evento = Evento(
@@ -500,8 +499,6 @@ class EventoService(
         )
 
         val encargado = usuarioService.findById(eventoReservaDto.encargadoId)
-            ?: throw NotFoundException("Encargado no encontrado")
-
         val evento = fromEventoReservaDtoToEvento(
             eventoReservaDto,
             tipoEvento,

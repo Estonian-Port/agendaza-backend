@@ -51,7 +51,6 @@ class UsuarioController(
     ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
 
         val usuario = usuarioService.findById(usuarioId)
-            ?: throw NotFoundException("Usuario con ID $usuarioId no encontrado")
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -70,7 +69,6 @@ class UsuarioController(
         @RequestParam email: String
     ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
         val usuarioDto = usuarioService.getUsuarioDtoByEmail(email)
-            ?: throw NotFoundException("Usuario con email '$email' no encontrado")
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -88,12 +86,7 @@ class UsuarioController(
     fun getUsuarioByCelular(
         @RequestParam celular: Long
     ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
-        val usuario = usuarioService.getByCelular(celular)
-            ?: throw NotFoundException("Usuario con celular '$celular' no encontrado")
-
-        val usuarioDto = usuario.run {
-            UsuarioResponseDto(id, nombre, apellido, username, email, celular)
-        }
+        val usuarioDto = usuarioService.getUsuarioDtoByCelular(celular)
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -109,9 +102,8 @@ class UsuarioController(
     @GetMapping("/{usuarioId}/perfil")
     fun getPerfilUsuario(
         @PathVariable usuarioId: Long
-    ): ResponseEntity<CustomResponse<UsuarioPerfilDTO>> {
+    ): ResponseEntity<CustomResponse<UsuarioPerfilDTO?>> {
         val perfil = usuarioService.getUsuarioPerfil(usuarioId)
-            ?: throw NotFoundException("Usuario con ID $usuarioId no encontrado")
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -130,9 +122,8 @@ class UsuarioController(
     fun getUsuarioOfEmpresa(
         @PathVariable usuarioId: Long,
         @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<UsuarioEditCargoDTO>> {
+    ): ResponseEntity<CustomResponse<UsuarioEditCargoDTO?>> {
         val usuarioOfEmpresa = usuarioService.getUsuarioOfEmpresa(usuarioId, empresaId)
-            ?: throw NotFoundException("Usuario no encontrado en esta empresa")
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -324,7 +315,7 @@ class UsuarioController(
         } else {
             // Si es actualización, mantener la contraseña existente
             val usuarioExistente = usuarioService.findById(usuarioDto.usuario.id)
-            usuarioDto.usuario.password = usuarioExistente?.password ?: ""
+            usuarioDto.usuario.password = usuarioExistente.password ?: ""
         }
 
         val usuario = usuarioService.save(usuarioDto.usuario)
@@ -392,7 +383,6 @@ class UsuarioController(
         @RequestBody dto: UsuarioEditPasswordDTO
     ): ResponseEntity<CustomResponse<String>> {
         val usuario = usuarioService.findById(usuarioId)
-            ?: throw NotFoundException("Usuario no encontrado")
 
         usuario.password = passwordEncoder.encode(dto.password)
         usuarioService.save(usuario)
@@ -438,7 +428,6 @@ class UsuarioController(
         @PathVariable usuarioId: Long
     ): ResponseEntity<CustomResponse<String>> {
         val usuario = usuarioService.findById(usuarioId)
-            ?: throw NotFoundException("Usuario no encontrado")
 
         usuarioService.delete(usuario.id)
 

@@ -36,7 +36,6 @@ class EventoServiceTest {
         service = EventoService(
             eventoRepository, empresaService, extraService, extraVariableService,
             emailService, usuarioService, pdfService, tipoEventoService
-            // CapacidadService eliminado en el refactor
         )
     }
 
