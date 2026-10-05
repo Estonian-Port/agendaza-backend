@@ -5,6 +5,7 @@ import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.dto.ResumenPagosMesDTO
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Pago
@@ -52,28 +53,6 @@ class PagoService(
     fun getEventoForSavePago(eventoId: Long): PagoDTO {
         return pagoRepository.getEventoForSavePago(eventoId, LocalDateTime.now())
             ?: throw NotFoundException("No se encontró el evento con id: $eventoId")
-    }
-
-    @Transactional(readOnly = true)
-    fun contadorDePagos(empresaId: Long): Int = pagoRepository.cantidadPagos(empresaId)
-
-    @Transactional(readOnly = true)
-    fun pagos(empresaId: Long, pageNumber: Int): List<PagoDTO> {
-        return pagoRepository.findAll(empresaId, PageRequest.of(pageNumber, 10))
-            .content
-            .map { it.toDTO() }
-    }
-
-    @Transactional(readOnly = true)
-    fun pagosFiltrados(empresaId: Long, pageNumber: Int, buscar: String): List<PagoDTO> {
-        return pagoRepository.pagosByNombre(empresaId, buscar, PageRequest.of(pageNumber, 10))
-            .content
-            .map { it.toDTO() }
-    }
-
-    @Transactional(readOnly = true)
-    fun contadorDePagosFiltrados(empresaId: Long, buscar: String): Int {
-        return pagoRepository.cantidadPagosFiltrados(empresaId, buscar)
     }
 
     @Transactional(readOnly = true)
@@ -150,5 +129,34 @@ class PagoService(
 
         emailService.enviarEmailEstadoCuenta(evento, empresa)
         return true
+    }
+
+    @Transactional(readOnly = true)
+    fun getAllPagoByMes(empresaId: Long, mes: Int, anio: Int): List<PagoDTO> {
+        val (desde, hasta) = rangoDelMes(mes, anio)
+        return pagoRepository.getAllPagoByRango(empresaId, desde, hasta)
+    }
+
+    @Transactional(readOnly = true)
+    fun getResumenPagosMes(empresaId: Long, mes: Int, anio: Int): ResumenPagosMesDTO {
+        val (desde, hasta) = rangoDelMes(mes, anio)
+        val totales = pagoRepository.totalesByRango(empresaId, desde, hasta)
+
+        val ingresos = totales.total
+        val egresos = 0.0 // TODO: EGRESOS
+
+        return ResumenPagosMesDTO(
+            ingresos = ingresos,
+            egresos = egresos,
+            balance = ingresos - egresos,
+            cantidadPagos = totales.cantidad,
+            totalPagos = totales.total
+        )
+    }
+
+    private fun rangoDelMes(mes: Int, anio: Int): Pair<LocalDateTime, LocalDateTime> {
+        if (mes !in 1..12) throw BusinessException("Mes inválido: $mes")
+        val desde = LocalDate.of(anio, mes, 1).atStartOfDay()
+        return desde to desde.plusMonths(1)
     }
 }

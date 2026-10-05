@@ -106,18 +106,6 @@ class PagoServiceTest {
         }
     }
 
-    // ── contadorDePagos ───────────────────────────────────────────────────────
-
-    @Nested
-    inner class ContadorDePagosTest {
-
-        @Test
-        fun `devuelve la cantidad de pagos`() {
-            whenever(pagoRepository.cantidadPagos(1L)).thenReturn(7)
-            assertEquals(7, service.contadorDePagos(1L))
-        }
-    }
-
     // ── savePago ──────────────────────────────────────────────────────────────
 
     @Nested
@@ -166,17 +154,6 @@ class PagoServiceTest {
         whenever(pagoRepository.getEventoForSavePago(eq(99L), any())).thenReturn(null)
 
         assertThrows(NotFoundException::class.java) { service.getEventoForSavePago(99L) }
-    }
-
-    @Test
-    fun `pagos pagina resultados y convierte cada pago a DTO`() {
-        val pago = mock<Pago>()
-        val dto = buildPagoDTO(id = 8L)
-        whenever(pagoRepository.findAll(eq(2L), any())).thenReturn(PageImpl(listOf(pago)))
-        whenever(pago.toDTO()).thenReturn(dto)
-
-        assertEquals(listOf(dto), service.pagos(2L, 1))
-        verify(pagoRepository).findAll(2L, PageRequest.of(1, 10))
     }
 
     @Test

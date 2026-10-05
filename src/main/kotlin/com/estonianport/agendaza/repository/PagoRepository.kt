@@ -2,6 +2,7 @@ package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.dto.TotalesPagosMes
 import com.estonianport.agendaza.model.Pago
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -14,14 +15,8 @@ interface PagoRepository : CrudRepository<Pago, Long> {
     @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = ?1 AND p.fechaBaja IS NULL")
     fun cantidadPagos(id: Long): Int
 
-    @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = ?1 AND (p.evento.codigo ILIKE %?2% OR p.evento.cliente.nombre ILIKE %?2%) AND p.fechaBaja IS NULL")
-    fun cantidadPagosFiltrados(id: Long, buscar: String): Int
-
     @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
     fun findAll(id: Long, pageable: Pageable): Page<Pago>
-
-    @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND (p.evento.codigo ILIKE %?2% OR p.evento.cliente.nombre ILIKE %?2%) AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
-    fun pagosByNombre(id: Long, buscar: String, pageable: Pageable): Page<Pago>
 
     @Query(
         """
@@ -52,4 +47,26 @@ interface PagoRepository : CrudRepository<Pago, Long> {
 
     @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = :id AND p.fechaBaja IS NULL")
     fun countActivosByEmpresaId(id: Long): Int
+
+    @Query(
+        """
+        SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, cast(null as string), ev.codigo, p.medioDePago,
+            ev.nombre, ev.inicio, p.fecha, ev.empresa.id, p.encargado.id)
+        FROM Pago p JOIN p.evento ev
+        WHERE ev.empresa.id = :empresaId
+          AND p.fechaBaja IS NULL
+          AND p.fecha >= :desde AND p.fecha < :hasta
+        ORDER BY p.fecha DESC"""
+    )
+    fun getAllPagoByRango(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): List<PagoDTO>
+
+    @Query(
+        """
+        SELECT new com.estonianport.agendaza.dto.TotalesPagosMes(COALESCE(SUM(p.monto), 0.0), COUNT(p))
+        FROM Pago p JOIN p.evento ev
+        WHERE ev.empresa.id = :empresaId
+          AND p.fechaBaja IS NULL
+          AND p.fecha >= :desde AND p.fecha < :hasta"""
+    )
+    fun totalesByRango(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): TotalesPagosMes
 }

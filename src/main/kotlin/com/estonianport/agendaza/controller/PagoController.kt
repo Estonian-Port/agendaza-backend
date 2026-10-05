@@ -2,6 +2,7 @@ package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
+import com.estonianport.agendaza.dto.ResumenPagosMesDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.model.enums.MedioDePago
@@ -76,82 +77,6 @@ class PagoController(
     }
 
     /**
-     * Obtiene todos los pagos de una empresa con paginación
-     * @param empresaId ID de la empresa
-     * @param page Número de página (default 0)
-     */
-    @GetMapping("/empresa/{empresaId}")
-    fun getAllPagosByEmpresa(
-        @PathVariable empresaId: Long,
-        @RequestParam(defaultValue = "0") page: Int
-    ): ResponseEntity<CustomResponse<List<PagoDTO>>> {
-        val pagos = pagoService.pagos(empresaId, page)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Pagos obtenidos correctamente",
-                data = pagos
-            )
-        )
-    }
-
-    /**
-     * Obtiene pagos de una empresa filtrados por código de evento o nombre de cliente, con paginación
-     * @param empresaId ID de la empresa
-     * @param buscar Texto a buscar
-     * @param page Número de página (default 0)
-     */
-    @GetMapping("/empresa/{empresaId}/filtrar")
-    fun getAllPagosFiltrados(
-        @PathVariable empresaId: Long,
-        @RequestParam buscar: String,
-        @RequestParam(defaultValue = "0") page: Int
-    ): ResponseEntity<CustomResponse<List<PagoDTO>>> {
-        val pagos = pagoService.pagosFiltrados(empresaId, page, buscar)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Pagos filtrados obtenidos correctamente",
-                data = pagos
-            )
-        )
-    }
-
-    /**
-     * Obtiene la cantidad total de pagos activos de una empresa
-     * @param empresaId ID de la empresa
-     */
-    @GetMapping("/empresa/{empresaId}/cantidad")
-    fun getCantidadPagos(
-        @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<Int>> {
-        val cantidad = pagoService.contadorDePagos(empresaId)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Cantidad de pagos obtenida correctamente",
-                data = cantidad
-            )
-        )
-    }
-
-    /**
-     * Obtiene la cantidad de pagos filtrados de una empresa
-     * @param empresaId ID de la empresa
-     * @param buscar Texto a buscar
-     */
-    @GetMapping("/empresa/{empresaId}/filtrar/cantidad")
-    fun getCantidadPagosFiltrados(
-        @PathVariable empresaId: Long,
-        @RequestParam buscar: String
-    ): ResponseEntity<CustomResponse<Int>> {
-        val cantidad = pagoService.contadorDePagosFiltrados(empresaId, buscar)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Cantidad de pagos filtrados obtenida correctamente",
-                data = cantidad
-            )
-        )
-    }
-
-    /**
      * Obtiene la información de un evento para cargar el formulario de nuevo pago
      * @param eventoId ID del evento
      */
@@ -198,6 +123,42 @@ class PagoController(
             CustomResponse(
                 message = "Pagos del evento obtenidos correctamente",
                 data = pagos
+            )
+        )
+    }
+
+    /**
+     * Obtiene todos los pagos de una empresa en un mes (sin paginar)
+     */
+    @GetMapping("/empresa/{empresaId}/mes")
+    fun getAllPagoByMes(
+        @PathVariable empresaId: Long,
+        @RequestParam mes: Int,
+        @RequestParam anio: Int
+    ): ResponseEntity<CustomResponse<List<PagoDTO>>> {
+        val pagos = pagoService.getAllPagoByMes(empresaId, mes, anio)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Pagos del mes obtenidos correctamente",
+                data = pagos
+            )
+        )
+    }
+
+    /**
+     * Obtiene el resumen (ingresos, egresos, balance, total) de pagos de una empresa en un mes
+     */
+    @GetMapping("/empresa/{empresaId}/resumen")
+    fun getResumenPagosMes(
+        @PathVariable empresaId: Long,
+        @RequestParam mes: Int,
+        @RequestParam anio: Int
+    ): ResponseEntity<CustomResponse<ResumenPagosMesDTO>> {
+        val resumen = pagoService.getResumenPagosMes(empresaId, mes, anio)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Resumen de pagos del mes obtenido correctamente",
+                data = resumen
             )
         )
     }
