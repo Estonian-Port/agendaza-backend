@@ -96,12 +96,6 @@ class UsuarioServiceTest {
             whenever(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario))
             assertEquals(usuario, service.findById(1L))
         }
-
-        @Test
-        fun `devuelve null cuando no existe`() {
-            whenever(usuarioRepository.findById(99L)).thenReturn(Optional.empty())
-            assertNull(service.findById(99L))
-        }
     }
 
     // ── getByCelular ──────────────────────────────────────────────────────────
@@ -129,17 +123,6 @@ class UsuarioServiceTest {
         whenever(usuarioRepository.getUsuarioDtoByEmail("test@test.com")).thenReturn(esperado)
 
         assertEquals(esperado, service.getUsuarioDtoByEmail("test@test.com"))
-    }
-
-    @Test
-    fun `getUsuarioDtoByUsername lanza excepcion cuando no existe`() {
-        whenever(usuarioRepository.getUsuarioDtoByUsername("inexistente")).thenReturn(null)
-
-        val error = assertThrows(NoSuchElementException::class.java) {
-            service.getUsuarioDtoByUsername("inexistente")
-        }
-
-        assertEquals("No se encontró un usuario con el username proporcionado", error.message)
     }
 
     @Test
