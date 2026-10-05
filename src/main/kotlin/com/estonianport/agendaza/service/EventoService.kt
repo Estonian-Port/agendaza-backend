@@ -5,7 +5,6 @@ import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.GlobalExceptionHandler
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
@@ -73,7 +72,7 @@ class EventoService(
      */
     @Transactional
     @CacheEvict(
-        value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "eventoAgenda", "agendaEventos"],
+        value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "agendaEventos"],
         key = "#dto.empresaId"
     )
     fun registrarReserva(dto: EventoReservaDTO): Long {
@@ -590,7 +589,7 @@ class EventoService(
     // ==================== ELIMINAR ====================
 
     @Transactional
-    @CacheEvict(value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "eventoAgenda"], allEntries = true)
+    @CacheEvict(value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "agendaEventos"])
     override fun delete(id: Long) {
         val evento = findById(id)
         evento.fechaBaja = LocalDate.now()
