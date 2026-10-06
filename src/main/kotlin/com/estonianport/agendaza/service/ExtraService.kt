@@ -5,6 +5,8 @@ import com.estonianport.agendaza.common.toEndOfMonth
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
+import com.estonianport.agendaza.dto.toDTO
+import com.estonianport.agendaza.dto.toExtraPrecioDTO
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
@@ -21,16 +23,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
-class ExtraService : GenericServiceImpl<Extra, Long>() {
-
-    @Autowired
-    private lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var extraRepository: ExtraRepository
-
-    @Autowired
-    lateinit var precioConFechaExtraService: PrecioConFechaExtraService
+class ExtraService (
+    val empresaService: EmpresaService,
+    val extraRepository: ExtraRepository,
+    val precioConFechaExtraService: PrecioConFechaExtraService
+): GenericServiceImpl<Extra, Long>() {
 
     override val dao: CrudRepository<Extra, Long>
         get() = extraRepository

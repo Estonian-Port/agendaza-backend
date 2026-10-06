@@ -6,6 +6,7 @@ import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoPagoDTO
 import com.estonianport.agendaza.dto.PagoDTO
 import com.estonianport.agendaza.dto.ResumenPagosMesDTO
+import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Pago

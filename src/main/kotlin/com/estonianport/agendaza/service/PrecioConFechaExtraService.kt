@@ -8,10 +8,9 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 
 @Service
-class PrecioConFechaExtraService : GenericServiceImpl<PrecioConFechaExtra, Long>(){
-
-    @Autowired
-    lateinit var precioConFechaExtraRepository: PrecioConFechaExtraRepository
+class PrecioConFechaExtraService(
+    val precioConFechaExtraRepository: PrecioConFechaExtraRepository
+) : GenericServiceImpl<PrecioConFechaExtra, Long>(){
 
     override val dao: CrudRepository<PrecioConFechaExtra, Long>
         get() = precioConFechaExtraRepository

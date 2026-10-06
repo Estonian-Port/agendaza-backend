@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.dto
 
+import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.model.enums.MedioDePago
 import java.io.Serializable
@@ -20,3 +21,20 @@ data class ResumenPagosMesDTO(
 data class TotalesPagosMes(
     val total: Double,
     val cantidad: Long)
+
+
+fun Pago.toDTO(): PagoDTO {
+    return PagoDTO(
+        id = id,
+        monto = monto,
+        codigo = evento.codigo,
+        medioDePago = medioDePago,
+        fechaEvento = evento.inicio,
+        nombreEvento = evento.nombre,
+        concepto = concepto,
+        numeroCuota = numeroCuota,
+        empresaId = evento.empresa.id,
+        usuarioId = encargado.id,
+        fecha = fecha
+    )
+}
