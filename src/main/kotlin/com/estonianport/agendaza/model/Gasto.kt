@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.model.enums.MedioDePago
 import com.estonianport.agendaza.model.enums.TipoGasto
 import jakarta.persistence.*
 import java.time.LocalDate
@@ -35,6 +36,10 @@ class Gasto(
     @ManyToOne
     @JoinColumn(name = "encargado_id", nullable = false)
     var encargado: Usuario,
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    var medioDePago: MedioDePago? = null,
 
     @Column
     var fechaBaja: LocalDate? = null

@@ -40,6 +40,24 @@ class EventoController(
     }
 
     /**
+     * Obtiene el ID de un evento usando su código dentro de una empresa.
+     * GET /v1/eventos/codigo/ABCD/empresa/1
+     */
+    @GetMapping("/codigo/{codigo}/empresa/{empresaId}")
+    fun getEventoIdByCodigo(
+        @PathVariable codigo: String,
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<Long>> {
+        val eventoId = eventoService.getByCodigoAndEmpresaId(codigo, empresaId).id
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "ID del evento obtenido correctamente",
+                data = eventoId
+            )
+        )
+    }
+
+    /**
      * Obtiene el presupuesto total de un evento
      * GET /v1/eventos/123/presupuesto
      */

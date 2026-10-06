@@ -11,15 +11,14 @@ import java.time.LocalDateTime
 
 interface GastoRepository : CrudRepository<Gasto, Long> {
 
-    @Query("SELECT g FROM Gasto g WHERE g.empresa.id = :empresaId AND g.fechaBaja IS NULL ORDER BY g.fecha DESC")
-    fun findAllByEmpresaId(empresaId: Long, pageable: Pageable): Page<Gasto>
-
     @Query(
         """
         SELECT new com.estonianport.agendaza.dto.GastoDTO(
-            g.id, g.monto, g.tipoGasto, g.descripcion, g.fecha, g.evento.id, g.empresa.id, g.encargado.id
+            g.id, g.monto, g.tipoGasto, g.descripcion, g.fecha, e.id, g.empresa.id, g.encargado.id,
+            g.medioDePago, e.nombre, e.codigo
         )
         FROM Gasto g
+        LEFT JOIN g.evento e
         WHERE g.empresa.id = :empresaId
           AND g.fechaBaja IS NULL
           AND g.fecha >= :desde AND g.fecha < :hasta
