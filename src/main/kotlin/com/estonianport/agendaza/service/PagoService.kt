@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 @Service
 class PagoService(
     private val pagoRepository: PagoRepository,
+    private val gastoService: GastoService,
     private val eventoService: EventoService,
     private val usuarioService: UsuarioService,
     private val empresaService: EmpresaService,
@@ -141,17 +142,15 @@ class PagoService(
     @Transactional(readOnly = true)
     fun getResumenPagosMes(empresaId: Long, mes: Int, anio: Int): ResumenPagosMesDTO {
         val (desde, hasta) = rangoDelMes(mes, anio)
-        val totales = pagoRepository.totalesByRango(empresaId, desde, hasta)
-
-        val ingresos = totales.total
-        val egresos = 0.0 // TODO: EGRESOS
+        val ingresos = pagoRepository.totalesByRango(empresaId, desde, hasta)
+        val egresos = gastoService.totalesByRango(empresaId, mes, anio)
 
         return ResumenPagosMesDTO(
-            ingresos = ingresos,
-            egresos = egresos,
-            balance = ingresos - egresos,
-            cantidadPagos = totales.cantidad,
-            totalPagos = totales.total
+            ingresos = ingresos.total,
+            egresos = egresos.total,
+            balance = ingresos.total - egresos.total,
+            cantidadIngresos = ingresos.cantidad,
+            cantidadEgresos = egresos.cantidad
         )
     }
 

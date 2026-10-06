@@ -15,8 +15,8 @@ data class ResumenPagosMesDTO(
     val ingresos: Double,
     val egresos: Double,
     val balance: Double,
-    val cantidadPagos: Long,
-    val totalPagos: Double)
+    val cantidadIngresos: Long,
+    val cantidadEgresos: Long)
 
 data class TotalesPagosMes(
     val total: Double,
