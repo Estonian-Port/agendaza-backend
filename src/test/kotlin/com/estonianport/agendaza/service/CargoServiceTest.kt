@@ -29,7 +29,7 @@ class CargoServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = CargoService().also { it.cargoRepository = repository }
+        service = CargoService(repository)
     }
 
     @Test
