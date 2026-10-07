@@ -35,13 +35,4 @@ class Extra(
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
-    fun toDTO(): ExtraDTO {
-        return ExtraDTO(id, nombre, tipoExtra)
-    }
-
-    fun toExtraPrecioDTO(empresa: Empresa, fechaEvento: LocalDateTime): ExtraDTO {
-        val extraDTO = ExtraDTO(id, nombre, tipoExtra)
-        extraDTO.precio = empresa.getPrecioOfExtraByFecha(this, fechaEvento)
-        return extraDTO
-    }
 }

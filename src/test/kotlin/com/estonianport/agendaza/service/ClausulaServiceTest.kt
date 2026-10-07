@@ -14,7 +14,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import org.springframework.test.util.ReflectionTestUtils
 
 class ClausulaServiceTest {
 
@@ -26,10 +25,7 @@ class ClausulaServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = ClausulaService().also {
-            it.clausulaRepository = repository
-            ReflectionTestUtils.setField(it, "empresaService", empresaService)
-        }
+        service = ClausulaService(empresaService, repository)
     }
 
     @Test

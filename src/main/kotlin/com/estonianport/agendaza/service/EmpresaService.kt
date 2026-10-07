@@ -16,31 +16,16 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class EmpresaService : GenericServiceImpl<Empresa, Long>() {
-
-    @Autowired
-    lateinit var empresaRepository: EmpresaRepository
-
-    @Autowired
-    lateinit var eventoRepository: EventoRepository
-
-    @Autowired
-    lateinit var cargoRepository: CargoRepository
-
-    @Autowired
-    lateinit var tipoEventoRepository: TipoEventoRepository
-
-    @Autowired
-    lateinit var extraRepository: ExtraRepository
-
-    @Autowired
-    lateinit var pagoRepository: PagoRepository
-
-    @Autowired
-    lateinit var servicioRepository: ServicioRepository
-
-    @Autowired
-    lateinit var clausulaRepository: ClausulaRepository
+class EmpresaService (
+    val empresaRepository: EmpresaRepository,
+    val eventoRepository: EventoRepository,
+    val cargoRepository: CargoRepository,
+    val tipoEventoRepository: TipoEventoRepository,
+    val extraRepository: ExtraRepository,
+    val pagoRepository: PagoRepository,
+    val servicioRepository: ServicioRepository,
+    val clausulaRepository: ClausulaRepository
+): GenericServiceImpl<Empresa, Long>() {
 
     override val dao: CrudRepository<Empresa, Long>
         get() = empresaRepository

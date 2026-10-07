@@ -29,10 +29,4 @@ class Servicio(
 
     @Column
     var fechaBaja : LocalDate? = null
-
-    fun toDTO(): ServicioDTO {
-        return ServicioDTO(id, nombre).apply {
-            listaTipoEventoId = listaTipoEvento.map { it.id }
-        }
-    }
 }

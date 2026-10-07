@@ -13,13 +13,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
-class ExtraVariableService : GenericServiceImpl<EventoExtraVariable, Long>() {
-
-    @Autowired
-    lateinit var extraVariableRepository: ExtraVariableRepository
-
-    @Autowired
-    lateinit var extraService: ExtraService
+class ExtraVariableService (
+    val extraVariableRepository: ExtraVariableRepository,
+    val extraService: ExtraService
+): GenericServiceImpl<EventoExtraVariable, Long>() {
 
     override val dao: CrudRepository<EventoExtraVariable, Long>
         get() = extraVariableRepository

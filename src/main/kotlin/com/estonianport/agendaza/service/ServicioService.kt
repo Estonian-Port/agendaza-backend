@@ -3,6 +3,7 @@ package com.estonianport.agendaza.service
 import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
+import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.repository.ServicioRepository

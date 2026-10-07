@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.model.enums.Concepto
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.Estado

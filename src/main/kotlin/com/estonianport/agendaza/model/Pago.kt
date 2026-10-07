@@ -49,21 +49,4 @@ import java.time.LocalDateTime
 
     @Column
     var fechaBaja: LocalDate? = null
-) {
-
-    fun toDTO(): PagoDTO {
-        return PagoDTO(
-            id = id,
-            monto = monto,
-            codigo = evento.codigo,
-            medioDePago = medioDePago,
-            fechaEvento = evento.inicio,
-            nombreEvento = evento.nombre,
-            concepto = concepto,
-            numeroCuota = numeroCuota,
-            empresaId = evento.empresa.id,
-            usuarioId = encargado.id,
-            fecha = fecha
-        )
-    }
-}
+)

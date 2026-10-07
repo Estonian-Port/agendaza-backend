@@ -11,17 +11,12 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 
 @Service
-class ClausulaService : GenericServiceImpl<Clausula, Long>(){
-
-    @Autowired
-    private lateinit var empresaService: EmpresaService
-
-    @Autowired
-    lateinit var clausulaRepository: ClausulaRepository
+class ClausulaService(
+    val empresaService: EmpresaService,
+    val clausulaRepository: ClausulaRepository) : GenericServiceImpl<Clausula, Long>(){
 
     override val dao: CrudRepository<Clausula, Long>
         get() = clausulaRepository
-
 
     fun delete(clausulaId : Long, empresaId: Long){
         val empresa: Empresa = empresaService.get(empresaId)!!

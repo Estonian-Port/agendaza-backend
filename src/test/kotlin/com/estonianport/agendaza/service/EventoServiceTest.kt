@@ -3,6 +3,10 @@ package com.estonianport.agendaza.service
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
+import com.estonianport.agendaza.dto.EventoAgendaDTO
+import com.estonianport.agendaza.dto.EventoCapacidadDTO
+import com.estonianport.agendaza.dto.EventoConUsuarioDTO
+import com.estonianport.agendaza.dto.EventoHoraDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
@@ -15,6 +19,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import java.time.format.DateTimeParseException
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -266,6 +273,121 @@ class EventoServiceTest {
     }
 
     @Test
+    fun `getAllEventosByFecha rechaza una fecha con formato invalido`() {
+        assertThrows(DateTimeParseException::class.java) { service.getAllEventosByFecha("25-09-2026", 3L) }
+        verifyNoInteractions(eventoRepository)
+    }
+
+    @Test
+    fun `listados paginados y cantidades delegan al repositorio`() {
+        val pageable = PageRequest.of(0, 10)
+        val page = PageImpl(listOf(buildEventoDTO()))
+        whenever(eventoRepository.eventosByEmpresa(3L, pageable)).thenReturn(page)
+        whenever(eventoRepository.eventosByNombre(3L, "boda", pageable)).thenReturn(page)
+        whenever(eventoRepository.cantidadDeEventos(3L)).thenReturn(8)
+        whenever(eventoRepository.cantidadDeEventosFiltrados(3L, "boda")).thenReturn(2)
+
+        assertEquals(page, service.getAllEventoByEmpresaId(3L, pageable))
+        assertEquals(page, service.getAllEventoByFilterName(3L, "boda", pageable))
+        assertEquals(8, service.cantEventos(3L))
+        assertEquals(2, service.cantEventosFiltrados(3L, "boda"))
+    }
+
+    @Test
+    fun `consultas por usuario delegan al repositorio`() {
+        val eventos = listOf(EventoConUsuarioDTO(1L, "boda", "ABCD", 4L, "Ana", "Perez", null))
+        whenever(eventoRepository.getEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(eventos)
+        whenever(eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(1)
+
+        assertEquals(eventos, service.getEventosByUsuarioAndEmpresa(4L, 3L))
+        assertEquals(1, service.getCantEventosByUsuarioAndEmpresa(4L, 3L))
+    }
+
+    @Test
+    fun `getPresupuesto devuelve el presupuesto calculado del evento`() {
+        val evento = mock<Evento>()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(evento.getPresupuestoTotal()).thenReturn(1250.0)
+
+        assertEquals(1250.0, service.getPresupuesto(1L))
+    }
+
+    @Test
+    fun `getEventoHora devuelve los datos horarios del evento`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+
+        val horario = service.getEventoHora(1L)
+
+        assertEquals(evento.id, horario?.id)
+        assertEquals(evento.inicio, horario?.inicio)
+        assertEquals(evento.fin, horario?.fin)
+    }
+
+    @Test
+    fun `editEventoHora actualiza y persiste las fechas`() {
+        val evento = buildEvento()
+        val inicio = LocalDateTime.of(2026, 10, 5, 18, 0)
+        val fin = inicio.plusHours(4)
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
+
+        val result = service.editEventoHora(EventoHoraDTO(1L, "evento", "ABCD", inicio, fin))
+
+        assertEquals(inicio, evento.inicio)
+        assertEquals(fin, evento.fin)
+        assertEquals(inicio, result.inicio)
+        verify(eventoRepository).save(evento)
+    }
+
+    @Test
+    fun `editEventoCapacidad actualiza y devuelve las capacidades`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
+
+        val capacidad = service.editEventoCapacidad(1L, EventoCapacidadDTO(80, 15))
+
+        assertEquals(80, capacidad.capacidadAdultos)
+        assertEquals(15, capacidad.capacidadNinos)
+        assertEquals(80, evento.capacidadAdultos)
+        verify(eventoRepository).save(evento)
+    }
+
+    @Test
+    fun `editEventoNombre y anotaciones guardan los cambios`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
+
+        assertEquals("nuevo nombre", service.editEventoNombre("nuevo nombre", 1L))
+        assertEquals("nueva nota", service.editEventoAnotaciones("nueva nota", 1L))
+        assertEquals("nuevo nombre", evento.nombre)
+        assertEquals("nueva nota", evento.anotaciones)
+        verify(eventoRepository, times(2)).save(evento)
+    }
+
+    @Test
+    fun `generarEstadoDeCuentaPDF delega al servicio PDF`() {
+        val evento = buildEvento()
+        val pdf = byteArrayOf(4, 5)
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(pdfService.generarEstadoDeCuenta(evento)).thenReturn(pdf)
+
+        assertArrayEquals(pdf, service.generarEstadoDeCuentaPDF(1L))
+        verify(pdfService).generarEstadoDeCuenta(evento)
+    }
+
+    @Test
+    fun `getAllEventosForAgendaByEmpresaId devuelve eventos del repositorio`() {
+        val agenda = listOf(EventoAgendaDTO(1L, "boda", LocalDateTime.now(), LocalDateTime.now().plusHours(4)))
+        whenever(eventoRepository.getAllEventosForAgendaByEmpresaId(eq(3L), any())).thenReturn(agenda)
+
+        assertEquals(agenda, service.getAllEventosForAgendaByEmpresaId(3L))
+        verify(eventoRepository).getAllEventosForAgendaByEmpresaId(eq(3L), any())
+    }
+
+    @Test
     fun `descargarEvento obtiene el evento y delega la generacion del PDF`() {
         val evento = buildEvento()
         val pdf = byteArrayOf(1, 2, 3)
@@ -285,5 +407,15 @@ class EventoServiceTest {
 
         assertTrue(service.reenviarMail(1L, 2L))
         verify(emailService).enviarMailComprabanteReserva(evento, "sido reservado (reenvío)", empresa)
+    }
+
+    @Test
+    fun `reenviarMail transforma errores en NotFoundException`() {
+        whenever(eventoRepository.findById(99L)).thenReturn(Optional.empty())
+
+        val error = assertThrows(NotFoundException::class.java) { service.reenviarMail(99L, 2L) }
+
+        assertTrue(error.message!!.contains("No se pudo reenviar mail"))
+        verifyNoInteractions(emailService)
     }
 }

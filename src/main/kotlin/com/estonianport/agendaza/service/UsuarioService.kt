@@ -14,10 +14,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class UsuarioService : GenericServiceImpl<Usuario, Long>() {
-
-    @Autowired
-    lateinit var usuarioRepository: UsuarioRepository
+class UsuarioService (
+    val usuarioRepository: UsuarioRepository
+): GenericServiceImpl<Usuario, Long>() {
 
     override val dao: CrudRepository<Usuario, Long>
         get() = usuarioRepository

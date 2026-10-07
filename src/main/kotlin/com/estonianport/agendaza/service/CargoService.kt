@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class CargoService : GenericServiceImpl<Cargo, Long>() {
-
-    @Autowired
-    lateinit var cargoRepository: CargoRepository
+class CargoService(val cargoRepository: CargoRepository) : GenericServiceImpl<Cargo, Long>() {
 
     override val dao: CrudRepository<Cargo, Long>
         get() = cargoRepository

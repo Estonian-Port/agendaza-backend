@@ -23,5 +23,5 @@ class Cargo(
     @Enumerated(EnumType.STRING)
     var tipoCargo : TipoCargo,
 
-        @Column
+    @Column
     var fechaBaja : LocalDate? = null)

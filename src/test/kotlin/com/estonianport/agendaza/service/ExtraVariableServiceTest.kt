@@ -25,10 +25,7 @@ class ExtraVariableServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = ExtraVariableService().also {
-            it.extraVariableRepository = repository
-            it.extraService = extraService
-        }
+        service = ExtraVariableService(repository, extraService)
     }
 
     @Test

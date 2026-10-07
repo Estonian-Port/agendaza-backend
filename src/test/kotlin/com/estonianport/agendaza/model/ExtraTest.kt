@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.dto.toDTO
+import com.estonianport.agendaza.dto.toExtraPrecioDTO
 import com.estonianport.agendaza.model.enums.TipoExtra
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
