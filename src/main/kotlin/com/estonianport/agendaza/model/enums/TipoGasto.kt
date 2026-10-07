@@ -7,5 +7,6 @@ enum class TipoGasto {
     SUELDOS,
     IMPUESTOS,
     SERVICIOS,
-    OTROS
+    OTROS,
+    TARJETA_CREDITO
 }

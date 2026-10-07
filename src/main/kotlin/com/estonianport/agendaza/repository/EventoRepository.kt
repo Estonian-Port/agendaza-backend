@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.repository
 
 import com.estonianport.agendaza.dto.EventoAgendaDTO
+import com.estonianport.agendaza.dto.EventoBalanceDTO
 import com.estonianport.agendaza.dto.EventoConUsuarioDTO
 import com.estonianport.agendaza.dto.EventoDTO
 import com.estonianport.agendaza.model.Empresa
@@ -285,4 +286,14 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         """
     )
     fun countClientesByEmpresaId(id: Long): Int
+
+    @Query(
+        """
+    SELECT new com.estonianport.agendaza.dto.EventoBalanceDTO(ev.inicio, ev.capacidadAdultos, ev.capacidadNinos)
+    FROM Evento ev
+    WHERE ev.empresa.id = :empresaId
+      AND ev.fechaBaja IS NULL
+      AND ev.inicio >= :desde AND ev.inicio < :hasta"""
+    )
+    fun getEventosParaBalance(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): List<EventoBalanceDTO>
 }
