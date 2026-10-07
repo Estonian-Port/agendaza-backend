@@ -26,6 +26,7 @@ import java.util.Optional
 class PagoServiceTest {
 
     private val pagoRepository  = mock<PagoRepository>()
+    private val gastoService    = mock<GastoService>()
     private val eventoService   = mock<EventoService>()
     private val usuarioService  = mock<UsuarioService>()
     private val empresaService  = mock<EmpresaService>()
@@ -37,7 +38,7 @@ class PagoServiceTest {
     @BeforeEach
     fun setUp() {
         service = PagoService(
-            pagoRepository, eventoService, usuarioService,
+            pagoRepository, gastoService, eventoService, usuarioService,
             empresaService, pdfService, emailService
         )
     }
@@ -238,15 +239,17 @@ class PagoServiceTest {
         val desde = LocalDate.of(2025, 12, 1).atStartOfDay()
         val hasta = LocalDate.of(2026, 1, 1).atStartOfDay()
         whenever(pagoRepository.totalesByRango(1L, desde, hasta)).thenReturn(TotalesPagosMes(3200.0, 3L))
+        whenever(gastoService.totalesByRango(1L, 12, 2025)).thenReturn(TotalesPagosMes(800.0, 2L))
 
         val resumen = service.getResumenPagosMes(1L, 12, 2025)
 
         assertEquals(3200.0, resumen.ingresos)
-        assertEquals(0.0, resumen.egresos)
-        assertEquals(3200.0, resumen.balance)
-        assertEquals(3L, resumen.cantidadPagos)
-        assertEquals(3200.0, resumen.totalPagos)
+        assertEquals(800.0, resumen.egresos)
+        assertEquals(2400.0, resumen.balance)
+        assertEquals(3L, resumen.cantidadIngresos)
+        assertEquals(2L, resumen.cantidadEgresos)
         verify(pagoRepository).totalesByRango(1L, desde, hasta)
+        verify(gastoService).totalesByRango(1L, 12, 2025)
     }
 
     @Test
