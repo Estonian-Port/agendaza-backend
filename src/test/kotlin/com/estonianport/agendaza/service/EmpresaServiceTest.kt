@@ -19,6 +19,7 @@ import com.estonianport.agendaza.repository.ServicioRepository
 import com.estonianport.agendaza.repository.ClausulaRepository
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.repository.EmpresaRepository
+import com.estonianport.agendaza.repository.GastoRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -28,7 +29,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.LocalTime
@@ -45,14 +45,17 @@ class EmpresaServiceTest {
     private val pagoRepository = mock<PagoRepository>()
     private val servicioRepository = mock<ServicioRepository>()
     private val clausulaRepository = mock<ClausulaRepository>()
+    private val gastoRepository = mock<GastoRepository>()
     private lateinit var service: EmpresaService
 
     private val empresa: Empresa = Salon(1L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
 
     @BeforeEach
     fun setUp() {
-        service = EmpresaService(repository, eventoRepository, cargoRepository, tipoEventoRepository,
-            extraRepository, pagoRepository, servicioRepository, clausulaRepository)
+        service = EmpresaService(
+            repository, eventoRepository, cargoRepository, tipoEventoRepository,
+            extraRepository, pagoRepository, servicioRepository, clausulaRepository, gastoRepository
+        )
     }
 
     @Test

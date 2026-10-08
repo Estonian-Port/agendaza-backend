@@ -43,4 +43,18 @@ interface GastoRepository : CrudRepository<Gasto, Long> {
       AND g.fechaBaja IS NULL
       AND g.fecha >= :desde AND g.fecha < :hasta""")
     fun findParaPlanilla(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): List<Gasto>
+
+    /**
+     * Cuenta gastos activos (no eliminados) de una empresa
+     * Utilizado para estadísticas y dashboards
+     */
+    @Query(
+        """
+        SELECT COUNT(g)
+        FROM Gasto g
+        WHERE g.empresa.id = :id
+        AND g.fechaBaja IS NULL
+        """
+    )
+    fun countActivosByEmpresaId(id: Long): Int
 }

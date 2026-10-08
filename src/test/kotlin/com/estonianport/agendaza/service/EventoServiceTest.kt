@@ -3,22 +3,32 @@ package com.estonianport.agendaza.service
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
+import com.estonianport.agendaza.dto.EventoReservaDTO
 import com.estonianport.agendaza.dto.EventoAgendaDTO
 import com.estonianport.agendaza.dto.EventoCapacidadDTO
+import com.estonianport.agendaza.dto.EventoCateringDTO
 import com.estonianport.agendaza.dto.EventoConUsuarioDTO
+import com.estonianport.agendaza.dto.EventoExtraDTO
+import com.estonianport.agendaza.dto.ExtraDTO
+import com.estonianport.agendaza.dto.EventoExtraVariableDTO
 import com.estonianport.agendaza.dto.EventoHoraDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.Extra
+import com.estonianport.agendaza.model.Salon
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.format.DateTimeParseException
@@ -47,10 +57,13 @@ class EventoServiceTest {
     }
 
     private fun buildEvento(id: Long = 1L, nombre: String = "evento test"): Evento {
-        val empresa    = mock<Empresa>()
-        val tipoEvento = mock<TipoEvento>().also { whenever(it.id).thenReturn(1L) }
-        val encargado  = mock<Usuario>()
-        val cliente    = mock<Usuario>().also { whenever(it.email).thenReturn("cliente@test.com") }
+        val empresa    = Salon(1L, "Salon test", 123456789L, "salon@test.com", "Calle 1", 1, "Ciudad")
+        val tipoEvento = mock<TipoEvento>().also {
+            whenever(it.id).thenReturn(1L)
+            whenever(it.nombre).thenReturn("Casamiento")
+        }
+        val encargado  = Usuario(2L, "Encargado", "Prueba", 111111111L, "encargado@test.com")
+        val cliente    = Usuario(3L, "Cliente", "Prueba", 222222222L, "cliente@test.com")
 
         return Evento(
             id = id, nombre = nombre, tipoEvento = tipoEvento,
@@ -69,6 +82,214 @@ class EventoServiceTest {
             inicio = LocalDateTime.now(), fin = LocalDateTime.now().plusHours(5),
             tipoEvento = "Casamiento"
         )
+    }
+
+    private fun buildReservaDTO(cliente: Usuario = Usuario(0L, " Ana ", " Perez ", 123456789L, " ANA@TEST.COM "), codigo: String = "ABCD") =
+        EventoReservaDTO(
+            id = 0L, nombre = "  Fiesta de Ana  ", capacidadAdultos = 50, capacidadNinos = 10,
+            codigo = codigo, inicio = LocalDateTime.of(2026, 10, 10, 18, 0),
+            fin = LocalDateTime.of(2026, 10, 10, 23, 0), tipoEventoId = 4L, empresaId = 3L,
+            extraOtro = 0.0, descuento = 0L, listaExtra = emptyList(), listaExtraVariable = emptyList(),
+            cateringOtro = 0.0, cateringOtroDescripcion = "", listaExtraTipoCatering = emptyList(),
+            listaExtraCateringVariable = emptyList(), cliente = cliente, encargadoId = 5L,
+            estado = Estado.RESERVADO, anotaciones = ""
+        )
+
+    private fun prepararDependenciasReserva(dto: EventoReservaDTO) {
+        whenever(empresaService.findById(dto.empresaId)).thenReturn(mock())
+        whenever(extraService.fromListaExtraDtoToListaExtra(any())).thenReturn(emptyList())
+        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(any())).thenReturn(emptyList())
+        whenever(usuarioService.getByEmail(any())).thenReturn(null)
+        whenever(usuarioService.getByCelular(any())).thenReturn(null)
+        whenever(usuarioService.save(any())).thenAnswer { it.arguments[0] as Usuario }
+        whenever(tipoEventoService.get(dto.tipoEventoId)).thenReturn(mock())
+        whenever(usuarioService.findById(dto.encargadoId)).thenReturn(mock())
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { invocation ->
+            (invocation.arguments[0] as Evento).also { it.id = 42L }
+        }
+        whenever(emailService.isEmailValid(any())).thenReturn(false)
+    }
+
+    @Nested
+    inner class RegistrarReservaTest {
+
+        @Test
+        fun `registra reserva normaliza datos y vincula extras variables`() {
+            val dto = buildReservaDTO().copy(
+                listaExtra = listOf(ExtraDTO(10L, "extra", TipoExtra.EVENTO)),
+                listaExtraTipoCatering = listOf(ExtraDTO(11L, "catering", TipoExtra.TIPO_CATERING)),
+                listaExtraVariable = listOf(EventoExtraVariableDTO(20L, 2, "variable", 15.0)),
+                listaExtraCateringVariable = listOf(EventoExtraVariableDTO(21L, 3, "variable catering", 20.0))
+            )
+            val extraEvento = mock<Extra>()
+            val extraCatering = mock<Extra>()
+            val variableEvento = EventoExtraVariable(1L, mock(), 2)
+            val variableCatering = EventoExtraVariable(2L, mock(), 3)
+            prepararDependenciasReserva(dto)
+            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra)).thenReturn(listOf(extraEvento))
+            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering)).thenReturn(listOf(extraCatering))
+            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable)).thenReturn(listOf(variableEvento))
+            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable)).thenReturn(listOf(variableCatering))
+            whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
+
+            assertEquals(42L, service.registrarReserva(dto))
+
+            val captor = argumentCaptor<Evento>()
+            verify(eventoRepository).save(captor.capture())
+            val saved = captor.firstValue
+            assertEquals("fiesta de ana", saved.nombre)
+            assertEquals(setOf(extraEvento, extraCatering), saved.listaExtra)
+            assertEquals(setOf(variableEvento, variableCatering), saved.listaEventoExtraVariable)
+            assertSame(saved, variableEvento.evento)
+            assertSame(saved, variableCatering.evento)
+            assertEquals("ana", dto.cliente.nombre)
+            assertEquals("perez", dto.cliente.apellido)
+            assertEquals("ana@test.com", dto.cliente.email)
+            verify(usuarioService).save(dto.cliente)
+            verify(emailService).enviarMailComprabanteReserva(saved, "sido reservado", saved.empresa)
+        }
+
+        @Test
+        fun `reutiliza cliente existente por id`() {
+            val clienteSolicitado = Usuario(9L, "Original", "Cliente", 111L, "original@test.com")
+            val dto = buildReservaDTO(clienteSolicitado)
+            val clienteExistente = Usuario(9L, "Ana", "Perez", 222L, "ana@test.com")
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.get(9L)).thenReturn(clienteExistente)
+
+            service.registrarReserva(dto)
+
+            verify(usuarioService).get(9L)
+            verify(usuarioService, never()).save(any())
+            verify(eventoRepository).save(argThat { cliente === clienteExistente })
+        }
+
+        @Test
+        fun `reutiliza cliente por email normalizado`() {
+            val dto = buildReservaDTO(Usuario(0L, "Ana", "Perez", 123L, " ANA@TEST.COM "))
+            val existente = Usuario(8L, "Ana", "Perez", 123L, "ana@test.com")
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.getByEmail("ana@test.com")).thenReturn(existente)
+
+            service.registrarReserva(dto)
+
+            verify(eventoRepository).save(argThat { cliente === existente })
+            verify(usuarioService, never()).save(any())
+        }
+
+        @Test
+        fun `reutiliza cliente por celular cuando no coincide email`() {
+            val dto = buildReservaDTO(Usuario(0L, "Ana", "Perez", 123L, "otro@test.com"))
+            val existente = Usuario(8L, "Ana", "Perez", 123L, "ana@test.com")
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.getByCelular(123L)).thenReturn(existente)
+
+            service.registrarReserva(dto)
+
+            verify(usuarioService).getByCelular(123L)
+            verify(eventoRepository).save(argThat { cliente === existente })
+            verify(usuarioService, never()).save(any())
+        }
+
+        @Test
+        fun `crea cliente con datos por defecto y celular fantasma libre`() {
+            val cliente = Usuario(0L, "  ", "  ", 0L, " ")
+            val dto = buildReservaDTO(cliente)
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.getByCelular(any())).thenReturn(null)
+
+            service.registrarReserva(dto)
+
+            assertEquals("cliente", cliente.nombre)
+            assertEquals("cliente", cliente.apellido)
+            assertTrue(cliente.email.startsWith("sin-email-") && cliente.email.endsWith("@agendaza.com"))
+            assertTrue(cliente.celular.toString().startsWith("999"))
+            assertNull(cliente.username)
+            assertNull(cliente.password)
+            verify(usuarioService).save(cliente)
+        }
+
+        @Test
+        fun `reintenta con email existente ante conflicto de integridad`() {
+            val dto = buildReservaDTO()
+            val existente = Usuario(8L, "Ana", "Perez", 123L, "ana@test.com")
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.save(any())).thenThrow(DataIntegrityViolationException("duplicado"))
+            whenever(usuarioService.getByEmail("ana@test.com")).thenReturn(existente)
+
+            service.registrarReserva(dto)
+
+            verify(eventoRepository).save(argThat { cliente === existente })
+        }
+
+        @Test
+        fun `propaga conflicto de integridad si no encuentra cliente existente`() {
+            val dto = buildReservaDTO()
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.save(any())).thenThrow(DataIntegrityViolationException("duplicado"))
+
+            assertThrows(DataIntegrityViolationException::class.java) { service.registrarReserva(dto) }
+            verify(eventoRepository, never()).save(any())
+        }
+
+        @Test
+        fun `genera codigo unico cuando el dto no trae codigo`() {
+            val dto = buildReservaDTO(codigo = "  ")
+            prepararDependenciasReserva(dto)
+            whenever(eventoRepository.existCodigoInEmpresa(any(), any())).thenReturn(true, false)
+
+            service.registrarReserva(dto)
+
+            val captor = argumentCaptor<Evento>()
+            verify(eventoRepository).save(captor.capture())
+            assertTrue(captor.firstValue.codigo.matches(Regex("[A-Z]{4}")))
+            verify(eventoRepository, atLeast(2)).existCodigoInEmpresa(any(), any())
+        }
+
+        @Test
+        fun `lanza not found si el tipo de evento no existe`() {
+            val dto = buildReservaDTO()
+            prepararDependenciasReserva(dto)
+            whenever(tipoEventoService.get(dto.tipoEventoId)).thenReturn(null)
+
+            assertThrows(NotFoundException::class.java) { service.registrarReserva(dto) }
+            verify(eventoRepository, never()).save(any())
+        }
+
+        @Test
+        fun `lanza not found si el cliente indicado por id no existe`() {
+            val dto = buildReservaDTO(Usuario(12L, "Ana", "Perez", 123L, "ana@test.com"))
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.get(12L)).thenReturn(null)
+
+            assertThrows(NotFoundException::class.java) { service.registrarReserva(dto) }
+            verify(eventoRepository, never()).save(any())
+        }
+
+        @Test
+        fun `reintenta conflicto de integridad usando celular si no hay email coincidente`() {
+            val dto = buildReservaDTO(Usuario(0L, "Ana", "Perez", 123L, "ana@test.com"))
+            val existente = Usuario(8L, "Ana", "Perez", 123L, "otro@test.com")
+            prepararDependenciasReserva(dto)
+            whenever(usuarioService.save(any())).thenThrow(DataIntegrityViolationException("duplicado"))
+            whenever(usuarioService.getByEmail("ana@test.com")).thenReturn(null)
+            whenever(usuarioService.getByCelular(123L)).thenReturn(existente)
+
+            service.registrarReserva(dto)
+
+            verify(eventoRepository).save(argThat { cliente === existente })
+        }
+
+        @Test
+        fun `un error al notificar no deshace la reserva`() {
+            val dto = buildReservaDTO()
+            prepararDependenciasReserva(dto)
+            whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
+            whenever(emailService.enviarMailComprabanteReserva(any(), any(), any())).thenThrow(RuntimeException("smtp caido"))
+
+            assertEquals(42L, service.registrarReserva(dto))
+            verify(eventoRepository).save(any())
+        }
     }
 
     // ── findById ──────────────────────────────────────────────────────────────
@@ -325,6 +546,89 @@ class EventoServiceTest {
     }
 
     @Test
+    fun `getEventoExtra filtra extras de evento y variables`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)).thenReturn(emptyList())
+        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)).thenReturn(emptyList())
+
+        val result = service.getEventoExtra(1L)
+
+        assertEquals(evento.id, result?.id)
+        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)
+        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)
+    }
+
+    @Test
+    fun `getEventoCatering filtra extras de catering y variables`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)).thenReturn(emptyList())
+        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)).thenReturn(emptyList())
+
+        val result = service.getEventoCatering(1L)
+
+        assertEquals(evento.id, result?.id)
+        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)
+        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+    }
+
+    @Test
+    fun `getEventoVer solicita las cuatro categorias de extras`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(any(), any(), any(), any())).thenReturn(emptyList())
+        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(any(), any(), any(), any())).thenReturn(emptyList())
+
+        service.getEventoVer(1L)
+
+        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)
+        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)
+        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)
+        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+    }
+
+    @Test
+    fun `editEventoExtra conserva extras de catering y reemplaza los de evento`() {
+        val evento = buildEvento()
+        val catering = Extra(1L, "catering", TipoExtra.TIPO_CATERING)
+        val anteriorEvento = Extra(2L, "anterior", TipoExtra.EVENTO)
+        val nuevoEvento = Extra(3L, "nuevo", TipoExtra.EVENTO)
+        evento.listaExtra.addAll(listOf(catering, anteriorEvento))
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList())).thenReturn(listOf(nuevoEvento))
+        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(emptyList())).thenReturn(emptyList())
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
+        val dto = EventoExtraDTO(1L, "evento", "ABCD", 55.0, 10L, emptyList(), emptyList(), mock(), evento.inicio)
+
+        assertEquals(1L, service.editEventoExtra(dto))
+
+        assertEquals(setOf(catering, nuevoEvento), evento.listaExtra)
+        assertEquals(55.0, evento.extraOtro)
+        assertEquals(10L, evento.descuento)
+    }
+
+    @Test
+    fun `editEventoCatering conserva extras de evento y reemplaza los de catering`() {
+        val evento = buildEvento()
+        val normal = Extra(1L, "evento", TipoExtra.EVENTO)
+        val anteriorCatering = Extra(2L, "anterior", TipoExtra.TIPO_CATERING)
+        val nuevoCatering = Extra(3L, "nuevo", TipoExtra.TIPO_CATERING)
+        evento.listaExtra.addAll(listOf(normal, anteriorCatering))
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList())).thenReturn(listOf(nuevoCatering))
+        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(emptyList())).thenReturn(emptyList())
+        whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
+        val dto = EventoCateringDTO(1L, "evento", "ABCD", 75.0, "menu", emptyList(), emptyList(), 2L, evento.inicio, 100, 20)
+
+        assertEquals(1L, service.editEventoCatering(dto))
+
+        assertEquals(setOf(normal, nuevoCatering), evento.listaExtra)
+        assertEquals(75.0, evento.cateringOtro)
+        assertEquals("menu", evento.cateringOtroDescripcion)
+    }
+
+    @Test
     fun `editEventoHora actualiza y persiste las fechas`() {
         val evento = buildEvento()
         val inicio = LocalDateTime.of(2026, 10, 5, 18, 0)
@@ -416,6 +720,18 @@ class EventoServiceTest {
         val error = assertThrows(NotFoundException::class.java) { service.reenviarMail(99L, 2L) }
 
         assertTrue(error.message!!.contains("No se pudo reenviar mail"))
+        verifyNoInteractions(emailService)
+    }
+
+    @Test
+    fun `reenviarMail transforma error al buscar la empresa`() {
+        val evento = buildEvento()
+        whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(empresaService.findById(2L)).thenThrow(IllegalStateException("empresa no disponible"))
+
+        val error = assertThrows(NotFoundException::class.java) { service.reenviarMail(1L, 2L) }
+
+        assertTrue(error.message!!.contains("empresa no disponible"))
         verifyNoInteractions(emailService)
     }
 }
