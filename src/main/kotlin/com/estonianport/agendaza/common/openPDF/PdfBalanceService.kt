@@ -559,7 +559,11 @@ class PdfBalanceService {
         TipoGasto.IMPUESTOS -> "Impuestos"
         TipoGasto.SERVICIOS -> "Servicios"
         TipoGasto.OTROS -> "Otros"
-        TipoGasto.TARJETA_CREDITO -> "Tarjeta de credito"
+        TipoGasto.TARJETA_CREDITO -> "Tarjeta de crédito"
+        TipoGasto.EMPLEADOS -> "Empleados"
+        TipoGasto.LIBRERIA -> "Librería"
+        TipoGasto.DECORACION -> "Decoración"
+        TipoGasto.EQUIPAMIENTO -> "Equipamiento"
     }
 
     private fun txtMultilinea(

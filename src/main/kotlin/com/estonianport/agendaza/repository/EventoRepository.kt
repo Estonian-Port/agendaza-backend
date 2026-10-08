@@ -241,7 +241,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         AND e.fechaBaja IS NULL
         """
     )
-    fun getByCodigoAndEmpresaId(codigo: String, empresaId: Long): Evento
+    fun getByCodigoAndEmpresaId(codigo: String, empresaId: Long): Evento?
 
     /**
      * Busca que el código no exista ya en la empresa

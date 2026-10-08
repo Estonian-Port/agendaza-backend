@@ -35,4 +35,12 @@ interface GastoRepository : CrudRepository<Gasto, Long> {
           AND g.fecha >= :desde AND g.fecha < :hasta"""
     )
     fun totalesByRango(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): TotalesPagosMes
+
+    @Query("""
+    SELECT g FROM Gasto g
+    LEFT JOIN FETCH g.evento
+    WHERE g.empresa.id = :empresaId
+      AND g.fechaBaja IS NULL
+      AND g.fecha >= :desde AND g.fecha < :hasta""")
+    fun findParaPlanilla(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): List<Gasto>
 }

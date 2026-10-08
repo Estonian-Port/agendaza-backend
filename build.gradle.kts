@@ -34,6 +34,7 @@ dependencies {
     implementation("commons-validator:commons-validator:1.7")
     implementation("com.github.librepdf:openpdf:1.3.30")
     implementation("com.itextpdf.tool:xmlworker:5.5.13.2")
+    implementation("org.apache.poi:poi-ooxml:5.5.1")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")

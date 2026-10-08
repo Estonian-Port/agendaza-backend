@@ -53,7 +53,7 @@ class EventoService(
      */
     fun findById(id: Long): Evento {
         return eventoRepository.findById(id).orElseThrow {
-            NotFoundException("Evento no encontrado con el ID: $id")
+            NotFoundException("Evento no encontrado")
         }
     }
 
@@ -63,6 +63,7 @@ class EventoService(
     @Transactional(readOnly = true)
     fun getByCodigoAndEmpresaId(codigo: String, empresaId: Long): Evento {
         return eventoRepository.getByCodigoAndEmpresaId(codigo, empresaId)
+            ?: throw NotFoundException("Evento no encontrado con el codigo: $codigo")
     }
 
     // ==================== OPERACIONES DE PERSISTENCIA Y NEGOCIO ====================

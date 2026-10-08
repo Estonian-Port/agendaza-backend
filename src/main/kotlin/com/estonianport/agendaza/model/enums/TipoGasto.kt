@@ -1,12 +1,22 @@
 package com.estonianport.agendaza.model.enums
 
 enum class TipoGasto {
+    // Gastos vinculados a un evento (subcategorías)
     EVENTO,
-    MANTENIMIENTO,
     MERCADERIA,
-    SUELDOS,
-    IMPUESTOS,
+    EMPLEADOS,
+    LIBRERIA,
+
+    // Reinversión
+    MANTENIMIENTO,
+    DECORACION,
+    EQUIPAMIENTO,
+
+    // Gastos fijos
     SERVICIOS,
-    OTROS,
-    TARJETA_CREDITO
+    IMPUESTOS,
+    SUELDOS,
+    TARJETA_CREDITO,
+
+    OTROS
 }
