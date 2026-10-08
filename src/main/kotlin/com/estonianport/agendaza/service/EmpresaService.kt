@@ -2,12 +2,10 @@ package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.dto.*
-import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.repository.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -24,7 +22,8 @@ class EmpresaService (
     val extraRepository: ExtraRepository,
     val pagoRepository: PagoRepository,
     val servicioRepository: ServicioRepository,
-    val clausulaRepository: ClausulaRepository
+    val clausulaRepository: ClausulaRepository,
+    val gastoRepository: GastoRepository
 ): GenericServiceImpl<Empresa, Long>() {
 
     override val dao: CrudRepository<Empresa, Long>
@@ -77,7 +76,7 @@ class EmpresaService (
         val extrasEvento = extraRepository.countEvento(id)
         val extrasCatering = extraRepository.countCatering(id)
 
-        val pagos = pagoRepository.countActivosByEmpresaId(id)
+        val pagos = pagoRepository.countActivosByEmpresaId(id) + gastoRepository.countActivosByEmpresaId(id)
         val eventos = eventoRepository.countActivosByEmpresaId(id)
         val clientes = eventoRepository.countClientesByEmpresaId(id)
         val servicios = servicioRepository.countActivosByEmpresaId(id)

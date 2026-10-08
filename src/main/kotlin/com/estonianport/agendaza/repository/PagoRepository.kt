@@ -12,12 +12,6 @@ import java.time.LocalDateTime
 
 interface PagoRepository : CrudRepository<Pago, Long> {
 
-    @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = ?1 AND p.fechaBaja IS NULL")
-    fun cantidadPagos(id: Long): Int
-
-    @Query("SELECT p FROM Pago p WHERE p.evento.empresa.id = ?1 AND p.fechaBaja IS NULL ORDER BY p.fecha DESC")
-    fun findAll(id: Long, pageable: Pageable): Page<Pago>
-
     @Query(
         """
         SELECT new com.estonianport.agendaza.dto.EventoPagoDTO(ev.id, ev.nombre, ev.codigo, 0)
@@ -45,7 +39,13 @@ interface PagoRepository : CrudRepository<Pago, Long> {
     )
     fun getEventoForSavePago(eventoId: Long, fechaAhora: LocalDateTime): PagoDTO?
 
-    @Query("SELECT COUNT(p) FROM Pago p WHERE p.evento.empresa.id = :id AND p.fechaBaja IS NULL")
+    @Query("""
+    SELECT COUNT(DISTINCT p) 
+    FROM Pago p 
+    JOIN p.evento e 
+    WHERE e.empresa.id = :id 
+    AND p.fechaBaja IS NULL"""
+    )
     fun countActivosByEmpresaId(id: Long): Int
 
     @Query(

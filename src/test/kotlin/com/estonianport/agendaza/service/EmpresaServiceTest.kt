@@ -28,7 +28,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.LocalTime
@@ -51,8 +50,10 @@ class EmpresaServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = EmpresaService(repository, eventoRepository, cargoRepository, tipoEventoRepository,
-            extraRepository, pagoRepository, servicioRepository, clausulaRepository)
+        service = EmpresaService(
+            repository, eventoRepository, cargoRepository, tipoEventoRepository,
+            extraRepository, pagoRepository, servicioRepository, clausulaRepository, gastoRepository
+        )
     }
 
     @Test
