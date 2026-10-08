@@ -19,6 +19,7 @@ import com.estonianport.agendaza.repository.ServicioRepository
 import com.estonianport.agendaza.repository.ClausulaRepository
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.repository.EmpresaRepository
+import com.estonianport.agendaza.repository.GastoRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -44,6 +45,7 @@ class EmpresaServiceTest {
     private val pagoRepository = mock<PagoRepository>()
     private val servicioRepository = mock<ServicioRepository>()
     private val clausulaRepository = mock<ClausulaRepository>()
+    private val gastoRepository = mock<GastoRepository>()
     private lateinit var service: EmpresaService
 
     private val empresa: Empresa = Salon(1L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
