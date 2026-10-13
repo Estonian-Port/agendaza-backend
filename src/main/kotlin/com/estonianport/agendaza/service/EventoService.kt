@@ -1,11 +1,11 @@
 package com.estonianport.agendaza.service
 
+import ReservaRegistradaEvent
 import com.estonianport.agendaza.common.GenericServiceImpl
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.*
-import com.estonianport.agendaza.errors.GlobalExceptionHandler
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
@@ -16,9 +16,9 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
-import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -37,16 +37,15 @@ class EventoService(
     private val empresaService: EmpresaService,
     private val extraService: ExtraService,
     private val extraVariableService: ExtraVariableService,
-    private val emailService: EmailService,
     private val usuarioService: UsuarioService,
     private val pdfService: PdfService,
     private val tipoEventoService: TipoEventoService,
+    private val emailService: EmailService,
+    private val eventPublisher: ApplicationEventPublisher
 ) : GenericServiceImpl<Evento, Long>() {
 
     override val dao: CrudRepository<Evento, Long>
         get() = eventoRepository
-
-    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     /**
      * Busca un evento por ID y lanza excepción si no existe
@@ -63,7 +62,7 @@ class EventoService(
     @Transactional(readOnly = true)
     fun getByCodigoAndEmpresaId(codigo: String, empresaId: Long): Evento {
         return eventoRepository.getByCodigoAndEmpresaId(codigo, empresaId)
-            ?: throw NotFoundException("Evento no encontrado con el codigo: $codigo")
+            ?: throw NotFoundException("Evento no encontrado con el código: $codigo")
     }
 
     // ==================== OPERACIONES DE PERSISTENCIA Y NEGOCIO ====================
@@ -100,8 +99,7 @@ class EventoService(
         val cliente = procesarYNormalizarCliente(dto.cliente)
 
         // 5. Obtener referencias necesarias
-        val tipoEvento = tipoEventoService.get(dto.tipoEventoId)
-            ?: throw NotFoundException("Tipo Evento no encontrado")
+        val tipoEvento = tipoEventoService.findById(dto.tipoEventoId)
         val encargado = usuarioService.findById(dto.encargadoId)
 
         // 6. Crear entidad evento
@@ -137,7 +135,7 @@ class EventoService(
         val eventoSaved = eventoRepository.save(evento)
 
         // 10. Notificar cliente
-        enviarMailComprobanteSeguro(eventoSaved, empresa)
+        eventPublisher.publishEvent(ReservaRegistradaEvent(eventoSaved.id, empresa.id))
 
         return eventoSaved.id
     }
@@ -200,22 +198,6 @@ class EventoService(
         } while (usuarioService.getByCelular(candidato) != null)
 
         return candidato
-    }
-
-    /**
-     * Envía email de comprobante
-     */
-    private fun enviarMailComprobanteSeguro(evento: Evento, empresa: Empresa) {
-        try {
-            if (emailService.isEmailValid(evento.cliente.email)) {
-                emailService.enviarMailComprabanteReserva(evento, "sido reservado", empresa)
-            }else{
-                logger.warn("Mail no enviado a ${evento.cliente.email} de evento codigo: ${evento.codigo}")
-            }
-
-        } catch (e: Exception) {
-            logger.error("Fallo al enviar el mail de comprobante de evento codigo: ${evento.codigo} error: ${e.message} ", e)
-        }
     }
 
     /**
@@ -391,7 +373,7 @@ class EventoService(
     fun editEventoExtra(eventoDTO: EventoExtraDTO): Long {
         val evento = findById(eventoDTO.id)
 
-        // 1. Convertimos los DTOs que vienen del front a entidades
+        // 1. Convertimos los DTO que vienen del front a entidades
         val nuevosExtras = extraService.fromListaExtraDtoToListaExtra(eventoDTO.listaExtra)
         val nuevasVariables = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoDTO.listaExtraVariable)
 
@@ -421,7 +403,7 @@ class EventoService(
     fun editEventoCatering(eventoCateringDto: EventoCateringDTO): Long {
         val evento = findById(eventoCateringDto.id)
 
-        // 1. Convertimos los DTOs que vienen del front a entidades
+        // 1. Convertimos los DTO que vienen del front a entidades
         val nuevosExtrasCatering = extraService.fromListaExtraDtoToListaExtra(eventoCateringDto.listaExtraTipoCatering.toList())
         val nuevasVariablesCatering = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoCateringDto.listaExtraCateringVariable.toList())
 
@@ -557,7 +539,7 @@ class EventoService(
     }
 
     /**
-     * Valida si un horario específico está disponible para una empresa
+     * Válida si un horario específico está disponible para una empresa
      */
     @Transactional(readOnly = true)
     fun getHorarioDisponible(empresaId: Long, desde: LocalDateTime, hasta: LocalDateTime): Boolean {

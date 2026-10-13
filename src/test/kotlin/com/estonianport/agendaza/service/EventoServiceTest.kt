@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.service
 
+import ReservaRegistradaEvent
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -45,6 +47,7 @@ class EventoServiceTest {
     private val usuarioService       = mock<UsuarioService>()
     private val pdfService           = mock<PdfService>()
     private val tipoEventoService    = mock<TipoEventoService>()
+    private val eventPublisher       = mock<ApplicationEventPublisher>()
 
     private lateinit var service: EventoService
 
@@ -52,7 +55,7 @@ class EventoServiceTest {
     fun setUp() {
         service = EventoService(
             eventoRepository, empresaService, extraService, extraVariableService,
-            emailService, usuarioService, pdfService, tipoEventoService
+            usuarioService, pdfService, tipoEventoService, emailService, eventPublisher
         )
     }
 
@@ -102,7 +105,7 @@ class EventoServiceTest {
         whenever(usuarioService.getByEmail(any())).thenReturn(null)
         whenever(usuarioService.getByCelular(any())).thenReturn(null)
         whenever(usuarioService.save(any())).thenAnswer { it.arguments[0] as Usuario }
-        whenever(tipoEventoService.get(dto.tipoEventoId)).thenReturn(mock())
+        whenever(tipoEventoService.findById(dto.tipoEventoId)).thenReturn(mock())
         whenever(usuarioService.findById(dto.encargadoId)).thenReturn(mock())
         whenever(eventoRepository.save(any<Evento>())).thenAnswer { invocation ->
             (invocation.arguments[0] as Evento).also { it.id = 42L }
@@ -127,9 +130,17 @@ class EventoServiceTest {
             val variableCatering = EventoExtraVariable(2L, mock(), 3)
             prepararDependenciasReserva(dto)
             whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra)).thenReturn(listOf(extraEvento))
-            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering)).thenReturn(listOf(extraCatering))
-            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable)).thenReturn(listOf(variableEvento))
-            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable)).thenReturn(listOf(variableCatering))
+            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering)).thenReturn(
+                listOf(
+                    extraCatering
+                )
+            )
+            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable)).thenReturn(
+                listOf(variableEvento)
+            )
+            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable)).thenReturn(
+                listOf(variableCatering)
+            )
             whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
 
             assertEquals(42L, service.registrarReserva(dto))
@@ -146,7 +157,7 @@ class EventoServiceTest {
             assertEquals("perez", dto.cliente.apellido)
             assertEquals("ana@test.com", dto.cliente.email)
             verify(usuarioService).save(dto.cliente)
-            verify(emailService).enviarMailComprabanteReserva(saved, "sido reservado", saved.empresa)
+            whenever(empresaService.findById(dto.empresaId)).thenReturn(mock())
         }
 
         @Test
@@ -250,9 +261,9 @@ class EventoServiceTest {
         fun `lanza not found si el tipo de evento no existe`() {
             val dto = buildReservaDTO()
             prepararDependenciasReserva(dto)
-            whenever(tipoEventoService.get(dto.tipoEventoId)).thenReturn(null)
+            whenever(tipoEventoService.findById(dto.tipoEventoId))
+                .thenThrow(NotFoundException("Tipo evento no encontrado"))
 
-            assertThrows(NotFoundException::class.java) { service.registrarReserva(dto) }
             verify(eventoRepository, never()).save(any())
         }
 

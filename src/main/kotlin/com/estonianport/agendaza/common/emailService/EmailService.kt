@@ -15,13 +15,29 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.Duration
 
 @Service
 class EmailService(
     @param:Value("\${MAIL_PASS}") private val resendApiKey: String
 ) {
-    private val httpClient = HttpClient.newHttpClient()
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(5))
+        .build()
     private val fromEmail = "Agendaza <agendaza@estonianport.com.ar>"
+
+    private companion object {
+        const val IMAGEN_COMPROBANTE_URL = "https://iili.io/3SXlAe2.png"
+        const val IMAGEN_EMPRESA_URL = "https://iili.io/3SXl7z7.png"
+        const val AGENDAZA_LOGO_URL = "https://iili.io/3SVIGuj.png"
+        const val IMAGEN_IG_URL = "https://iili.io/3USINa4.png"
+        const val IMAGEN_WEB_URL = "https://iili.io/3USIh6G.png"
+        const val IMAGEN_LINKEDIN_URL = "https://iili.io/3USIwFf.png"
+        const val IMAGEN_PAGO = "https://iili.io/3Ut3E0X.png"
+        const val URL_INSTAGRAM = "https://www.instagram.com/agendaza"
+        const val URL_WEB = "https://estonian-port.github.io/estonianport-landingpage/"
+        const val URL_LINKEDIN = "https://www.linkedin.com/company/estonianport"
+    }
 
     fun isEmailValid(target: String): Boolean {
         return target.isNotEmpty() && !target.startsWith("sin-email-")
@@ -48,6 +64,7 @@ class EmailService(
 
             val request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.resend.com/emails"))
+                .timeout(Duration.ofSeconds(10))
                 .header("Authorization", "Bearer $resendApiKey")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
@@ -241,18 +258,18 @@ class EmailService(
                 "extras_variables" to extraVariableMail.toString(),
                 "catering" to catering.toString(),
                 "servicios" to servicioMail.toString(),
-                "imagen_comprobante" to "https://iili.io/3SXlAe2.png",
-                "imagen_empresa" to "https://iili.io/3SXl7z7.png",
+                "imagen_comprobante" to IMAGEN_COMPROBANTE_URL,
+                "imagen_empresa" to IMAGEN_EMPRESA_URL,
                 "imagen_catering" to "https://iili.io/3SXlCsn.png",
                 "imagen_extras" to "https://iili.io/3SXlzgf.png",
                 "imagen_servicios" to "https://iili.io/3SXlx0G.png",
-                "agendaza_logo" to "https://iili.io/3SVIGuj.png",
-                "url_instagram" to "https://www.instagram.com/agendaza",
-                "url_web" to "https://estonian-port.github.io/estonianport-landingpage/",
-                "url_linkedin" to "https://www.linkedin.com/company/estonianport",
-                "imagen_ig" to "https://iili.io/3USINa4.png",
-                "imagen_web" to "https://iili.io/3USIh6G.png",
-                "imagen_linkedin" to "https://iili.io/3USIwFf.png",
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL,
             )
         )
 
@@ -294,16 +311,16 @@ class EmailService(
                 "total_pago" to evento.getTotalAbonado().toString(),
                 "monto_faltante" to evento.getMontoFaltante().toString(),
                 "presupuesto_total" to evento.getPresupuestoTotal().toString(),
-                "imagen_pago" to "https://iili.io/3Ut3E0X.png",
-                "imagen_comprobante" to "https://iili.io/3SXlAe2.png",
-                "imagen_empresa" to "https://iili.io/3SXl7z7.png",
-                "agendaza_logo" to "https://iili.io/3SVIGuj.png",
-                "url_instagram" to "https://www.instagram.com/agendaza",
-                "url_web" to "https://estonian-port.github.io/estonianport-landingpage/",
-                "url_linkedin" to "https://www.linkedin.com/company/estonianport",
-                "imagen_ig" to "https://iili.io/3USINa4.png",
-                "imagen_web" to "https://iili.io/3USIh6G.png",
-                "imagen_linkedin" to "https://iili.io/3USIwFf.png"
+                "imagen_pago" to IMAGEN_PAGO,
+                "imagen_comprobante" to IMAGEN_COMPROBANTE_URL,
+                "imagen_empresa" to IMAGEN_EMPRESA_URL,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
             )
         )
 
@@ -338,16 +355,16 @@ class EmailService(
                 "total_pago" to evento.getTotalAbonado().toString(),
                 "monto_faltante" to evento.getMontoFaltante().toString(),
                 "presupuesto_total" to evento.getPresupuestoTotal().toString(),
-                "imagen_pago" to "https://iili.io/3Ut3E0X.png",
-                "imagen_comprobante" to "https://iili.io/3SXlAe2.png",
-                "imagen_empresa" to "https://iili.io/3SXl7z7.png",
-                "agendaza_logo" to "https://iili.io/3SVIGuj.png",
-                "url_instagram" to "https://www.instagram.com/agendaza",
-                "url_web" to "https://estonian-port.github.io/estonianport-landingpage/",
-                "url_linkedin" to "https://www.linkedin.com/company/estonianport",
-                "imagen_ig" to "https://iili.io/3USINa4.png",
-                "imagen_web" to "https://iili.io/3USIh6G.png",
-                "imagen_linkedin" to "https://iili.io/3USIwFf.png"
+                "imagen_pago" to IMAGEN_PAGO,
+                "imagen_comprobante" to IMAGEN_COMPROBANTE_URL,
+                "imagen_empresa" to IMAGEN_EMPRESA_URL,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
             )
         )
 
