@@ -11,6 +11,7 @@ import com.estonianport.agendaza.dto.TimeDTO
 import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.dto.toEventoCapacidadDTO
 import com.estonianport.agendaza.errors.NotFoundException
+import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaTipoEvento
 import com.estonianport.agendaza.model.TipoEvento
@@ -36,6 +37,16 @@ class TipoEventoService(
 
     override val dao: CrudRepository<TipoEvento, Long>
         get() = tipoEventoRepository
+
+
+    /**
+     * Busca un evento por ID y lanza excepción si no existe
+     */
+    fun findById(id: Long): TipoEvento {
+        return tipoEventoRepository.findById(id).orElseThrow {
+            NotFoundException("Tipo evento no encontrado")
+        }
+    }
 
     // ==================== QUERIES ====================
 
