@@ -9,6 +9,8 @@ import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.ExtraRepository
 import com.estonianport.agendaza.common.toEndOfMonth
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
+import com.estonianport.agendaza.model.Evento
+import com.estonianport.agendaza.model.EventoExtra
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -39,17 +41,28 @@ class ExtraServiceTest {
     }
 
     @Test
-    fun `fromListaExtraDtoToListaExtra busca los extras por sus ids`() {
-        val evento = Extra(1L, "Decoración", TipoExtra.EVENTO)
+    fun `fromListaExtraDtoToListaExtra crea el detalle con precio y cantidad recibidos`() {
+        val evento = mock<Evento>()
+        val extraFijo = Extra(1L, "Decoración", TipoExtra.EVENTO)
         val variable = Extra(2L, "Mozo", TipoExtra.VARIABLE_EVENTO)
-        whenever(repository.findById(1L)).thenReturn(Optional.of(evento))
+        whenever(repository.findById(1L)).thenReturn(Optional.of(extraFijo))
         whenever(repository.findById(2L)).thenReturn(Optional.of(variable))
 
         val resultado = service.fromListaExtraDtoToListaExtra(
-            listOf(ExtraDTO(1L, "Decoración", TipoExtra.EVENTO), ExtraDTO(2L, "Mozo", TipoExtra.VARIABLE_EVENTO))
+            listOf(
+                ExtraDTO(1L, "Decoración", TipoExtra.EVENTO).also { it.precio = 75.0; it.cantidad = 8 },
+                ExtraDTO(2L, "Mozo", TipoExtra.VARIABLE_EVENTO).also { it.precio = 120.0; it.cantidad = 3 }
+            ),
+            evento
         )
 
-        assertEquals(listOf(evento, variable), resultado)
+        assertEquals(2, resultado.size)
+        assertEquals(extraFijo, resultado[0].extra)
+        assertEquals(75.0, resultado[0].precio)
+        assertEquals(1, resultado[0].cantidad) // tipo fijo siempre tiene cantidad uno
+        assertEquals(variable, resultado[1].extra)
+        assertEquals(120.0, resultado[1].precio)
+        assertEquals(3, resultado[1].cantidad)
         verify(repository).findById(1L)
         verify(repository).findById(2L)
     }
@@ -137,20 +150,29 @@ class ExtraServiceTest {
     }
 
     @Test
-    fun `conversores devuelven precio y filtran extras por tipo`() {
-        val empresa = Salon(1L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
+    fun `aplicarPreciosFoto devuelve precio y cantidad guardados y filtra por tipo`() {
+        val evento = mock<Evento>()
         val extraEvento = Extra(1L, "Luces", TipoExtra.EVENTO)
-        val extraCatering = Extra(2L, "Menu", TipoExtra.TIPO_CATERING)
-        val desde = LocalDateTime.of(2026, 1, 1, 0, 0)
-        empresa.listaPrecioConFechaExtra.add(PrecioConFechaExtra(1L, 75.0, desde, desde.plusMonths(1), empresa, extraEvento))
+        val extraCatering = Extra(2L, "Menu", TipoExtra.VARIABLE_CATERING)
+        val fotoEvento = EventoExtra(evento = evento, extra = extraEvento, precio = 75.0, cantidad = 1)
+        val fotoCatering = EventoExtra(evento = evento, extra = extraCatering, precio = 40.0, cantidad = 4)
 
-        val dto = service.fromListaExtraToListaExtraDto(empresa, listOf(extraEvento), desde.plusDays(2)).single()
-        val filtrados = service.fromListaExtraToListaExtraDtoByFilter(
-            empresa, mutableSetOf(extraEvento, extraCatering), desde.plusDays(2), TipoExtra.EVENTO
-        )
+        val dto = service.aplicarPreciosFoto(listOf(fotoEvento, fotoCatering), setOf(TipoExtra.VARIABLE_CATERING)).single()
 
-        assertEquals(75.0, dto.precio)
-        assertEquals(listOf(extraEvento.id), filtrados.map { it.id })
+        assertEquals(extraCatering.id, dto.id)
+        assertEquals(40.0, dto.precio)
+        assertEquals(4, dto.cantidad)
+    }
+
+    @Test
+    fun `aplicarPreciosFoto preserva el precio cero guardado en la foto`() {
+        val evento = mock<Evento>()
+        val extra = Extra(1L, "Luces", TipoExtra.EVENTO)
+        val foto = EventoExtra(evento = evento, extra = extra, precio = 0.0)
+
+        val dto = service.aplicarPreciosFoto(listOf(foto), setOf(TipoExtra.EVENTO)).single()
+
+        assertEquals(0.0, dto.precio)
     }
 
     @Test

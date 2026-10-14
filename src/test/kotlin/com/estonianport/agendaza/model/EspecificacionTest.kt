@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
-import java.time.LocalDateTime
 
 class EspecificacionTest {
 
@@ -53,11 +52,11 @@ class EspecificacionTest {
         fun `aplica correctamente usando un extra de TIPO_CATERING`() {
             whenever(evento.cateringOtro).thenReturn(0.0)
 
-            val extraCatering = mock<Extra> { whenever(it.tipoExtra).thenReturn(TipoExtra.TIPO_CATERING) }
-            val extraNormal   = mock<Extra> { whenever(it.tipoExtra).thenReturn(TipoExtra.EVENTO) }
-            whenever(evento.listaExtra).thenReturn(mutableSetOf(extraNormal, extraCatering))
-            whenever(evento.inicio).thenReturn(LocalDateTime.now())
-            whenever(empresa.getPrecioOfExtraByFecha(eq(extraCatering), any())).thenReturn(2000.0)
+            val extraCatering = Extra(2L, "Menu", TipoExtra.TIPO_CATERING)
+            val extraNormal = Extra(3L, "Luces", TipoExtra.EVENTO)
+            val cateringFoto = EventoExtra(evento = evento, extra = extraCatering, precio = 2000.0)
+            val eventoFoto = EventoExtra(evento = evento, extra = extraNormal, precio = 500.0)
+            whenever(evento.listaEventoExtra).thenReturn(mutableSetOf(eventoFoto, cateringFoto))
 
             especificacion.aplicar(evento)
 
@@ -68,7 +67,7 @@ class EspecificacionTest {
         @Test
         fun `setea extraOtro en 0 si no hay catering`() {
             whenever(evento.cateringOtro).thenReturn(0.0)
-            whenever(evento.listaExtra).thenReturn(mutableSetOf())
+            whenever(evento.listaEventoExtra).thenReturn(mutableSetOf())
 
             especificacion.aplicar(evento)
 
@@ -103,15 +102,15 @@ class EspecificacionTest {
 
         private lateinit var especificacion: AgregarExtraNinoSiSuperaCapacidad
         private lateinit var extraNino: Extra
-        private lateinit var listaVariablesMock: MutableSet<EventoExtraVariable>
+        private lateinit var listaVariablesMock: MutableSet<EventoExtra>
 
         @BeforeEach
         fun setUp() {
             extraNino      = mock()
             especificacion = AgregarExtraNinoSiSuperaCapacidad(1L, empresa, extraNino)
 
-            listaVariablesMock = mock()
-            whenever(evento.listaEventoExtraVariable).thenReturn(listaVariablesMock)
+            listaVariablesMock = mutableSetOf()
+            whenever(evento.listaEventoExtra).thenReturn(listaVariablesMock)
         }
 
         @Test
@@ -121,11 +120,10 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            argumentCaptor<EventoExtraVariable>().apply {
-                verify(listaVariablesMock).add(capture())
-                assertEquals(10, firstValue.cantidad)  // 30 - 20
-                assertEquals(extraNino, firstValue.extra)
-            }
+            val agregado = listaVariablesMock.single()
+            assertEquals(10, agregado.cantidad)  // 30 - 20
+            assertEquals(extraNino, agregado.extra)
+            assertEquals(0.0, agregado.precio)
         }
 
         @Test
@@ -135,7 +133,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            verify(listaVariablesMock, never()).add(any())
+            assertTrue(listaVariablesMock.isEmpty())
         }
 
         @Test
@@ -145,7 +143,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            verify(listaVariablesMock, never()).add(any())
+            assertTrue(listaVariablesMock.isEmpty())
         }
 
         @Test
@@ -155,10 +153,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            argumentCaptor<EventoExtraVariable>().apply {
-                verify(listaVariablesMock).add(capture())
-                assertEquals(15, firstValue.cantidad)
-            }
+            assertEquals(15, listaVariablesMock.single().cantidad)
         }
     }
 
@@ -169,15 +164,15 @@ class EspecificacionTest {
 
         private lateinit var especificacion: AgregarExtraCamareraSiSuperaCapacidad
         private lateinit var extraCamarera: Extra
-        private lateinit var listaVariablesMock: MutableSet<EventoExtraVariable>
+        private lateinit var listaVariablesMock: MutableSet<EventoExtra>
 
         @BeforeEach
         fun setUp() {
             extraCamarera  = mock()
             especificacion = AgregarExtraCamareraSiSuperaCapacidad(1L, empresa, extraCamarera, Duracion.CORTO)
 
-            listaVariablesMock = mock()
-            whenever(evento.listaEventoExtraVariable).thenReturn(listaVariablesMock)
+            listaVariablesMock = mutableSetOf()
+            whenever(evento.listaEventoExtra).thenReturn(listaVariablesMock)
         }
 
         @Test
@@ -189,11 +184,10 @@ class EspecificacionTest {
             especificacion.aplicar(evento)
 
             // 120 - 100 = 20 extras → 20/10 = 2 camareras
-            argumentCaptor<EventoExtraVariable>().apply {
-                verify(listaVariablesMock).add(capture())
-                assertEquals(2, firstValue.cantidad)
-                assertEquals(extraCamarera, firstValue.extra)
-            }
+            val agregado = listaVariablesMock.single()
+            assertEquals(2, agregado.cantidad)
+            assertEquals(extraCamarera, agregado.extra)
+            assertEquals(0.0, agregado.precio)
         }
 
         @Test
@@ -204,7 +198,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            verify(listaVariablesMock, never()).add(any())
+            assertTrue(listaVariablesMock.isEmpty())
         }
 
         @Test
@@ -215,7 +209,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            verify(listaVariablesMock, never()).add(any())
+            assertTrue(listaVariablesMock.isEmpty())
         }
 
         @Test
@@ -226,7 +220,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            verify(listaVariablesMock, never()).add(any())
+            assertTrue(listaVariablesMock.isEmpty())
         }
 
         @Test
@@ -237,10 +231,7 @@ class EspecificacionTest {
 
             especificacion.aplicar(evento)
 
-            argumentCaptor<EventoExtraVariable>().apply {
-                verify(listaVariablesMock).add(capture())
-                assertEquals(1, firstValue.cantidad)
-            }
+            assertEquals(1, listaVariablesMock.single().cantidad)
         }
     }
 }

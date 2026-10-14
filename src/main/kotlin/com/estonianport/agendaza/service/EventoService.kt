@@ -9,7 +9,7 @@ import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.EventoExtra
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.TipoEvento
 import com.estonianport.agendaza.model.Usuario
@@ -36,7 +36,6 @@ class EventoService(
     private val eventoRepository: EventoRepository,
     private val empresaService: EmpresaService,
     private val extraService: ExtraService,
-    private val extraVariableService: ExtraVariableService,
     private val usuarioService: UsuarioService,
     private val pdfService: PdfService,
     private val tipoEventoService: TipoEventoService,
@@ -83,18 +82,6 @@ class EventoService(
             generateCodigoForEventoOfEmpresa(empresa)
         }
 
-        // 2. Unificar extras de evento y catering
-        val listaExtra = mutableSetOf<Extra>().apply {
-            addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra))
-            addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering))
-        }
-
-        // 3. Unificar extras variables
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>().apply {
-            addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable))
-            addAll(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable))
-        }
-
         // 4. Procesar cliente
         val cliente = procesarYNormalizarCliente(dto.cliente)
 
@@ -112,9 +99,9 @@ class EventoService(
             capacidadAdultos = dto.capacidadAdultos,
             capacidadNinos = dto.capacidadNinos,
             extraOtro = dto.extraOtro,
-            descuento = dto.descuento,
-            listaExtra = listaExtra,
-            listaEventoExtraVariable = mutableSetOf(),
+            extraOtroDescripcion = dto.extraOtroDescripcion,
+            precioTipoEvento = dto.precioTipoEvento,
+            listaEventoExtra = mutableSetOf(),
             cateringOtro = dto.cateringOtro,
             cateringOtroDescripcion = dto.cateringOtroDescripcion,
             encargado = encargado,
@@ -125,11 +112,7 @@ class EventoService(
             empresa = empresa
         )
 
-        // 8. Vincular extras variables al evento (cascade)
-        listaEventoExtraVariable.forEach { variable ->
-            variable.evento = evento
-            evento.listaEventoExtraVariable.add(variable)
-        }
+        evento.listaEventoExtra.addAll(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra, evento))
 
         // 9. Guardar evento
         val eventoSaved = eventoRepository.save(evento)
@@ -298,22 +281,7 @@ class EventoService(
     @Cacheable(value = ["eventoVer"], key = "#eventoId")
     fun getEventoVer(eventoId: Long): EventoVerDTO? {
         val evento = findById(eventoId)
-        val empresa = evento.empresa
-
-        return evento.toEventoVerDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO
-            ),
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING
-            )
-        )
+        return evento.toEventoVerDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
     }
 
     @Transactional(readOnly = true)
@@ -321,15 +289,8 @@ class EventoService(
     fun getEventoExtra(eventoId: Long): EventoExtraDTO? {
 
         val evento = findById(eventoId)
-        val empresa = evento.empresa
-
         return evento.toEventoExtraDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO
-            )
+            extraService.aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO))
         )
     }
 
@@ -337,15 +298,9 @@ class EventoService(
     @Cacheable(value = ["eventoCatering"], key = "#eventoId")
     fun getEventoCatering(eventoId: Long): EventoCateringDTO? {
         val evento = findById(eventoId)
-        val empresa = evento.empresa
-
         return evento.toEventoCateringDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING
-            )
+            extraService.aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING))
+
         )
 
     }
@@ -373,26 +328,20 @@ class EventoService(
     fun editEventoExtra(eventoDTO: EventoExtraDTO): Long {
         val evento = findById(eventoDTO.id)
 
+        evento.precioTipoEvento = eventoDTO.tipoEventoExtra.precio
+
         // 1. Convertimos los DTO que vienen del front a entidades
-        val nuevosExtras = extraService.fromListaExtraDtoToListaExtra(eventoDTO.listaExtra)
-        val nuevasVariables = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoDTO.listaExtraVariable)
+        val nuevosExtras = extraService.fromListaExtraDtoToListaExtra(eventoDTO.listaEventoExtra, evento)
 
         // 2. ACTUALIZAR EXTRAS NORMALES
-        evento.listaExtra.removeAll { it.tipoExtra != TipoExtra.TIPO_CATERING }
+        evento.listaEventoExtra.removeAll { it.extra.tipoExtra == TipoExtra.EVENTO || it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
 
         // Agregamos los nuevos que vinieron del front
-        evento.listaExtra.addAll(nuevosExtras)
-
-        // 3. ACTUALIZAR EXTRAS VARIABLES
-        evento.listaEventoExtraVariable.removeAll { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
-
-        // Le asignamos el evento padre a las nuevas variables y las agregamos a la colección
-        nuevasVariables.forEach { it.evento = evento }
-        evento.listaEventoExtraVariable.addAll(nuevasVariables)
+        evento.listaEventoExtra.addAll(nuevosExtras)
 
         // 4. Actualizar campos básicos
         evento.extraOtro = eventoDTO.extraOtro
-        evento.descuento = eventoDTO.descuento
+        evento.extraOtroDescripcion = eventoDTO.extraOtroDescripcion
 
         // 5. Guardar
         return save(evento).id
@@ -404,25 +353,18 @@ class EventoService(
         val evento = findById(eventoCateringDto.id)
 
         // 1. Convertimos los DTO que vienen del front a entidades
-        val nuevosExtrasCatering = extraService.fromListaExtraDtoToListaExtra(eventoCateringDto.listaExtraTipoCatering.toList())
-        val nuevasVariablesCatering = extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(eventoCateringDto.listaExtraCateringVariable.toList())
+        val nuevosExtrasCatering = extraService.fromListaExtraDtoToListaExtra(eventoCateringDto.listaExtra, evento)
 
         // 2. ACTUALIZAR EXTRAS NORMALES
-        evento.listaExtra.removeAll { it.tipoExtra != TipoExtra.EVENTO }
+        evento.listaEventoExtra.removeAll { it.extra.tipoExtra == TipoExtra.TIPO_CATERING || it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
 
         // Agregamos los nuevos de catering
-        evento.listaExtra.addAll(nuevosExtrasCatering)
-
-        // 3. ACTUALIZAR EXTRAS VARIABLES
-        evento.listaEventoExtraVariable.removeAll { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
-
-        // Le asignamos el evento padre a las nuevas variables y las agregamos
-        nuevasVariablesCatering.forEach { it.evento = evento }
-        evento.listaEventoExtraVariable.addAll(nuevasVariablesCatering)
+        evento.listaEventoExtra.addAll(nuevosExtrasCatering)
 
         // 4. Actualizar campos básicos
         evento.cateringOtro = eventoCateringDto.cateringOtro
         evento.cateringOtroDescripcion = eventoCateringDto.cateringOtroDescripcion
+        evento.capacidadAdultos = eventoCateringDto.capacidadAdultos
 
         // 5. Guardar
         return save(evento).id
@@ -440,6 +382,25 @@ class EventoService(
             capacidadAdultos = saved.capacidadAdultos,
             capacidadNinos = saved.capacidadNinos
         )
+    }
+
+    @Transactional
+    @CacheEvict(value = ["eventoVer", "eventoExtra", "eventoCatering"], key = "#eventoId")
+    fun editPreciosEvento(eventoId: Long, precios: EventoPreciosDTO): Long {
+        val evento = findById(eventoId)
+        evento.precioTipoEvento = precios.precioTipoEvento
+        evento.capacidadAdultos = precios.capacidadAdultos
+        val incoming = precios.listaExtra + precios.listaExtraVariable.map { variable ->
+            val extra = extraService.get(variable.id) ?: throw NotFoundException("Extra no encontrado")
+            ExtraDTO(variable.id, variable.nombre, extra.tipoExtra).also {
+                it.precio = variable.precio
+                it.cantidad = variable.cantidad
+            }
+        }
+        val nuevoDetalle = extraService.fromListaExtraDtoToListaExtra(incoming, evento)
+        evento.listaEventoExtra.removeAll { it.extra.tipoExtra == TipoExtra.EVENTO || it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+        evento.listaEventoExtra.addAll(nuevoDetalle)
+        return save(evento).id
     }
 
     @Transactional
@@ -468,44 +429,24 @@ class EventoService(
         val tipoEvento = tipoEventoService.get(eventoReservaDto.tipoEventoId)
             ?: throw NotFoundException("Tipo evento no encontrado")
 
-        val listaExtra = mutableSetOf<Extra>()
-        listaExtra.addAll(
-            extraService.fromListaExtraDtoToListaExtra(eventoReservaDto.listaExtraTipoCatering.toList())
-        )
-
-        val listaEventoExtraVariable = mutableSetOf<EventoExtraVariable>()
-        listaEventoExtraVariable.addAll(
-            extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(
-                eventoReservaDto.listaExtraCateringVariable.toList()
-            )
-        )
-
         val encargado = usuarioService.findById(eventoReservaDto.encargadoId)
         val evento = fromEventoReservaDtoToEvento(
             eventoReservaDto,
             tipoEvento,
-            listaExtra,
-            listaEventoExtraVariable,
+            mutableSetOf(),
             encargado,
             empresa
         )
+        evento.listaEventoExtra.addAll(extraService.fromListaExtraDtoToListaExtra(eventoReservaDto.listaExtra, evento))
+
+        evento.precioTipoEvento = empresa.getPrecioOfTipoEvento(tipoEvento.id, evento.inicio)
 
         empresa.recorrerEspecificaciones(evento)
+        evento.listaEventoExtra.forEach { item ->
+            item.precio = empresa.getPrecioOfExtraByFecha(item.extra, evento.inicio)
+        }
 
-        return evento.toEventoReservaDto(
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO
-            ),
-            extraService.fromListaExtraToListaExtraDtoByFilter(
-                empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING
-            ),
-            extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(
-                empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING
-            )
-        )
+        return evento.toEventoReservaDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
     }
 
     // ==================== VALIDACIONES ====================
@@ -609,28 +550,27 @@ class EventoService(
     private fun fromEventoReservaDtoToEvento(
         eventoReservaDto: EventoReservaDTO,
         tipoEvento: TipoEvento,
-        listaExtra: MutableSet<Extra>,
-        listaEventoExtraVariable: MutableSet<EventoExtraVariable>,
+        listaExtra: MutableSet<EventoExtra>,
         encargado: Usuario,
         empresa: Empresa
     ): Evento {
         return Evento(
             eventoReservaDto.id,
+            eventoReservaDto.codigo,
             eventoReservaDto.nombre,
-            tipoEvento,
             eventoReservaDto.inicio,
             eventoReservaDto.fin,
             eventoReservaDto.capacidadAdultos,
             eventoReservaDto.capacidadNinos,
+            tipoEvento,
+            eventoReservaDto.precioTipoEvento,
             eventoReservaDto.extraOtro,
-            eventoReservaDto.descuento,
-            listaExtra,
-            listaEventoExtraVariable,
+            eventoReservaDto.extraOtroDescripcion,
             eventoReservaDto.cateringOtro,
             eventoReservaDto.cateringOtroDescripcion,
+            listaExtra,
             encargado,
             eventoReservaDto.cliente,
-            eventoReservaDto.codigo,
             eventoReservaDto.estado,
             eventoReservaDto.anotaciones,
             empresa

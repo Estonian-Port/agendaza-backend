@@ -388,6 +388,17 @@ class EventoController(
         )
     }
 
+    @PutMapping("/{eventoId}/precios")
+    fun editPreciosEvento(
+        @PathVariable eventoId: Long,
+        @RequestBody precios: EventoPreciosDTO
+    ): ResponseEntity<CustomResponse<Long>> = ResponseEntity.ok(
+        CustomResponse(
+            message = "Precios del evento actualizados correctamente",
+            data = eventoService.editPreciosEvento(eventoId, precios)
+        )
+    )
+
     /**
      * Actualiza los extras de un evento
      * PUT /v1/eventos/extra

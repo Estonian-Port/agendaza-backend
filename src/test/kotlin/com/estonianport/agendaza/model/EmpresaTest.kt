@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.model
 
+import com.estonianport.agendaza.model.enums.Estado
 import com.estonianport.agendaza.model.enums.TipoPrestador
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -15,15 +16,51 @@ class EmpresaTest {
     private lateinit var empresa: Salon
     private lateinit var extra: Extra
     private lateinit var tipoEvento: TipoEvento
+    private lateinit var encargado: Usuario
+    private lateinit var cliente: Usuario
 
     private val fecha = LocalDateTime.of(2025, 8, 20, 18, 0)
+
+    private val inicio = LocalDateTime.of(2025, 6, 15, 18, 0)
+    private val fin    = LocalDateTime.of(2025, 6, 15, 23, 0)
 
     @BeforeEach
     fun setUp() {
         empresa    = Salon(1L, "Salón Test", 1234567890L, "test@test.com", "Calle", 123, "Ciudad")
         extra      = mock<Extra>().also { whenever(it.id).thenReturn(10L) }
         tipoEvento = mock<TipoEvento>().also { whenever(it.id).thenReturn(20L) }
+        encargado  = mock()
+        cliente    = mock()
     }
+
+    private fun buildEvento(
+        extraOtro: Double = 0.0,
+        extraOtroDescripcion: String = "",
+        cateringOtro: Double = 0.0,
+        capacidadAdultos: Int = 100,
+        capacidadNinos: Int = 20,
+        listaExtra: MutableSet<EventoExtra> = mutableSetOf(),
+    ): Evento = Evento(
+        id = 1L,
+        nombre = "fiesta de prueba",
+        tipoEvento = tipoEvento,
+        inicio = inicio,
+        fin = fin,
+        capacidadAdultos = capacidadAdultos,
+        capacidadNinos = capacidadNinos,
+        extraOtro = extraOtro,
+        extraOtroDescripcion = extraOtroDescripcion,
+        listaEventoExtra = listaExtra,
+        cateringOtro = cateringOtro,
+        cateringOtroDescripcion = "",
+        encargado = encargado,
+        cliente = cliente,
+        codigo = "ABCD",
+        estado = Estado.RESERVADO,
+        anotaciones = "",
+        empresa = empresa
+    )
+
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -174,14 +211,14 @@ class EmpresaTest {
             empresa.listaPrecioConFechaExtra = mutableSetOf(
                 precioExtra(precio = 100.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
             )
-            val extraVariable = EventoExtraVariable(1L, extra, 3)
+            val extraVariable = EventoExtra(1L, buildEvento(), extra, 100.0, 3)
             assertEquals(300.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
         }
 
         @Test
         fun `devuelve 0 si el extra variable no tiene precio en la fecha`() {
             empresa.listaPrecioConFechaExtra = mutableSetOf()
-            val extraVariable = EventoExtraVariable(1L, extra, 5)
+            val extraVariable = EventoExtra(1L, buildEvento(), extra, 5.0, 1)
             assertEquals(0.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
         }
 
@@ -190,7 +227,7 @@ class EmpresaTest {
             empresa.listaPrecioConFechaExtra = mutableSetOf(
                 precioExtra(precio = 500.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
             )
-            val extraVariable = EventoExtraVariable(1L, extra, 0)
+            val extraVariable = EventoExtra(1L, buildEvento(), extra, 0.0, 0)
             assertEquals(0.0, empresa.getPrecioOfExtraVariableByFecha(extraVariable, fecha))
         }
     }
@@ -242,8 +279,8 @@ class EmpresaTest {
                 precioExtra(extraId = 11L, precio = 200.0, desde = fecha.minusDays(1), hasta = fecha.plusDays(1))
             )
 
-            val var1 = EventoExtraVariable(1L, extra,  2)  // 2 * 100 = 200
-            val var2 = EventoExtraVariable(2L, extra2, 3)  // 3 * 200 = 600
+            val var1 = EventoExtra(1L, buildEvento(), extra,  100.0, 2)  // 2 * 100 = 200
+            val var2 = EventoExtra(2L, buildEvento(), extra2, 200.0, 3)  // 3 * 200 = 600
 
             assertEquals(800.0, empresa.getSumOfPrecioByListaExtraVariable(listOf(var1, var2), fecha), 0.001)
         }

@@ -108,13 +108,13 @@ abstract class Empresa(
         }
     }
 
-    fun getSumOfPrecioByListaExtraVariable(listaExtraVariable: List<EventoExtraVariable>, fecha : LocalDateTime): Double{
+    fun getSumOfPrecioByListaExtraVariable(listaExtraVariable: List<EventoExtra>, fecha : LocalDateTime): Double{
         return listaExtraVariable.sumOf {
             getPrecioOfExtraVariableByFecha(it, fecha)
         }
     }
 
-    fun getPrecioOfExtraVariableByFecha(extraVariable: EventoExtraVariable, fecha: LocalDateTime): Double{
+    fun getPrecioOfExtraVariableByFecha(extraVariable: EventoExtra, fecha: LocalDateTime): Double{
         return getPrecioOfExtraByFecha(extraVariable.extra, fecha) * extraVariable.cantidad
     }
 
