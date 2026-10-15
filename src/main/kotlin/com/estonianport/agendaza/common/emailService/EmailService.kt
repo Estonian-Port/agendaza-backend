@@ -3,7 +3,7 @@ package com.estonianport.agendaza.common.emailService
 import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.EventoExtra
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
@@ -106,7 +106,7 @@ class EmailService(
         }
 
         // -------------------------- Extra --------------------------
-        val listaExtra: List<Extra> = evento.listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }
+        val listaExtra: List<Extra> = evento.listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.EVENTO }.map { it.extra }
         val extraMail = StringBuilder()
         if (listaExtra.isNotEmpty()) {
             var i = 0
@@ -125,8 +125,8 @@ class EmailService(
         }
 
         // -------------------------- Extra variable --------------------------
-        val listaEventoEventoExtraVariable: List<EventoExtraVariable> =
-            evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+        val listaEventoEventoExtraVariable: List<EventoExtra> =
+            evento.listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
         val extraVariableMail = StringBuilder()
         if (listaEventoEventoExtraVariable.isNotEmpty()) {
             val listaExtraVariable: MutableSet<Extra> = mutableSetOf()
@@ -174,7 +174,7 @@ class EmailService(
         if (evento.getPresupuestoCatering() != 0.0) {
 
             // ------------------- Tipo Catering -----------------------
-            val listaTipoCatering: List<Extra> = evento.listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }
+            val listaTipoCatering: List<Extra> = evento.listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.TIPO_CATERING }.map { it.extra }
             val tipoCateringMail = StringBuilder()
             if (listaTipoCatering.isNotEmpty()) {
                 var i = 0
@@ -193,8 +193,8 @@ class EmailService(
             }
 
             // ------------------- Extra Catering -----------------------
-            val listaCateringExtraCatering: List<EventoExtraVariable> =
-                evento.listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
+            val listaCateringExtraCatering: List<EventoExtra> =
+                evento.listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
             val extraVariableCateringMail = StringBuilder()
             if (listaCateringExtraCatering.isNotEmpty()) {
                 val listaExtraCatering: MutableSet<Extra> = mutableSetOf()

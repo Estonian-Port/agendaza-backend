@@ -15,7 +15,6 @@ import java.awt.Color
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 class PdfService {
@@ -75,7 +74,6 @@ class PdfService {
 
     private fun setMontoCapacidadCatering(evento: Evento, document: Document, fontSubtitulo: Font, fontNormal: Font) {
 
-        //recuadro(document,"CATERING", fontTitulo)
         espacioEnBlanco(document)
         document.add(Paragraph("CATERING", fontSubtitulo))
         lineaHorizontal(document)
@@ -83,22 +81,15 @@ class PdfService {
         var cateringDescripcion : String
 
         val fechaEvento: LocalDate = evento.inicio.toLocalDate()
-        val eventoAnioMes: YearMonth = YearMonth.from(fechaEvento)
 
         if (evento.cateringOtro != 0.0) {
             cateringDescripcion = evento.cateringOtroDescripcion + ". Precio por plato: $" + evento.cateringOtro
         } else {
-            val catering = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING } ?: Extra(
-                0, "No cuenta con Catering incluido",
-                TipoExtra.TIPO_CATERING
-            )
-
-            val precioCatering = buscarPrecio(catering.id, eventoAnioMes, evento.empresa.listaPrecioConFechaExtra)
-
-            cateringDescripcion = if (catering.id != 0L) {
-                "${catering.nombre}. Precio por plato: $$precioCatering"
+            val catering = evento.listaEventoExtra.firstOrNull { it.extra.tipoExtra == TipoExtra.TIPO_CATERING }
+            cateringDescripcion = if (catering != null) {
+                "${catering.extra.nombre}. Precio por plato: $${catering.precio}"
             } else {
-                catering.nombre
+                "No cuenta con Catering incluido"
             }
         }
 
@@ -110,18 +101,12 @@ class PdfService {
             )
         )
 
-        val precioTipoEvento = evento.empresa.listaPrecioConFechaTipoEvento.find {
-            it.tipoEvento.id == evento.tipoEvento.id &&
-                    YearMonth.from(it.desde) <= eventoAnioMes &&
-                    eventoAnioMes <= YearMonth.from(it.hasta)
-        }
-
-        if (precioTipoEvento != null && precioTipoEvento.precio != 0.0) {
+        if (evento.precioTipoEvento != 0.0) {
             //recuadro(document,"COSTO DEL SALON", fontTitulo)
             espacioEnBlanco(document)
             document.add(Paragraph("COSTO DEL SALON", fontSubtitulo))
             lineaHorizontal(document)
-            document.add(Paragraph("${evento.tipoEvento.nombre}. Valor: $100000", fontNormal))
+            document.add(Paragraph("${evento.tipoEvento.nombre}. Valor: $${evento.precioTipoEvento}", fontNormal))
         }
 
         //recuadro(document,"TOTAL", fontTitulo, true)
@@ -296,31 +281,25 @@ class PdfService {
         //document.add(Paragraph("INFORMACION SOBRE EL EVENTO", fontTitulo))
         //lineaHorizontal(document)
 
-        val ymEvento = YearMonth.from(evento.inicio)
-        val listaPreciosExtra = evento.empresa.listaPrecioConFechaExtra
-
-        val listaExtra = evento.listaExtra
-            .filter { it.tipoExtra == TipoExtra.EVENTO }
-            .map { extra ->
-                val precio = buscarPrecio(extra.id, ymEvento, listaPreciosExtra)
-                "${extra.nombre} $${precio}"
+        val listaExtra = evento.listaEventoExtra
+            .filter { it.extra.tipoExtra == TipoExtra.EVENTO }
+            .map { item ->
+                "${item.extra.nombre} $${item.precio}"
             }
 
-        val listaExtraVariable = evento.listaEventoExtraVariable
+        val listaExtraVariable = evento.listaEventoExtra
             .filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
             .map { extraVar ->
                 val cantidad = extraVar.cantidad
-                val precio = buscarPrecio(extraVar.extra.id, ymEvento, listaPreciosExtra)
-                "${extraVar.extra.nombre}: $cantidad x $${precio}"
+                "${extraVar.extra.nombre}: $cantidad x $${extraVar.precio}"
             }
 
         // Agrega descripcion de catering
-        val listaCatering = evento.listaEventoExtraVariable
+        val listaCatering = evento.listaEventoExtra
             .filter{ it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }
             .map { extraVariable->
                 val cantidad = extraVariable.cantidad
-                val precio = buscarPrecio(extraVariable.extra.id, ymEvento, listaPreciosExtra)
-                "${extraVariable.extra.nombre}: $cantidad x $${precio}"
+                "${extraVariable.extra.nombre}: $cantidad x $${extraVariable.precio}"
             }
 
         if(listaExtra.isNotEmpty() || listaExtraVariable.isNotEmpty() || listaCatering.isNotEmpty()) {
@@ -386,15 +365,6 @@ class PdfService {
         document.close()
         return baos.toByteArray()
     }
-
-    fun buscarPrecio(extraId: Long, ymEvento: YearMonth, lista: MutableSet<PrecioConFechaExtra>): Double {
-        return lista.find { r ->
-            r.extra.id == extraId &&
-                    YearMonth.from(r.desde) <= ymEvento &&
-                    ymEvento <= YearMonth.from(r.hasta)
-        }?.precio ?: 0.0
-    }
-
 
     fun generarComprobanteDePago(pago : Pago): ByteArray {
 

@@ -1,5 +1,6 @@
 package com.estonianport.agendaza.common.security
 
+import com.estonianport.agendaza.repository.UsuarioRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -17,15 +18,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val jwtAuthorizationFilter: JWTAuthorizationFilter
+    private val jwtAuthorizationFilter: JWTAuthorizationFilter,
+    private val loginAttemptService: LoginAttemptService,
+    private val usuarioRepository: UsuarioRepository
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager): SecurityFilterChain {
-        val jwtAuthenticationFilter = JWTAuthenticationFilter()
+        val jwtAuthenticationFilter = JWTAuthenticationFilter(loginAttemptService, usuarioRepository)
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
-        jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler())
+        jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler(loginAttemptService))
 
         return http
             .cors(Customizer.withDefaults())
@@ -49,7 +52,6 @@ class SecurityConfig(
         return BCryptPasswordEncoder()
     }
 
-    // Nuevo Bean para el AuthenticationManager usando AuthenticationConfiguration
     @Bean
     fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
         return authenticationConfiguration.authenticationManager

@@ -37,13 +37,11 @@ data class EventoReservaDTO(
     val tipoEventoId: Long,
     val empresaId: Long,
     val extraOtro: Double,
-    val descuento: Long,
+    val extraOtroDescripcion: String,
+    val precioTipoEvento: Double = 0.0,
     val listaExtra: List<ExtraDTO>,
-    val listaExtraVariable: List<EventoExtraVariableDTO>,
     val cateringOtro: Double,
     val cateringOtroDescripcion: String,
-    val listaExtraTipoCatering: List<ExtraDTO>,
-    val listaExtraCateringVariable: List<EventoExtraVariableDTO>,
     val cliente: Usuario,
     val encargadoId: Long,
     val estado: Estado,
@@ -62,13 +60,11 @@ data class EventoVerDTO(
     val capacidadAdultos: Int,
     val capacidadNinos: Int,
     val extraOtro: Double,
-    val descuento: Long,
+    val extraOtroDescripcion: String,
+    val precioTipoEvento: Double,
     val listaExtra: List<ExtraDTO>,
-    val listaExtraVariable: List<EventoExtraVariableDTO>,
     val cateringOtro: Double,
     val cateringOtroDescripcion: String,
-    val listaExtraTipoCatering: List<ExtraDTO>,
-    val listaExtraCateringVariable: List<EventoExtraVariableDTO>,
     val encargado: UsuarioAbmDTO,
     val cliente: UsuarioResponseDto,
     val presupuesto: Double,
@@ -90,9 +86,8 @@ data class EventoExtraDTO(
     val nombre: String,
     val codigo: String,
     val extraOtro: Double,
-    val descuento: Long,
-    val listaExtra: List<ExtraDTO>,
-    val listaExtraVariable: List<EventoExtraVariableDTO>,
+    val extraOtroDescripcion: String,
+    val listaEventoExtra: List<ExtraDTO>,
     val tipoEventoExtra: TipoEventoPrecioDTO,
     val fechaEvento: LocalDateTime
 ) : Serializable
@@ -103,8 +98,7 @@ data class EventoCateringDTO(
     val codigo: String,
     val cateringOtro: Double,
     val cateringOtroDescripcion: String,
-    val listaExtraTipoCatering: List<ExtraDTO>,
-    val listaExtraCateringVariable: List<EventoExtraVariableDTO>,
+    val listaExtra: List<ExtraDTO>,
     val tipoEventoId: Long,
     val fechaEvento: LocalDateTime,
     val capacidadAdultos: Int,
@@ -136,6 +130,13 @@ data class EventoConUsuarioDTO(
 /**
  * DTO para editar la capacidad de un evento (PATCH /eventos/{id}/capacidad)
  */
+data class EventoPreciosDTO(
+    val precioTipoEvento: Double,
+    val listaExtra: List<ExtraDTO>,
+    val listaExtraVariable: List<EventoExtraVariableDTO>,
+    val capacidadAdultos: Int
+) : Serializable
+
 data class EventoCapacidadDTO(
     val capacidadAdultos: Int,
     val capacidadNinos: Int
@@ -143,36 +144,18 @@ data class EventoCapacidadDTO(
 
 // ==================== Extensiones para Conversión ====================
 
-fun Evento.toEventoDto(): EventoDTO {
-    return EventoDTO(
-        id = id,
-        nombre = nombre,
-        codigo = codigo,
-        inicio = inicio,
-        fin = fin,
-        tipoEvento = tipoEvento.nombre
-    )
-}
-
-fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>,
-                   listaExtraVariableEvento : List<EventoExtraVariableDTO>,
-                   listaExtraCatering : List<ExtraDTO>,
-                   listaExtraVariableCatering : List<EventoExtraVariableDTO>) : EventoVerDTO{
+fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>) : EventoVerDTO{
     return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidadAdultos, capacidadNinos, extraOtro,
-        descuento, listaExtraEvento, listaExtraVariableEvento, cateringOtro, cateringOtroDescripcion,
-        listaExtraCatering, listaExtraVariableCatering, encargado.toUsuarioAbmDto(), cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
+        extraOtroDescripcion, precioTipoEvento, listaExtraEvento, cateringOtro, cateringOtroDescripcion, encargado.toUsuarioAbmDto(),
+        cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
 }
 
 fun Evento.toEventoReservaDto(
-    listaExtraEvento: List<ExtraDTO>,
-    listaExtraVariableEvento: List<EventoExtraVariableDTO>,
-    listaExtraCatering: List<ExtraDTO>,
-    listaExtraVariableCatering: List<EventoExtraVariableDTO>
+    listaExtraEvento: List<ExtraDTO>
 ): EventoReservaDTO {
     return EventoReservaDTO(id, nombre, capacidadAdultos, capacidadNinos, codigo, inicio, fin, tipoEvento.id,
-        empresa.id, extraOtro, descuento, listaExtraEvento, listaExtraVariableEvento,
-        cateringOtro, cateringOtroDescripcion, listaExtraCatering, listaExtraVariableCatering,
-        cliente, encargado.id, estado, anotaciones
+        empresa.id, extraOtro, extraOtroDescripcion, precioTipoEvento, listaExtraEvento,
+        cateringOtro, cateringOtroDescripcion, cliente, encargado.id, estado, anotaciones
     )
 }
 
@@ -180,14 +163,12 @@ fun Evento.toEventoHoraDto(): EventoHoraDTO {
     return EventoHoraDTO(id, nombre, codigo, inicio, fin)
 }
 
-fun Evento.toEventoCateringDto(listaExtra: List<ExtraDTO>,
-                        listaExtraVariable: List<EventoExtraVariableDTO>): EventoCateringDTO {
+fun Evento.toEventoCateringDto(listaExtra: List<ExtraDTO>): EventoCateringDTO {
     return EventoCateringDTO(id, nombre, codigo, cateringOtro, cateringOtroDescripcion, listaExtra,
-        listaExtraVariable, tipoEvento.id, inicio, capacidadAdultos, capacidadNinos)
+        tipoEvento.id, inicio, capacidadAdultos, capacidadNinos)
 }
 
-fun Evento.toEventoExtraDto(listaExtra: List<ExtraDTO>,
-                     listaExtraVariable: List<EventoExtraVariableDTO>): EventoExtraDTO {
-    return EventoExtraDTO(id, nombre, codigo, extraOtro, descuento, listaExtra,
-        listaExtraVariable, empresa.toTipoEventoPrecioDTO(inicio, tipoEvento), inicio)
+fun Evento.toEventoExtraDto(listaExtra: List<ExtraDTO>): EventoExtraDTO {
+    return EventoExtraDTO(id, nombre, codigo, extraOtro, extraOtroDescripcion, listaExtra,
+        TipoEventoPrecioDTO(tipoEvento.id, tipoEvento.nombre, precioTipoEvento), inicio)
 }

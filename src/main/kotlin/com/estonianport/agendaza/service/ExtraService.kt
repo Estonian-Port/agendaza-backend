@@ -8,6 +8,7 @@ import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.dto.toExtraPrecioDTO
 import com.estonianport.agendaza.model.Empresa
+import com.estonianport.agendaza.model.EventoExtra
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.PrecioConFechaExtra
 import com.estonianport.agendaza.model.enums.TipoExtra
@@ -34,14 +35,33 @@ class ExtraService (
 
     // ==================== CONVERSIÓN ====================
 
-    fun fromListaExtraDtoToListaExtra(listaExtraDTO: List<ExtraDTO>): List<Extra> =
-        listaExtraDTO.map { get(it.id)!! }
+    fun fromListaExtraDtoToListaExtra(listaExtraDTO: List<ExtraDTO>, evento: com.estonianport.agendaza.model.Evento): List<EventoExtra> =
+        listaExtraDTO.map { dto ->
+            val extra = get(dto.id) ?: throw com.estonianport.agendaza.errors.NotFoundException("Extra no encontrado")
+            val cantidad = when (extra.tipoExtra) {
+                TipoExtra.EVENTO, TipoExtra.TIPO_CATERING -> 1
+                TipoExtra.VARIABLE_EVENTO, TipoExtra.VARIABLE_CATERING -> dto.cantidad.coerceAtLeast(1)
+            }
+            EventoExtra(
+                id = 0,
+                evento = evento,
+                extra = extra,
+                precio = dto.precio,
+                cantidad = cantidad
+            )
+        }
 
     fun fromListaExtraToListaExtraDto(
         empresa: Empresa,
         listaExtra: List<Extra>,
         fechaEvento: LocalDateTime
-    ): List<ExtraDTO> = listaExtra.map { it.toExtraPrecioDTO(empresa, fechaEvento) }
+    ): List<ExtraDTO> = listaExtra.map { extra ->
+        extra.toExtraPrecioDTO(empresa, fechaEvento).also { dto ->
+            empresa.listaPrecioConFechaExtra.firstOrNull { it.extra.id == extra.id && it.fechaBaja == null &&
+                (it.desde == fechaEvento || (it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento)))
+            }?.let { vigente -> dto.precio = vigente.precio }
+        }
+    }
 
     fun fromListaExtraToListaExtraDtoByFilter(
         empresa: Empresa,
@@ -53,6 +73,10 @@ class ExtraService (
         listaExtra.filter { it.tipoExtra == tipoExtra },
         fechaEvento
     )
+
+    fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
+        listaExtra.filter { it.extra.tipoExtra in tipoExtras }
+            .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
 
     // ==================== EVENTO - PAGINADO ====================
 

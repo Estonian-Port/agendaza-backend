@@ -135,7 +135,13 @@ class UsuarioService (
     // ==================== SAVE/UPDATE ====================
 
     @Transactional
-    @CacheEvict(value = ["usuarioByUsername"], key = "#entity.username", allEntries = true)
+    @CacheEvict(value = [
+        "usuarioDtoByEmail",
+        "usuarioDtoByCelular",
+        "usuarioDtoByUsername",
+        "usuarioPerfil",
+        "eventoVer"
+    ], key = "#entity.username", allEntries = true)
     override fun save(entity: Usuario): Usuario {
         return usuarioRepository.save(entity)
     }

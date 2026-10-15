@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,6 +13,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(
@@ -43,6 +45,7 @@ class Usuario(
     @Column(nullable = true)
     var username: String? = null
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = true)
     var password: String? = null
 
@@ -54,6 +57,12 @@ class Usuario(
 
     @Column
     var fechaBaja: LocalDate? = null
+
+    @Column(nullable = true)
+    var ultimoLogin: LocalDateTime? = null
+
+    @Column(nullable = true)
+    var fechaCambioPassword: LocalDateTime? = null
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)

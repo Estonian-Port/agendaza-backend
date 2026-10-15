@@ -1,6 +1,5 @@
 package com.estonianport.agendaza.service
 
-import ReservaRegistradaEvent
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.openPDF.PdfService
 import com.estonianport.agendaza.dto.EventoDTO
@@ -11,12 +10,12 @@ import com.estonianport.agendaza.dto.EventoCateringDTO
 import com.estonianport.agendaza.dto.EventoConUsuarioDTO
 import com.estonianport.agendaza.dto.EventoExtraDTO
 import com.estonianport.agendaza.dto.ExtraDTO
-import com.estonianport.agendaza.dto.EventoExtraVariableDTO
 import com.estonianport.agendaza.dto.EventoHoraDTO
+import com.estonianport.agendaza.dto.TipoEventoPrecioDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.Evento
-import com.estonianport.agendaza.model.EventoExtraVariable
+import com.estonianport.agendaza.model.EventoExtra
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Salon
 import com.estonianport.agendaza.model.TipoEvento
@@ -42,7 +41,6 @@ class EventoServiceTest {
     private val eventoRepository     = mock<EventoRepository>()
     private val empresaService       = mock<EmpresaService>()
     private val extraService         = mock<ExtraService>()
-    private val extraVariableService = mock<ExtraVariableService>()
     private val emailService         = mock<EmailService>()
     private val usuarioService       = mock<UsuarioService>()
     private val pdfService           = mock<PdfService>()
@@ -54,8 +52,8 @@ class EventoServiceTest {
     @BeforeEach
     fun setUp() {
         service = EventoService(
-            eventoRepository, empresaService, extraService, extraVariableService,
-            usuarioService, pdfService, tipoEventoService, emailService, eventPublisher
+            eventoRepository, empresaService, extraService, usuarioService,
+            pdfService, tipoEventoService, emailService, eventPublisher
         )
     }
 
@@ -72,8 +70,8 @@ class EventoServiceTest {
             id = id, nombre = nombre, tipoEvento = tipoEvento,
             inicio = LocalDateTime.now(), fin = LocalDateTime.now().plusHours(5),
             capacidadAdultos = 100, capacidadNinos = 20,
-            extraOtro = 0.0, descuento = 0L,
-            listaExtra = mutableSetOf(), cateringOtro = 0.0,
+            extraOtro = 0.0, extraOtroDescripcion = "",
+            listaEventoExtra = mutableSetOf(), cateringOtro = 0.0,
             cateringOtroDescripcion = "", encargado = encargado, cliente = cliente,
             codigo = "ABCD", estado = Estado.RESERVADO, anotaciones = "", empresa = empresa
         )
@@ -92,16 +90,13 @@ class EventoServiceTest {
             id = 0L, nombre = "  Fiesta de Ana  ", capacidadAdultos = 50, capacidadNinos = 10,
             codigo = codigo, inicio = LocalDateTime.of(2026, 10, 10, 18, 0),
             fin = LocalDateTime.of(2026, 10, 10, 23, 0), tipoEventoId = 4L, empresaId = 3L,
-            extraOtro = 0.0, descuento = 0L, listaExtra = emptyList(), listaExtraVariable = emptyList(),
-            cateringOtro = 0.0, cateringOtroDescripcion = "", listaExtraTipoCatering = emptyList(),
-            listaExtraCateringVariable = emptyList(), cliente = cliente, encargadoId = 5L,
+            extraOtro = 0.0, extraOtroDescripcion = "", listaExtra = emptyList(),
+            cateringOtro = 0.0, cateringOtroDescripcion = "", cliente = cliente, encargadoId = 5L,
             estado = Estado.RESERVADO, anotaciones = ""
         )
 
     private fun prepararDependenciasReserva(dto: EventoReservaDTO) {
         whenever(empresaService.findById(dto.empresaId)).thenReturn(mock())
-        whenever(extraService.fromListaExtraDtoToListaExtra(any())).thenReturn(emptyList())
-        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(any())).thenReturn(emptyList())
         whenever(usuarioService.getByEmail(any())).thenReturn(null)
         whenever(usuarioService.getByCelular(any())).thenReturn(null)
         whenever(usuarioService.save(any())).thenAnswer { it.arguments[0] as Usuario }
@@ -117,30 +112,27 @@ class EventoServiceTest {
     inner class RegistrarReservaTest {
 
         @Test
-        fun `registra reserva normaliza datos y vincula extras variables`() {
+        fun `registra reserva normaliza datos y guarda la foto de precios y cantidades de extras`() {
             val dto = buildReservaDTO().copy(
-                listaExtra = listOf(ExtraDTO(10L, "extra", TipoExtra.EVENTO)),
-                listaExtraTipoCatering = listOf(ExtraDTO(11L, "catering", TipoExtra.TIPO_CATERING)),
-                listaExtraVariable = listOf(EventoExtraVariableDTO(20L, 2, "variable", 15.0)),
-                listaExtraCateringVariable = listOf(EventoExtraVariableDTO(21L, 3, "variable catering", 20.0))
-            )
-            val extraEvento = mock<Extra>()
-            val extraCatering = mock<Extra>()
-            val variableEvento = EventoExtraVariable(1L, mock(), 2)
-            val variableCatering = EventoExtraVariable(2L, mock(), 3)
-            prepararDependenciasReserva(dto)
-            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtra)).thenReturn(listOf(extraEvento))
-            whenever(extraService.fromListaExtraDtoToListaExtra(dto.listaExtraTipoCatering)).thenReturn(
-                listOf(
-                    extraCatering
+                listaExtra = listOf(
+                    ExtraDTO(10L, "extra", TipoExtra.EVENTO).also { it.precio = 25.0 },
+                    ExtraDTO(11L, "catering", TipoExtra.TIPO_CATERING).also { it.precio = 100.0 },
+                    ExtraDTO(20L, "variable", TipoExtra.VARIABLE_EVENTO).also { it.precio = 15.0; it.cantidad = 2 },
+                    ExtraDTO(21L, "variable catering", TipoExtra.VARIABLE_CATERING).also { it.precio = 20.0; it.cantidad = 3 }
                 )
             )
-            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraVariable)).thenReturn(
-                listOf(variableEvento)
-            )
-            whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(dto.listaExtraCateringVariable)).thenReturn(
-                listOf(variableCatering)
-            )
+            prepararDependenciasReserva(dto)
+            whenever(extraService.fromListaExtraDtoToListaExtra(eq(dto.listaExtra), any())).thenAnswer { invocation ->
+                val evento = invocation.getArgument<Evento>(1)
+                dto.listaExtra.map { item ->
+                    EventoExtra(
+                        evento = evento,
+                        extra = Extra(item.id, item.nombre, item.tipoExtra),
+                        precio = item.precio,
+                        cantidad = item.cantidad
+                    )
+                }
+            }
             whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
 
             assertEquals(42L, service.registrarReserva(dto))
@@ -149,10 +141,10 @@ class EventoServiceTest {
             verify(eventoRepository).save(captor.capture())
             val saved = captor.firstValue
             assertEquals("fiesta de ana", saved.nombre)
-            assertEquals(setOf(extraEvento, extraCatering), saved.listaExtra)
-            assertEquals(setOf(variableEvento, variableCatering), saved.listaEventoExtraVariable)
-            assertSame(saved, variableEvento.evento)
-            assertSame(saved, variableCatering.evento)
+            assertEquals(4, saved.listaEventoExtra.size)
+            assertEquals(mapOf(10L to 25.0, 11L to 100.0, 20L to 15.0, 21L to 20.0), saved.listaEventoExtra.associate { it.extra.id to it.precio })
+            assertEquals(mapOf(10L to 1, 11L to 1, 20L to 2, 21L to 3), saved.listaEventoExtra.associate { it.extra.id to it.cantidad })
+            assertTrue(saved.listaEventoExtra.all { it.evento === saved })
             assertEquals("ana", dto.cliente.nombre)
             assertEquals("perez", dto.cliente.apellido)
             assertEquals("ana@test.com", dto.cliente.email)
@@ -557,46 +549,38 @@ class EventoServiceTest {
     }
 
     @Test
-    fun `getEventoExtra filtra extras de evento y variables`() {
+    fun `getEventoExtra devuelve extras de evento desde la foto de precios`() {
         val evento = buildEvento()
         whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
-        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)).thenReturn(emptyList())
-        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)).thenReturn(emptyList())
+        whenever(extraService.aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO))).thenReturn(emptyList())
 
         val result = service.getEventoExtra(1L)
 
         assertEquals(evento.id, result?.id)
-        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)
-        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)
+        verify(extraService).aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO))
     }
 
     @Test
-    fun `getEventoCatering filtra extras de catering y variables`() {
+    fun `getEventoCatering devuelve extras de catering desde la foto de precios`() {
         val evento = buildEvento()
         whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
-        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)).thenReturn(emptyList())
-        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)).thenReturn(emptyList())
+        whenever(extraService.aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING))).thenReturn(emptyList())
 
         val result = service.getEventoCatering(1L)
 
         assertEquals(evento.id, result?.id)
-        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)
-        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+        verify(extraService).aplicarPreciosFoto(evento.listaEventoExtra, setOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING))
     }
 
     @Test
-    fun `getEventoVer solicita las cuatro categorias de extras`() {
+    fun `getEventoVer obtiene todas las categorias desde la foto de precios`() {
         val evento = buildEvento()
         whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
-        whenever(extraService.fromListaExtraToListaExtraDtoByFilter(any(), any(), any(), any())).thenReturn(emptyList())
-        whenever(extraVariableService.fromListaExtraVariableToListaExtraVariableDtoByFilter(any(), any(), any(), any())).thenReturn(emptyList())
+        whenever(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet())).thenReturn(emptyList())
 
         service.getEventoVer(1L)
 
-        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.EVENTO)
-        verify(extraService).fromListaExtraToListaExtraDtoByFilter(evento.empresa, evento.listaExtra, evento.inicio, TipoExtra.TIPO_CATERING)
-        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_EVENTO)
-        verify(extraVariableService).fromListaExtraVariableToListaExtraVariableDtoByFilter(evento.empresa, evento.listaEventoExtraVariable, evento.inicio, TipoExtra.VARIABLE_CATERING)
+        verify(extraService).aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet())
     }
 
     @Test
@@ -605,18 +589,23 @@ class EventoServiceTest {
         val catering = Extra(1L, "catering", TipoExtra.TIPO_CATERING)
         val anteriorEvento = Extra(2L, "anterior", TipoExtra.EVENTO)
         val nuevoEvento = Extra(3L, "nuevo", TipoExtra.EVENTO)
-        evento.listaExtra.addAll(listOf(catering, anteriorEvento))
+        val itemCatering = EventoExtra(evento = evento, extra = catering, precio = 40.0)
+        val itemAnterior = EventoExtra(evento = evento, extra = anteriorEvento, precio = 30.0)
+        val itemNuevo = EventoExtra(evento = evento, extra = nuevoEvento, precio = 55.0)
+        evento.listaEventoExtra.addAll(listOf(itemCatering, itemAnterior))
         whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
-        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList())).thenReturn(listOf(nuevoEvento))
-        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(emptyList())).thenReturn(emptyList())
+        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList(), evento)).thenReturn(listOf(itemNuevo))
         whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
-        val dto = EventoExtraDTO(1L, "evento", "ABCD", 55.0, 10L, emptyList(), emptyList(), mock(), evento.inicio)
+        val dto = EventoExtraDTO(
+            1L, "evento", "ABCD", 55.0, "descripcion", emptyList(),
+            TipoEventoPrecioDTO(1L, "Casamiento", 120.0), evento.inicio
+        )
 
         assertEquals(1L, service.editEventoExtra(dto))
 
-        assertEquals(setOf(catering, nuevoEvento), evento.listaExtra)
+        assertEquals(setOf(itemCatering, itemNuevo), evento.listaEventoExtra)
         assertEquals(55.0, evento.extraOtro)
-        assertEquals(10L, evento.descuento)
+        assertEquals(120.0, evento.precioTipoEvento)
     }
 
     @Test
@@ -625,16 +614,18 @@ class EventoServiceTest {
         val normal = Extra(1L, "evento", TipoExtra.EVENTO)
         val anteriorCatering = Extra(2L, "anterior", TipoExtra.TIPO_CATERING)
         val nuevoCatering = Extra(3L, "nuevo", TipoExtra.TIPO_CATERING)
-        evento.listaExtra.addAll(listOf(normal, anteriorCatering))
+        val itemNormal = EventoExtra(evento = evento, extra = normal, precio = 30.0)
+        val itemAnterior = EventoExtra(evento = evento, extra = anteriorCatering, precio = 40.0)
+        val itemNuevo = EventoExtra(evento = evento, extra = nuevoCatering, precio = 75.0)
+        evento.listaEventoExtra.addAll(listOf(itemNormal, itemAnterior))
         whenever(eventoRepository.findById(1L)).thenReturn(Optional.of(evento))
-        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList())).thenReturn(listOf(nuevoCatering))
-        whenever(extraVariableService.fromListaExtraVariableDtoToListaExtraVariable(emptyList())).thenReturn(emptyList())
+        whenever(extraService.fromListaExtraDtoToListaExtra(emptyList(), evento)).thenReturn(listOf(itemNuevo))
         whenever(eventoRepository.save(any<Evento>())).thenAnswer { it.arguments[0] as Evento }
-        val dto = EventoCateringDTO(1L, "evento", "ABCD", 75.0, "menu", emptyList(), emptyList(), 2L, evento.inicio, 100, 20)
+        val dto = EventoCateringDTO(1L, "evento", "ABCD", 75.0, "menu", emptyList(), 2L, evento.inicio, 100, 20)
 
         assertEquals(1L, service.editEventoCatering(dto))
 
-        assertEquals(setOf(normal, nuevoCatering), evento.listaExtra)
+        assertEquals(setOf(itemNormal, itemNuevo), evento.listaEventoExtra)
         assertEquals(75.0, evento.cateringOtro)
         assertEquals("menu", evento.cateringOtroDescripcion)
     }

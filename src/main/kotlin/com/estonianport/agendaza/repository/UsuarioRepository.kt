@@ -4,9 +4,12 @@ import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.model.Usuario
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Repository
 interface UsuarioRepository : CrudRepository<Usuario, Long> {
@@ -16,13 +19,6 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.username = :username")
     fun getByUsername(username: String): Usuario?
 
-    @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL")
-    fun getByEmail(email: String): Usuario?
-
-    @Query("SELECT u FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL")
-    fun getByCelular(celular: Long): Usuario?
-
-    // Devuelven lista en vez de resultado único: no explotan si hay duplicados viejos en la base
     @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByEmail(email: String): List<Usuario>
 
@@ -193,5 +189,12 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL")
     fun existsByCelular(celular: Long): Boolean
+
+    // ==================== SECURITY ====================
+
+    @Modifying
+    @Transactional
+    @Query("update Usuario u set u.ultimoLogin = :ahora where u.username = :username")
+    fun actualizarUltimoLogin(username: String, ahora: LocalDateTime)
 
 }

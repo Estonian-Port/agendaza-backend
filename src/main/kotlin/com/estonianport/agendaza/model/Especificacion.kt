@@ -38,11 +38,11 @@ class PrecioDePlatoNinos(
         if(evento.cateringOtro != 0.0){
             precioPlato = evento.cateringOtro
 
-        }else if(evento.listaExtra.any { it.tipoExtra == TipoExtra.TIPO_CATERING }){
-            val extra = evento.listaExtra.find { it.tipoExtra == TipoExtra.TIPO_CATERING }
+        }else if(evento.listaEventoExtra.any { it.extra.tipoExtra == TipoExtra.TIPO_CATERING }){
+            val extra = evento.listaEventoExtra.find { it.extra.tipoExtra == TipoExtra.TIPO_CATERING }
 
             if (extra != null) {
-                precioPlato = evento.empresa.getPrecioOfExtraByFecha(extra, evento.inicio)
+                precioPlato = extra.precio
             }
         }
 
@@ -73,8 +73,9 @@ class AgregarExtraNinoSiSuperaCapacidad(
         if (capacidadNinosEvento > capacidadNinosTipoEvento) {
             val ninosExtras = capacidadNinosEvento - capacidadNinosTipoEvento
 
-            val extraEventoVariableNino = EventoExtraVariable(0,extraNino,ninosExtras)
-            evento.listaEventoExtraVariable.add(extraEventoVariableNino)
+            val precio = empresa.getPrecioOfExtraByFecha(extraNino, evento.inicio)
+            evento.listaEventoExtra.removeAll { it.extra.id == extraNino.id && it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+            evento.listaEventoExtra.add(EventoExtra(0, evento, extraNino, precio, ninosExtras))
         }
     }
 
@@ -108,8 +109,9 @@ class AgregarExtraCamareraSiSuperaCapacidad(
             if (capacidadAdultosEvento > capacidadAdultosTipoEvento) {
                 val adultosExtras = (capacidadAdultosEvento - capacidadAdultosTipoEvento) / 10
 
-                val extraEventoVariableNino = EventoExtraVariable(0,extraCamarera,adultosExtras)
-                evento.listaEventoExtraVariable.add(extraEventoVariableNino)
+                val precio = empresa.getPrecioOfExtraByFecha(extraCamarera, evento.inicio)
+                evento.listaEventoExtra.removeAll { it.extra.id == extraCamarera.id && it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+                evento.listaEventoExtra.add(EventoExtra(0, evento, extraCamarera, precio, adultosExtras))
             }
 
         }

@@ -12,6 +12,8 @@ class ExtraDTO(val id : Long, val nombre : String, val tipoExtra : TipoExtra){
 
     var precio : Double = 0.0
 
+    var cantidad: Int = 1
+
     var listaTipoEventoId: MutableSet<Long> = mutableSetOf()
 
 }

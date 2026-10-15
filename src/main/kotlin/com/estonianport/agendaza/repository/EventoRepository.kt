@@ -27,8 +27,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         "tipoEvento",
         "encargado",
         "cliente",
-        "listaExtra",
-        "listaEventoExtraVariable",
+        "listaEventoExtra",
         "empresa"
     ])
     override fun findById(id: Long): Optional<Evento>
@@ -228,8 +227,7 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         "tipoEvento",
         "encargado",
         "cliente",
-        "listaExtra",
-        "listaEventoExtraVariable",
+        "listaEventoExtra",
         "empresa"
     ])
     @Query(

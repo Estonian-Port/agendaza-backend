@@ -27,11 +27,10 @@ class Evento(
     var id: Long,
 
     @Column
-    var nombre: String,
+    var codigo: String,
 
-    @ManyToOne
-    @JoinColumn(name = "tipo_evento_id")
-    var tipoEvento: TipoEvento,
+    @Column
+    var nombre: String,
 
     @Column
     var inicio: LocalDateTime,
@@ -45,28 +44,27 @@ class Evento(
     @Column(name = "capacidad_ninos")
     var capacidadNinos: Int,
 
+    @ManyToOne
+    @JoinColumn(name = "tipo_evento_id")
+    var tipoEvento: TipoEvento,
+
+    @Column(name = "precio_tipo_evento")
+    var precioTipoEvento: Double = 0.0,
+
     @Column
     var extraOtro: Double,
 
     @Column
-    var descuento : Long,
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "evento_extra",
-        joinColumns = [JoinColumn(name = "evento_id")],
-        inverseJoinColumns = [JoinColumn(name = "extra_id")]
-    )
-    var listaExtra: MutableSet<Extra>,
-
-    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-    var listaEventoExtraVariable: MutableSet<EventoExtraVariable> = mutableSetOf(),
+    var extraOtroDescripcion : String,
 
     @Column
     var cateringOtro : Double,
 
     @Column
     var cateringOtroDescripcion : String,
+
+    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    var listaEventoExtra: MutableSet<EventoExtra>,
 
     @ManyToOne
     @JoinColumn(name = "encargado_id")
@@ -75,9 +73,6 @@ class Evento(
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     var cliente: Usuario,
-
-    @Column
-    var codigo: String,
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -90,6 +85,12 @@ class Evento(
     @JoinColumn(name = "empresa_id")
     var empresa : Empresa){
 
+    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var listaPago: MutableSet<Pago> = mutableSetOf()
+
+    @Column
+    var fechaBaja : LocalDate? = null
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "evento_empleado",
@@ -98,34 +99,18 @@ class Evento(
     )
     var listaEmpleado: MutableSet<Usuario> = mutableSetOf()
 
-    @OneToMany(mappedBy = "evento", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var listaPago: MutableSet<Pago> = mutableSetOf()
-
-    @Column
-    var fechaBaja : LocalDate? = null
-
-    //TODO Simplificar los filter
     fun getPresupuesto(): Double{
-        var presupuesto =
-                empresa.getPrecioOfTipoEvento(tipoEvento.id, inicio) +
-                empresa.getSumOfPrecioByListaExtra(
-                    listaExtra.filter { it.tipoExtra == TipoExtra.EVENTO }, inicio) +
-                empresa.getSumOfPrecioByListaExtraVariable(
-                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }, inicio) +
+        val presupuesto =
+                precioTipoEvento +
+                listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.EVENTO || it.extra.tipoExtra == TipoExtra.VARIABLE_EVENTO }
+                    .sumOf { it.subtotal } +
                 extraOtro
-
-        if(descuento != 0L){
-            presupuesto -= (presupuesto * (descuento / 100.0))
-        }
         return presupuesto
     }
 
     fun getPresupuestoCatering(): Double{
-        return capacidadAdultos *
-                empresa.getSumOfPrecioByListaExtra(
-                    listaExtra.filter { it.tipoExtra == TipoExtra.TIPO_CATERING }, inicio) +
-                empresa.getSumOfPrecioByListaExtraVariable(
-                    listaEventoExtraVariable.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }, inicio) +
+        return capacidadAdultos * listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.TIPO_CATERING }.sumOf { it.subtotal } +
+                listaEventoExtra.filter { it.extra.tipoExtra == TipoExtra.VARIABLE_CATERING }.sumOf { it.subtotal } +
             capacidadAdultos * cateringOtro
     }
 

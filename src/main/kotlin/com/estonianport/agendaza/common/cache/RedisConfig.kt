@@ -2,7 +2,8 @@ package com.estonianport.agendaza.common.cache
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule // <-- NUEVA IMPORTACIÓN
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,12 +20,23 @@ class RedisConfig {
 
     @Bean
     fun cacheManager(connectionFactory: RedisConnectionFactory): RedisCacheManager {
+
+        val typeValidator = BasicPolymorphicTypeValidator.builder()
+            .allowIfSubType("com.estonianport.agendaza.")
+            .allowIfSubType("java.util.")
+            .allowIfSubType("java.time.")
+            .allowIfSubType("java.math.")
+            .allowIfSubType("kotlin.")
+            .allowIfSubType(Number::class.java)
+            .allowIfSubTypeIsArray()
+            .build()
+
         val objectMapper = ObjectMapper().apply {
             registerKotlinModule()
             registerModule(JavaTimeModule())
 
             activateDefaultTyping(
-                polymorphicTypeValidator,
+                typeValidator,
                 ObjectMapper.DefaultTyping.EVERYTHING,
                 JsonTypeInfo.As.PROPERTY
             )
