@@ -31,7 +31,7 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "FROM Empresa e " +
             "INNER JOIN e.listaPrecioConFechaExtra pf " +
             "WHERE e.id = :empresaId AND pf.extra.id = :extraId " +
-            " AND pf.desde >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
+            " AND pf.hasta >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
             " AND pf.fechaBaja IS NULL")
     fun getAllPrecioConFechaByExtraId(empresaId: Long, extraId: Long): List<PrecioConFechaDTO>
 
@@ -39,7 +39,7 @@ interface EmpresaRepository : CrudRepository<Empresa, Long>{
             "FROM Empresa e " +
             "INNER JOIN e.listaPrecioConFechaTipoEvento pf " +
             "WHERE e.id = :empresaId AND pf.tipoEvento.id = :tipoEventoId " +
-            " AND pf.desde >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
+            " AND pf.hasta >= CAST(CONCAT(EXTRACT(YEAR FROM CURRENT_DATE), '-01-01') AS DATE) " +
             " AND pf.fechaBaja IS NULL")
     fun getAllPrecioConFechaByTipoEventoId(empresaId: Long, tipoEventoId: Long): List<PrecioConFechaDTO>
 
