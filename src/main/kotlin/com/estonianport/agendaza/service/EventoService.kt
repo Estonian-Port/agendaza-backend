@@ -74,7 +74,7 @@ class EventoService(
         value = ["eventoVer", "eventoHora", "eventoCatering", "eventoExtra", "agendaEventos"],
         key = "#dto.empresaId"
     )
-    fun registrarReserva(dto: EventoReservaDTO): Long {
+    fun registrarReserva(dto: EventoReservaDTO): EventoHoraDTO {
         val empresa = empresaService.findById(dto.empresaId)
 
         // 1. Generar código si es necesario
@@ -120,7 +120,7 @@ class EventoService(
         // 10. Notificar cliente
         eventPublisher.publishEvent(ReservaRegistradaEvent(eventoSaved.id, empresa.id))
 
-        return eventoSaved.id
+        return eventoSaved.toEventoHoraDto()
     }
 
     private fun procesarYNormalizarCliente(clienteInput: Usuario): Usuario {
@@ -281,6 +281,7 @@ class EventoService(
     @Cacheable(value = ["eventoVer"], key = "#eventoId")
     fun getEventoVer(eventoId: Long): EventoVerDTO? {
         val evento = findById(eventoId)
+        return evento.toEventoVerDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
         return evento.toEventoVerDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
     }
 

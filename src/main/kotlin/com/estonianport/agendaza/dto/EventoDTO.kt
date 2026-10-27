@@ -56,6 +56,7 @@ data class EventoVerDTO(
     val codigo: String,
     val inicio: LocalDateTime,
     val fin: LocalDateTime,
+    val tipoEventoId: Long,
     val tipoEventoNombre: String,
     val capacidadAdultos: Int,
     val capacidadNinos: Int,
@@ -145,7 +146,7 @@ data class EventoCapacidadDTO(
 // ==================== Extensiones para Conversión ====================
 
 fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>) : EventoVerDTO{
-    return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidadAdultos, capacidadNinos, extraOtro,
+    return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.id, tipoEvento.nombre, capacidadAdultos, capacidadNinos, extraOtro,
         extraOtroDescripcion, precioTipoEvento, listaExtraEvento, cateringOtro, cateringOtroDescripcion, encargado.toUsuarioAbmDto(),
         cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
 }
