@@ -18,6 +18,20 @@ interface GastoRepository : CrudRepository<Gasto, Long> {
             g.medioDePago, e.nombre, e.codigo
         )
         FROM Gasto g
+        JOIN g.evento e
+        WHERE e.id = :eventoId AND g.fechaBaja IS NULL
+        ORDER BY g.fecha DESC
+        """
+    )
+    fun getAllGastoByEvento(eventoId: Long): List<GastoDTO>
+
+    @Query(
+        """
+        SELECT new com.estonianport.agendaza.dto.GastoDTO(
+            g.id, g.monto, g.tipoGasto, g.descripcion, g.fecha, e.id, g.empresa.id, g.encargado.id,
+            g.medioDePago, e.nombre, e.codigo
+        )
+        FROM Gasto g
         LEFT JOIN g.evento e
         WHERE g.empresa.id = :empresaId
           AND g.fechaBaja IS NULL

@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.controller
 
 import com.estonianport.agendaza.dto.EventoReservaDTO
+import com.estonianport.agendaza.dto.EventoHoraDTO
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.Estado
@@ -49,12 +50,15 @@ class EventoControllerTest {
             estado = Estado.RESERVADO,
             anotaciones = ""
         )
-        whenever(eventoService.registrarReserva(any())).thenReturn(91L)
+        val eventoGuardado = EventoHoraDTO(
+            reserva.id, reserva.nombre, reserva.codigo, reserva.inicio, reserva.fin
+        )
+        whenever(eventoService.registrarReserva(any())).thenReturn(eventoGuardado)
 
         val response = controller.saveEvento(reserva)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(91L, response.body?.data)
+        assertEquals(eventoGuardado, response.body?.data)
         verify(eventoService).registrarReserva(reserva)
     }
 }

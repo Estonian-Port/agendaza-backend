@@ -45,6 +45,17 @@ class GastoController(
         )
     }
 
+    @GetMapping("/evento/{eventoId}")
+    fun getAllGastoByEvento(@PathVariable eventoId: Long): ResponseEntity<CustomResponse<List<GastoDTO>>> {
+        val gastos = gastoService.getAllGastoByEvento(eventoId)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Gastos del evento obtenidos correctamente",
+                data = gastos
+            )
+        )
+    }
+
     @GetMapping("/empresa/{empresaId}/mes")
     fun getAllGastoByMes(
         @PathVariable empresaId: Long,

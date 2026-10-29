@@ -2,6 +2,7 @@ package com.estonianport.agendaza.dto
 
 import com.estonianport.agendaza.model.Evento
 import com.estonianport.agendaza.model.enums.Estado
+import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.Usuario
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -56,7 +57,9 @@ data class EventoVerDTO(
     val codigo: String,
     val inicio: LocalDateTime,
     val fin: LocalDateTime,
+    val tipoEventoId: Long,
     val tipoEventoNombre: String,
+    val duracion: Duracion,
     val capacidadAdultos: Int,
     val capacidadNinos: Int,
     val extraOtro: Double,
@@ -76,6 +79,7 @@ data class EventoPagoDTO(
     val id: Long,
     val nombre: String,
     val codigo: String,
+    val fechaEvento: LocalDateTime,
     var precioTotal: Double
 ) : Serializable
 
@@ -145,9 +149,9 @@ data class EventoCapacidadDTO(
 // ==================== Extensiones para Conversión ====================
 
 fun Evento.toEventoVerDto(listaExtraEvento : List<ExtraDTO>) : EventoVerDTO{
-    return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.nombre, capacidadAdultos, capacidadNinos, extraOtro,
-        extraOtroDescripcion, precioTipoEvento, listaExtraEvento, cateringOtro, cateringOtroDescripcion, encargado.toUsuarioAbmDto(),
-        cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
+    return EventoVerDTO(id, nombre, codigo, inicio, fin, tipoEvento.id, tipoEvento.nombre, tipoEvento.duracion,
+        capacidadAdultos, capacidadNinos, extraOtro, extraOtroDescripcion, precioTipoEvento, listaExtraEvento, cateringOtro, cateringOtroDescripcion,
+        encargado.toUsuarioAbmDto(), cliente.toUsuarioResponseDto(), this.getPresupuestoTotal(), estado, anotaciones)
 }
 
 fun Evento.toEventoReservaDto(

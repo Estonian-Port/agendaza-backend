@@ -355,7 +355,7 @@ class EventoController(
     @PostMapping
     fun saveEvento(
         @RequestBody evento: EventoReservaDTO
-    ): ResponseEntity<CustomResponse<Long>> {
+    ): ResponseEntity<CustomResponse<EventoHoraDTO>> {
         val eventoGuardado = eventoService.registrarReserva(evento)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
