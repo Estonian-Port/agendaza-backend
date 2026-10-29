@@ -36,6 +36,10 @@ class GastoService(
     }
 
     @Transactional(readOnly = true)
+    fun getAllGastoByEvento(eventoId: Long): List<GastoDTO> =
+        gastoRepository.getAllGastoByEvento(eventoId)
+
+    @Transactional(readOnly = true)
     fun getAllGastoByMes(empresaId: Long, mes: Int, anio: Int): List<GastoDTO> {
         val (desde, hasta) = rangoDelMes(mes, anio)
         return gastoRepository.getAllGastoByRango(empresaId, desde, hasta)

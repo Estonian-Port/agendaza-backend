@@ -282,7 +282,6 @@ class EventoService(
     fun getEventoVer(eventoId: Long): EventoVerDTO? {
         val evento = findById(eventoId)
         return evento.toEventoVerDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
-        return evento.toEventoVerDto(extraService.aplicarPreciosFoto(evento.listaEventoExtra, TipoExtra.entries.toSet()))
     }
 
     @Transactional(readOnly = true)

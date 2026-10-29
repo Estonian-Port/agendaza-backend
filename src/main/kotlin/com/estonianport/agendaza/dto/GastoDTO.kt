@@ -16,8 +16,8 @@ data class GastoDTO(
     val empresaId: Long,
     val usuarioId: Long,
     val medioDePago: MedioDePago? = null,
-    val nombreEvento: String? = null,   // solo respuesta (lista / edición)
-    val codigoEvento: String? = null    // entrada opcional al guardar; salida al editar
+    val nombreEvento: String? = null,
+    val codigoEvento: String? = null
 ) : Serializable
 
 fun Gasto.toDTO(): GastoDTO {
