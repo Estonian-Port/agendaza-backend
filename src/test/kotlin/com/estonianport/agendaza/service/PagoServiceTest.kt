@@ -200,7 +200,9 @@ class PagoServiceTest {
     @Test
     fun `getEventoForEditEventoPago actualiza el precio total con el presupuesto del evento`() {
         val evento = mock<Evento>()
-        val eventoPago = com.estonianport.agendaza.dto.EventoPagoDTO(4L, "Boda", "ABCD", 0.0)
+        val eventoPago = com.estonianport.agendaza.dto.EventoPagoDTO(
+            4L, "Boda", "ABCD", LocalDateTime.of(2026, 11, 1, 18, 0), 0.0
+        )
         whenever(eventoService.findById(4L)).thenReturn(evento)
         whenever(pagoRepository.getEventoForPago(4L)).thenReturn(eventoPago)
         whenever(evento.getPresupuestoTotal()).thenReturn(2500.0)

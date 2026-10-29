@@ -62,6 +62,7 @@ class EventoServiceTest {
         val tipoEvento = mock<TipoEvento>().also {
             whenever(it.id).thenReturn(1L)
             whenever(it.nombre).thenReturn("Casamiento")
+            whenever(it.duracion).thenReturn(com.estonianport.agendaza.model.enums.Duracion.MEDIO)
         }
         val encargado  = Usuario(2L, "Encargado", "Prueba", 111111111L, "encargado@test.com")
         val cliente    = Usuario(3L, "Cliente", "Prueba", 222222222L, "cliente@test.com")
@@ -135,7 +136,7 @@ class EventoServiceTest {
             }
             whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
 
-            assertEquals(42L, service.registrarReserva(dto))
+            assertEquals(42L, service.registrarReserva(dto).id)
 
             val captor = argumentCaptor<Evento>()
             verify(eventoRepository).save(captor.capture())
@@ -290,7 +291,7 @@ class EventoServiceTest {
             whenever(emailService.isEmailValid("ana@test.com")).thenReturn(true)
             whenever(emailService.enviarMailComprabanteReserva(any(), any(), any())).thenThrow(RuntimeException("smtp caido"))
 
-            assertEquals(42L, service.registrarReserva(dto))
+            assertEquals(42L, service.registrarReserva(dto).id)
             verify(eventoRepository).save(any())
         }
     }
