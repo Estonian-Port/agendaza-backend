@@ -18,6 +18,7 @@ import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
@@ -313,7 +314,10 @@ class EventoService(
     // ==================== EDICIONES PARCIALES ====================
 
     @Transactional
-    @CacheEvict(value = ["eventoHora", "eventoVer", "eventoAgenda"], key = "#evento.id")
+    @Caching(evict = [
+        CacheEvict(value = ["eventoHora", "eventoVer"], key = "#evento.id"),
+        CacheEvict(value = ["agendaEventos"], allEntries = true)
+    ])
     fun editEventoHora(evento: EventoHoraDTO): EventoHoraDTO {
         val eventoExistente = findById(evento.id)
         eventoExistente.inicio = evento.inicio
