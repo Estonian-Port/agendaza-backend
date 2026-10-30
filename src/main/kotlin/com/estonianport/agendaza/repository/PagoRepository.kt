@@ -50,7 +50,7 @@ interface PagoRepository : CrudRepository<Pago, Long> {
 
     @Query(
         """
-        SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, cast(null as string), ev.codigo, p.medioDePago,
+        SELECT new com.estonianport.agendaza.dto.PagoDTO(p.id, p.monto, p.concepto, p.numeroCuota, ev.codigo, p.medioDePago,
             ev.nombre, ev.inicio, p.fecha, ev.empresa.id, p.encargado.id)
         FROM Pago p JOIN p.evento ev
         WHERE ev.empresa.id = :empresaId
