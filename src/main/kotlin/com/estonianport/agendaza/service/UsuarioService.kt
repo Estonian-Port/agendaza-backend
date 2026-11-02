@@ -1,21 +1,31 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
+import com.estonianport.agendaza.common.aceptacionTerminos.TerminosService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.model.Usuario
-import org.springframework.beans.factory.annotation.Autowired
+import com.estonianport.agendaza.model.Cargo
+import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
+import com.estonianport.agendaza.common.emailService.EmailService
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class UsuarioService (
-    val usuarioRepository: UsuarioRepository
+    val usuarioRepository: UsuarioRepository,
+    val empresaService: EmpresaService? = null,
+    val cargoService: CargoService? = null,
+    val emailService: EmailService? = null,
+    val passwordEncoder: BCryptPasswordEncoder? = null,
+    val terminosService: TerminosService? = null
 ): GenericServiceImpl<Usuario, Long>() {
 
     override val dao: CrudRepository<Usuario, Long>
@@ -103,6 +113,65 @@ class UsuarioService (
         return usuarioRepository.getCantidadFiltrados(empresaId, buscar)
     }
 
+    @Transactional
+    fun alta(dto: AltaUsuarioDTO): Usuario {
+        val empresa = empresaService!!.findById(dto.empresaId)
+        var usuario = getByEmail(dto.email)
+        var temporaryPassword: String? = null
+
+        val usuarioConCredenciales = usuario?.username?.isNotBlank() == true &&
+                usuario.password?.isNotBlank() == true
+        if (usuario == null || !usuarioConCredenciales) {
+            temporaryPassword = CodeGeneratorUtil.generarCodigoBase26(8)
+            usuario = usuario ?: Usuario(
+                0,
+                "",
+                "",
+                CodeGeneratorUtil.generarCelularUnico(),
+                dto.email)
+
+            usuario.username = dto.email
+            usuario.password = passwordEncoder!!.encode(temporaryPassword)
+            usuario.debeActualizarDatos = true
+            usuario = save(usuario)
+        }
+
+        cargoService!!.save(Cargo(0, usuario, empresa, dto.rol))
+
+        if (temporaryPassword != null) {
+            emailService!!.enviarInvitacion(dto.email, dto.email, temporaryPassword!!, empresa, dto.rol)
+        } else {
+            emailService!!.enviarNotificacionNuevaAgenda(dto.email, empresa, dto.rol)
+        }
+        return usuario
+    }
+
+    @Transactional
+    @CacheEvict(value = ["onboardingPendiente", "usuarioDtoByUsername", "usuarioPerfil"], allEntries = true)
+    fun completarDatos(username: String, dto: CompletarDatosUsuarioDTO, ip: String?, userAgent: String?): Usuario {
+        val usuario = usuarioRepository.getByUsername(username)
+            ?: throw NotFoundException("Usuario no encontrado")
+
+        require(dto.aceptaTerminos && dto.versionTerminos == TerminosService.VERSION_VIGENTE) {
+            "Debés aceptar los términos y condiciones vigentes"
+        }
+        require(dto.nombre.isNotBlank() && dto.apellido.isNotBlank()) { "Nombre y apellido son obligatorios" }
+        require(dto.fechaNacimiento.isBefore(LocalDate.now().minusYears(18))) { "Fecha de nacimiento inválida" }
+        require(dto.password.length >= 8) { "La contraseña debe tener al menos 8 caracteres" }
+        require(!passwordEncoder!!.matches(dto.password, usuario.password)) {
+            "La nueva contraseña debe ser distinta de la temporal"
+        }
+        if (usuarioRepository.findAllByCelular(dto.celular).any { it.id != usuario.id })
+            throw IllegalArgumentException("Celular ya registrado")
+        usuarioRepository.getByUsername(dto.username)?.takeIf { it.id != usuario.id }
+            ?.let { throw IllegalArgumentException("Username no disponible") }
+
+        val guardado = save(dto.updateUsuario(usuario, passwordEncoder!!.encode(dto.password)))
+        terminosService?.registrarAceptacion(guardado.id, ip, userAgent)
+        return guardado
+    }
+
+
     // ==================== CLIENTES ====================
 
     @Transactional(readOnly = true)
@@ -160,6 +229,10 @@ class UsuarioService (
     fun existsByEmail(email: String): Boolean {
         return usuarioRepository.existsByEmail(email)
     }
+
+    @Transactional(readOnly = true)
+    fun existsByUsername(username: String): Boolean = usuarioRepository.existsByUsername(username)
+
 
     @Transactional(readOnly = true)
     fun existsByCelular(celular: Long): Boolean {

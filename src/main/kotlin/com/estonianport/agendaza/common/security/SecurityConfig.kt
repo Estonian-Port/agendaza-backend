@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.common.security
 
+import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingFilter
+import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingService
 import com.estonianport.agendaza.repository.UsuarioRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,7 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtAuthorizationFilter: JWTAuthorizationFilter,
     private val loginAttemptService: LoginAttemptService,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val onboardingService: OnboardingService
 ) {
 
     @Bean
@@ -36,6 +39,7 @@ class SecurityConfig(
             .authorizeHttpRequests { authorize ->
                 authorize
                     .requestMatchers("/", "/index.html", "/styles.css", "/logo.png", "/favicon.ico").permitAll()
+                    .requestMatchers("/version/latest").permitAll()
                     .requestMatchers("/actuator/prometheus").access(WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
                     .anyRequest().authenticated()
             }
@@ -44,6 +48,7 @@ class SecurityConfig(
             }
             .addFilter(jwtAuthenticationFilter)
             .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(OnboardingFilter(onboardingService), JWTAuthorizationFilter::class.java)
             .build()
     }
 

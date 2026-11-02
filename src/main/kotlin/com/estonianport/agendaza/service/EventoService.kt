@@ -141,7 +141,7 @@ class EventoService(
         }
 
         val emailParaGuardar = emailLimpio.ifBlank {
-            "sin-email-${UUID.randomUUID()}@agendaza.com"
+            CodeGeneratorUtil.generarEmailUnico()
         }
 
         val celularParaGuardar = if (celularInput > 0) {
@@ -178,7 +178,7 @@ class EventoService(
     private fun generarCelularFantasmaUnico(): Long {
         var candidato: Long
         do {
-            candidato = "999${System.currentTimeMillis().toString().takeLast(7)}".toLong()
+            candidato = CodeGeneratorUtil.generarCelularUnico()
         } while (usuarioService.getByCelular(candidato) != null)
 
         return candidato
@@ -188,10 +188,10 @@ class EventoService(
      * Genera un código único para un evento en una empresa
      */
     private fun generateCodigoForEventoOfEmpresa(empresa: Empresa): String {
-        var codigo: String = CodeGeneratorUtil.base26Only4Letters
+        var codigo: String = CodeGeneratorUtil.generarCodigoBase26(4)
 
         while (eventoRepository.existCodigoInEmpresa(codigo, empresa)) {
-            codigo = CodeGeneratorUtil.base26Only4Letters
+            codigo = CodeGeneratorUtil.generarCodigoBase26(4)
         }
 
         return codigo

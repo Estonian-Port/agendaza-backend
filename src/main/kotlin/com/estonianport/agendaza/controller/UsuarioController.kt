@@ -1,13 +1,14 @@
 package com.estonianport.agendaza.controller
 
+import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.dto.response.CustomResponse
-import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.service.CargoService
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -15,13 +16,14 @@ import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
 @RestController
-@RequestMapping("/v1/usuarios")
+@RequestMapping("/v1/usuarios", "/api/usuarios")
 @CrossOrigin("*")
 class UsuarioController(
     private val usuarioService: UsuarioService,
     private val empresaService: EmpresaService,
     private val cargoService: CargoService,
-    private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder()
+    private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder(),
+    private val onboardingService: OnboardingService
 ){
 
     // ==================== AUTENTICACIÓN ====================
@@ -38,6 +40,26 @@ class UsuarioController(
                 data = usuarioDto
             )
         )
+    }
+
+    @GetMapping("/me/estado")
+    fun estado(principal: Principal) =
+        ResponseEntity.ok(
+        CustomResponse(
+            message = "Estado",
+            data = onboardingService.pendiente(principal.name)
+            )
+        )
+
+    @PutMapping("/me/completar-datos")
+    fun completarDatos(
+        principal: Principal,
+        @RequestBody dto: CompletarDatosUsuarioDTO,
+        request: HttpServletRequest
+    ): ResponseEntity<Any> {
+        val ip = request.getHeader("X-Forwarded-For")?.substringBefore(",")?.trim() ?: request.remoteAddr
+        val u = usuarioService.completarDatos(principal.name, dto, ip, request.getHeader("User-Agent"))
+        return ResponseEntity.ok(CustomResponse(message = "Datos completados", data = u.toUsuarioResponseDto()))
     }
 
     // ==================== BÚSQUEDAS ====================
@@ -224,6 +246,28 @@ class UsuarioController(
         )
     }
 
+    @PostMapping("/alta")
+    fun alta(@RequestBody dto: AltaUsuarioDTO): ResponseEntity<CustomResponse<Long>> {
+        val usuario = usuarioService.alta(dto)
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            CustomResponse(
+                message = "Usuario creado correctamente",
+                data = usuario.id
+            )
+        )
+    }
+
+    @GetMapping("/check-username")
+    fun checkUsername(@RequestParam username: String): ResponseEntity<CustomResponse<Boolean>> {
+        val isAvailable = !usuarioService.existsByUsername(username)
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Disponibilidad de username verificada",
+                data = isAvailable
+            )
+        )
+    }
+
     // ==================== CRUD ====================
 
     /**
@@ -374,8 +418,7 @@ class UsuarioController(
         @PathVariable usuarioId: Long,
         @PathVariable empresaId: Long
     ): ResponseEntity<CustomResponse<String>> {
-        val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
-        cargoService.delete(cargo.id)
+        cargoService.delete(empresaId, usuarioId)
 
         return ResponseEntity.ok(
             CustomResponse(

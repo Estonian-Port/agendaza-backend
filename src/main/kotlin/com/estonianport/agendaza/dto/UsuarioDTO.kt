@@ -4,11 +4,29 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.TipoCargo
 import java.io.Serializable
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UsuarioDTORequest(
     var usuario: Usuario,
     var empresaId: Long,
     var cargo: TipoCargo?
+) : Serializable
+
+data class AltaUsuarioDTO(
+    val email: String,
+    val empresaId: Long,
+    val rol: TipoCargo
+) : Serializable
+
+data class CompletarDatosUsuarioDTO(
+    val nombre: String,
+    val apellido: String,
+    val celular: Long,
+    val fechaNacimiento: LocalDate,
+    val username: String,
+    val password: String,
+    val aceptaTerminos: Boolean,
+    val versionTerminos: String
 ) : Serializable
 
 data class UsuarioPerfilDTO(
@@ -72,3 +90,15 @@ fun Usuario.toUsuarioAbmDto() = UsuarioAbmDTO(
     apellido = this.apellido,
     username = this.username
 )
+
+fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: String): Usuario = usuario.apply {
+    nombre = this@updateUsuario.nombre
+    apellido = this@updateUsuario.apellido
+    celular = this@updateUsuario.celular
+    fechaNacimiento = this@updateUsuario.fechaNacimiento
+    username = this@updateUsuario.username
+    password = encodedPassword
+    debeActualizarDatos = false
+    fechaCambioPassword = LocalDateTime.now()
+
+}

@@ -18,6 +18,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("SELECT u FROM Usuario u WHERE u.username = :username")
     fun getByUsername(username: String): Usuario?
+    fun existsByUsername(username: String): Boolean
 
     @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByEmail(email: String): List<Usuario>
