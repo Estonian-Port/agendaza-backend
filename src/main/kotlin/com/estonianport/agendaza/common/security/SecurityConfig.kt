@@ -3,11 +3,13 @@ package com.estonianport.agendaza.common.security
 import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingFilter
 import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingService
 import com.estonianport.agendaza.repository.UsuarioRepository
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -19,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 class SecurityConfig(
     private val jwtAuthorizationFilter: JWTAuthorizationFilter,
     private val loginAttemptService: LoginAttemptService,
@@ -43,6 +46,10 @@ class SecurityConfig(
                     .requestMatchers("/actuator/prometheus").access(WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
                     .anyRequest().authenticated()
             }
+            .exceptionHandling { ex ->
+                ex.authenticationEntryPoint { _, res, _ -> res.json(401, "UNAUTHENTICATED", "Sesión inválida o vencida") }
+                ex.accessDeniedHandler { _, res, _ -> res.json(403, "FORBIDDEN", "No tenés permiso para realizar esta acción") }
+            }
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
@@ -60,5 +67,11 @@ class SecurityConfig(
     @Bean
     fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
         return authenticationConfiguration.authenticationManager
+    }
+
+    fun HttpServletResponse.json(status: Int, code: String, message: String) {
+        this.status = status
+        contentType = "application/json;charset=UTF-8"
+        writer.write("""{"code":"$code","message":"$message","status":$status}""")
     }
 }

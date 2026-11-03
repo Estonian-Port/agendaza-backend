@@ -58,6 +58,13 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         )
     }
 
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleForbidden(exception: Exception, webRequest: WebRequest): ResponseEntity<Any>? {
+        val status = HttpStatus.FORBIDDEN
+        val body = mapOf("code" to "FORBIDDEN", "message" to "No tenés permiso para realizar esta acción", "status" to status.value())
+        return handleExceptionInternal(exception, body, HttpHeaders(), status, webRequest)
+    }
+
     private fun resolveAnnotatedResponseStatus(exception: Exception): HttpStatus {
         val annotation = AnnotatedElementUtils.findMergedAnnotation(exception.javaClass, ResponseStatus::class.java)
         return annotation?.value ?: HttpStatus.INTERNAL_SERVER_ERROR

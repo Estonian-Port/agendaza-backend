@@ -71,7 +71,8 @@ data class UsuarioResponseDto(
     val apellido: String,
     val username: String?,
     val email: String,
-    val celular: Long
+    val celular: Long,
+    val fechaNacimiento: LocalDate
 ) : Serializable
 
 // Funciones de extensión más idiomáticas (expression body)
@@ -81,7 +82,8 @@ fun Usuario.toUsuarioResponseDto() = UsuarioResponseDto(
     apellido = this.apellido,
     username = this.username,
     email = this.email,
-    celular = this.celular
+    celular = this.celular,
+    fechaNacimiento = this.fechaNacimiento
 )
 
 fun Usuario.toUsuarioAbmDto() = UsuarioAbmDTO(

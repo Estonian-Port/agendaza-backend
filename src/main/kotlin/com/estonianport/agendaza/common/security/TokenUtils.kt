@@ -10,42 +10,39 @@ import java.util.*
 
 class TokenUtils {
 
-    companion object{
+    companion object {
 
-        private val ACCESS_TOKEN_SECRET: String =
-            System.getenv("JWT_SECRET")
-        const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = 5184000
+        private val ACCESS_TOKEN_SECRET: String = System.getenv("JWT_SECRET")
+
+        private const val ACCESS_TOKEN_VALIDITY_MS: Long = 15 * 60 * 1000L
 
         fun createToken(nombre: String, username: String?): String {
-            val expirationDate = Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS)
+            val expirationDate = Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_MS)
 
             val extra: MutableMap<String, Any> = HashMap()
-            extra["nombre"] = nombre
+            extra["nombre"] = nombre ?: ""
 
             return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(expirationDate)
                 .addClaims(extra)
-                .signWith(Keys.hmacShaKeyFor((ACCESS_TOKEN_SECRET.toByteArray())))
+                .signWith(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.toByteArray()))
                 .compact()
         }
 
-        fun getAuthentication(token : String) : UsernamePasswordAuthenticationToken? {
-
+        fun getAuthentication(token: String): UsernamePasswordAuthenticationToken? {
             try {
-                val claims : Claims = Jwts.parserBuilder()
+                val claims: Claims = Jwts.parserBuilder()
                     .setSigningKey(ACCESS_TOKEN_SECRET.toByteArray())
                     .build()
                     .parseClaimsJws(token)
                     .body
 
-                val username : String = claims.subject
-
+                val username: String = claims.subject
                 return UsernamePasswordAuthenticationToken(username, null, Collections.emptyList())
-            }catch (e : JwtException){
+            } catch (e: JwtException) {
                 return null
             }
-
         }
     }
 }

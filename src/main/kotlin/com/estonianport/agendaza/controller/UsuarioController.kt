@@ -3,26 +3,18 @@ package com.estonianport.agendaza.controller
 import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.dto.response.CustomResponse
-import com.estonianport.agendaza.model.Cargo
-import com.estonianport.agendaza.model.Usuario
-import com.estonianport.agendaza.service.CargoService
-import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.UsuarioService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
 @RestController
-@RequestMapping("/v1/usuarios", "/api/usuarios")
+@RequestMapping("/v1/usuarios")
 @CrossOrigin("*")
 class UsuarioController(
     private val usuarioService: UsuarioService,
-    private val empresaService: EmpresaService,
-    private val cargoService: CargoService,
-    private val passwordEncoder: BCryptPasswordEncoder = BCryptPasswordEncoder(),
     private val onboardingService: OnboardingService
 ){
 
@@ -279,65 +271,12 @@ class UsuarioController(
     fun saveUsuario(
         @RequestBody usuarioDto: UsuarioDTORequest
     ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
-        // Si es nuevo, encriptar contraseña
-        if (usuarioDto.usuario.id == 0L) {
-            usuarioDto.usuario.password = passwordEncoder.encode(usuarioDto.usuario.password)
-        } else {
-            // Si es actualización, mantener la contraseña existente
-            val usuarioExistente = usuarioService.findById(usuarioDto.usuario.id)
-            usuarioDto.usuario.password = usuarioExistente.password ?: ""
-        }
-
-        val usuario = usuarioService.save(usuarioDto.usuario)
-
-        // Asignar cargo si se proporciona
-        if (usuarioDto.empresaId != 0L && usuarioDto.cargo != null) {
-            val empresa = empresaService.get(usuarioDto.empresaId)
-            if (empresa != null) {
-                val cargoExistente = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
-                if (cargoExistente != null) {
-                    cargoExistente.tipoCargo = usuarioDto.cargo!!
-                    cargoService.save(cargoExistente)
-                } else {
-                    cargoService.save(Cargo(0, usuario, empresa, usuarioDto.cargo!!))
-                }
-            }
-        }
-
-        val responseDto = UsuarioResponseDto(
-            usuario.id, usuario.nombre, usuario.apellido, usuario.username, usuario.email, usuario.celular
-        )
+        val usuario = usuarioService.saveUsuario(usuarioDto)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
             CustomResponse(
                 message = "Usuario guardado correctamente",
-                data = responseDto
-            )
-        )
-    }
-
-    /**
-     * Crea un nuevo cliente
-     */
-    @PostMapping("/clientes")
-    fun saveCliente(
-        @RequestBody clienteDto: ClienteDTO
-    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
-        val usuario = Usuario(
-            clienteDto.id, clienteDto.nombre, clienteDto.apellido,
-            clienteDto.celular, clienteDto.email
-        )
-        val usuarioGuardado = usuarioService.save(usuario)
-
-        val responseDto = UsuarioResponseDto(
-            usuarioGuardado.id, usuarioGuardado.nombre, usuarioGuardado.apellido,
-            usuarioGuardado.username, usuarioGuardado.email, usuarioGuardado.celular
-        )
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            CustomResponse(
-                message = "Cliente guardado correctamente",
-                data = responseDto
+                data = usuario.toUsuarioResponseDto()
             )
         )
     }
@@ -352,38 +291,12 @@ class UsuarioController(
         @PathVariable usuarioId: Long,
         @RequestBody dto: UsuarioEditPasswordDTO
     ): ResponseEntity<CustomResponse<String>> {
-        val usuario = usuarioService.findById(usuarioId)
-
-        usuario.password = passwordEncoder.encode(dto.password)
-        usuarioService.save(usuario)
+        usuarioService.updatePassword(usuarioId, dto.password)
 
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Contraseña actualizada correctamente",
                 data = "OK"
-            )
-        )
-    }
-
-    /**
-     * Actualiza el cargo de un usuario en una empresa
-     * Se delegó a CargoController pero se mantiene aquí por compatibilidad
-     */
-    @PutMapping("/{usuarioId}/cargo")
-    fun updateCargo(
-        @PathVariable usuarioId: Long,
-        @RequestBody usuarioEditCargoDTO: UsuarioEditCargoDTO
-    ): ResponseEntity<CustomResponse<Long>> {
-        val cargo = cargoService.getCargoByEmpresaIdAndUsuarioId(
-            usuarioEditCargoDTO.empresaId, usuarioId
-        )
-        cargo.tipoCargo = usuarioEditCargoDTO.cargo
-        val cargoGuardado = cargoService.save(cargo)
-
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Cargo actualizado correctamente",
-                data = cargoGuardado.id
             )
         )
     }
@@ -394,12 +307,10 @@ class UsuarioController(
      * Elimina un usuario (soft delete)
      */
     @DeleteMapping("/{usuarioId}")
-    fun deleteUsuario(
+    fun delete(
         @PathVariable usuarioId: Long
     ): ResponseEntity<CustomResponse<String>> {
-        val usuario = usuarioService.findById(usuarioId)
-
-        usuarioService.delete(usuario.id)
+        usuarioService.delete(usuarioId)
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -409,22 +320,4 @@ class UsuarioController(
         )
     }
 
-    /**
-     * Elimina el cargo de un usuario en una empresa
-     * Se delegó a CargoController pero se mantiene aquí por compatibilidad
-     */
-    @DeleteMapping("/{usuarioId}/cargo/{empresaId}")
-    fun deleteCargo(
-        @PathVariable usuarioId: Long,
-        @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<String>> {
-        cargoService.delete(empresaId, usuarioId)
-
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Cargo eliminado correctamente",
-                data = "OK"
-            )
-        )
-    }
 }

@@ -9,9 +9,9 @@ class TerminosService(
     private val aceptacionTerminosRepository: AceptacionTerminosRepository
 ) {
 
-    companion object { const val VERSION_VIGENTE = "2026-10-30" }
+    companion object { const val VERSION_VIGENTE = "2026-11-01" }
 
-    // El texto vive en src/main/resources/terminos/2026-10-30.md
+    // El texto vive en src/main/resources/terminos/x.md
     private val texto: String by lazy {
         ClassPathResource("terminos/$VERSION_VIGENTE.md").inputStream.readBytes().toString(Charsets.UTF_8)
     }

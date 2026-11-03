@@ -9,7 +9,7 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
@@ -17,6 +17,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class UsuarioService (
@@ -24,7 +25,7 @@ class UsuarioService (
     val empresaService: EmpresaService? = null,
     val cargoService: CargoService? = null,
     val emailService: EmailService? = null,
-    val passwordEncoder: BCryptPasswordEncoder? = null,
+    val passwordEncoder: PasswordEncoder? = null,
     val terminosService: TerminosService? = null
 ): GenericServiceImpl<Usuario, Long>() {
 
@@ -204,6 +205,53 @@ class UsuarioService (
     // ==================== SAVE/UPDATE ====================
 
     @Transactional
+    fun saveUsuario(dto: UsuarioDTORequest): Usuario {
+        val usuario = dto.usuario
+
+        if (usuario.id == 0L) {
+            usuario.password = requireNotNull(passwordEncoder) {
+                "PasswordEncoder no configurado"
+            }.encode(usuario.password)
+        } else {
+            usuario.password = findById(usuario.id).password.orEmpty()
+        }
+
+        val usuarioGuardado = save(usuario)
+        actualizarCargo(usuarioGuardado, dto.empresaId, dto.cargo)
+        return usuarioGuardado
+    }
+
+    @Transactional
+    fun updatePassword(usuarioId: Long, password: String) {
+        val usuario = findById(usuarioId)
+        usuario.password = requireNotNull(passwordEncoder) {
+            "PasswordEncoder no configurado"
+        }.encode(password)
+        save(usuario)
+    }
+
+    private fun actualizarCargo(
+        usuario: Usuario,
+        empresaId: Long,
+        tipoCargo: com.estonianport.agendaza.model.enums.TipoCargo?
+    ) {
+        if (empresaId == 0L || tipoCargo == null) return
+
+        val empresa = empresaService?.get(empresaId) ?: return
+        val cargoService = requireNotNull(cargoService) {
+            "CargoService no configurado"
+        }
+        val cargoExistente = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
+
+        if (cargoExistente != null) {
+            cargoExistente.tipoCargo = tipoCargo
+            cargoService.save(cargoExistente)
+        } else {
+            cargoService.save(Cargo(0, usuario, empresa, tipoCargo))
+        }
+    }
+
+    @Transactional
     @CacheEvict(value = [
         "usuarioDtoByEmail",
         "usuarioDtoByCelular",
@@ -218,9 +266,10 @@ class UsuarioService (
     // ==================== DELETE ====================
 
     @Transactional
-    @CacheEvict(value = ["usuarioPerfil"], key = "#id")
     override fun delete(id: Long) {
-        super.delete(id)
+        val usuario = findById(id)
+        usuario.fechaBaja = LocalDate.now()
+        save(usuario)
     }
 
     // ==================== VALIDACIONES ====================

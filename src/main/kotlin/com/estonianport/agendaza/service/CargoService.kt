@@ -28,7 +28,7 @@ class CargoService(val cargoRepository: CargoRepository) : GenericServiceImpl<Ca
     }
 
     fun delete(empresaId: Long, usuarioId: Long) {
-        val cargo : Cargo = cargoRepository.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
+        val cargo = cargoRepository.getCargoByEmpresaIdAndUsuarioId(empresaId, usuarioId)
         cargo.fechaBaja = LocalDate.now()
         cargoRepository.save(cargo)
     }

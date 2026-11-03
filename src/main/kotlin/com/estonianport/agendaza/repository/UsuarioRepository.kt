@@ -30,7 +30,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.email = :email
@@ -39,7 +39,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.celular = :celular
@@ -48,7 +48,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.username = :username
