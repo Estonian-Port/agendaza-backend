@@ -144,6 +144,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
         SELECT new com.estonianport.agendaza.dto.ExtraPrecioDTO(e.id, e.nombre, e.tipoExtra, COALESCE(p.precio, 0))
         FROM TipoEvento te
         JOIN te.listaExtra e
+        JOIN e.listaEmpresa empresa
         LEFT JOIN precio_con_fecha_extra p
             ON p.extra.id = e.id
            AND p.empresa.id = :empresaId
@@ -151,6 +152,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
            AND p.desde <= :fechaEvento
            AND p.hasta >= :fechaEvento
         WHERE te.id = :tipoEventoId
+          AND empresa.id = :empresaId
           AND e.tipoExtra = :tipoExtra
           AND e.fechaBaja IS NULL
         ORDER BY e.nombre

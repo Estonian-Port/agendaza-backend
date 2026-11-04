@@ -183,6 +183,15 @@ class ExtraService (
         empresa.listaExtra = empresa.listaExtra
             .filter { it.id != extraId }
             .toMutableSet()
+
+        // Al desvincular el extra, sus precios dejan de ser válidos para esta empresa.
+        empresa.listaPrecioConFechaExtra
+            .filter { it.extra.id == extraId && it.fechaBaja == null }
+            .forEach {
+                it.fechaBaja = LocalDate.now()
+                precioConFechaExtraService.save(it)
+            }
+
         empresaService.save(empresa)
     }
 

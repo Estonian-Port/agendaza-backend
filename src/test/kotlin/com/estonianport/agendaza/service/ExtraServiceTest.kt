@@ -201,17 +201,29 @@ class ExtraServiceTest {
     }
 
     @Test
-    fun `deleteExtra elimina el vinculo con la empresa`() {
+    fun `deleteExtra elimina el vinculo y da de baja sus precios con la empresa`() {
         val empresa = com.estonianport.agendaza.model.Salon(7L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
         val conservar = Extra(1L, "Luces", TipoExtra.EVENTO)
         val borrar = Extra(2L, "Sonido", TipoExtra.EVENTO)
+        val precio = PrecioConFechaExtra(
+            11L,
+            50.0,
+            LocalDateTime.of(2026, 1, 1, 0, 0),
+            LocalDateTime.of(2026, 1, 31, 0, 0),
+            empresa,
+            borrar
+        )
         empresa.listaExtra.addAll(listOf(conservar, borrar))
+        empresa.listaPrecioConFechaExtra.add(precio)
         whenever(empresaService.get(7L)).thenReturn(empresa)
         whenever(empresaService.save(empresa)).thenReturn(empresa)
+        whenever(precioService.save(any<PrecioConFechaExtra>())).thenAnswer { it.arguments[0] as PrecioConFechaExtra }
 
         service.deleteExtra(2L, 7L)
 
         assertEquals(setOf(conservar), empresa.listaExtra)
+        assertEquals(LocalDate.now(), precio.fechaBaja)
+        verify(precioService).save(precio)
         verify(empresaService).save(empresa)
     }
 
