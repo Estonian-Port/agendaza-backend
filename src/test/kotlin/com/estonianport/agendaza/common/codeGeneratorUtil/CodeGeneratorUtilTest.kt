@@ -8,7 +8,7 @@ class CodeGeneratorUtilTest {
 
     @Test
     fun `base26Only4Letters genera cuatro letras mayusculas`() {
-        val codigo = CodeGeneratorUtil.base26Only4Letters
+        val codigo = CodeGeneratorUtil.generarCodigoBase26(4)
 
         assertEquals(4, codigo.length)
         assertTrue(codigo.all { it in 'A'..'Z' })

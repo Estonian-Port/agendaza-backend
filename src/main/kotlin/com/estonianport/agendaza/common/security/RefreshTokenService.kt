@@ -46,6 +46,11 @@ class RefreshTokenService(
         refreshTokenRepository.deleteByToken(token)
     }
 
+    @Transactional
+    fun revocarTodos(username: String) {
+        refreshTokenRepository.deleteByUsername(username)
+    }
+
     @Scheduled(cron = "0 0 3 * * *")
     fun limpiarVencidos() {
         refreshTokenRepository.deleteByExpiryDateBefore(Instant.now())

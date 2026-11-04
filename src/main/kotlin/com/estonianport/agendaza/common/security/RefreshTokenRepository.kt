@@ -14,5 +14,8 @@ interface RefreshTokenRepository : CrudRepository<RefreshToken, Long> {
     fun deleteByToken(token: String): Long
 
     @Transactional
+    fun deleteByUsername(username: String): Long
+
+    @Transactional
     fun deleteByExpiryDateBefore(fecha: Instant): Long
 }

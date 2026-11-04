@@ -18,7 +18,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.security.access.AccessDeniedException
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class UsuarioService (
@@ -27,7 +29,8 @@ class UsuarioService (
     val cargoService: CargoService? = null,
     val emailService: EmailService? = null,
     val passwordEncoder: PasswordEncoder? = null,
-    val terminosService: TerminosService? = null
+    val terminosService: TerminosService? = null,
+    val refreshTokenService: com.estonianport.agendaza.common.security.RefreshTokenService? = null
 ): GenericServiceImpl<Usuario, Long>() {
 
     override val dao: CrudRepository<Usuario, Long>
@@ -74,6 +77,10 @@ class UsuarioService (
         return usuarioRepository.getUsuarioDtoByUsername(username)
             ?: throw NotFoundException("No se encontró un usuario con el username proporcionado")
     }
+
+    @Transactional(readOnly = true)
+    fun debeCambiarPassword(username: String): Boolean =
+        usuarioRepository.getByUsername(username)?.debeCambiarPassword ?: false
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioPerfil"], key = "#usuarioId")
@@ -134,6 +141,7 @@ class UsuarioService (
 
             usuario.username = dto.email
             usuario.password = passwordEncoder!!.encode(temporaryPassword)
+            usuario.debeCambiarPassword = true
             usuario = save(usuario)
         }
 
@@ -160,7 +168,7 @@ class UsuarioService (
             throw BadRequestException("Nombre y apellido son obligatorios")
         }
         val emailRegex = Regex("^[A-Za-z0-9._%+-]{3,}@[A-Za-z0-9.-]+$")
-        if (!emailRegex.matches(dto.email)) {
+        if (!emailRegex.matches(dto.email.trim())) {
             throw BadRequestException("El email debe tener al menos 3 caracteres antes de @ y un dominio válido")
         }
         if (!dto.fechaNacimiento.isBefore(LocalDate.now().minusYears(18))) {
@@ -189,6 +197,8 @@ class UsuarioService (
         }
 
         val guardado = save(dto.updateUsuario(usuario, passwordEncoder!!.encode(dto.password)))
+        guardado.debeCambiarPassword = false
+        save(guardado)
         terminosService?.registrarAceptacion(guardado.id, ip, userAgent)
         return guardado
     }
@@ -243,12 +253,60 @@ class UsuarioService (
     }
 
     @Transactional
-    fun updatePassword(usuarioId: Long, password: String) {
+    fun updatePassword(adminUsername: String, usuarioId: Long, password: String) {
+        val cargoService = cargoService ?: throw AccessDeniedException("Servicio de cargos no configurado")
+        if (!cargoService.esAdminDeUsuario(adminUsername, usuarioId)) {
+            throw AccessDeniedException("Solo un administrador de la empresa puede actualizar contraseñas")
+        }
         val usuario = findById(usuarioId)
+        validarPassword(password)
         usuario.password = requireNotNull(passwordEncoder) {
             "PasswordEncoder no configurado"
         }.encode(password)
+        usuario.debeCambiarPassword = false
+        usuario.fechaCambioPassword = LocalDateTime.now()
         save(usuario)
+        refreshTokenService?.revocarTodos(requireNotNull(usuario.username))
+    }
+
+    @Transactional
+    fun restablecerPassword(adminUsername: String, usuarioId: Long) {
+        val cargoService = cargoService ?: throw AccessDeniedException("Servicio de cargos no configurado")
+        if (!cargoService.esAdminDeUsuario(adminUsername, usuarioId)) {
+            throw AccessDeniedException("Solo un administrador de la empresa puede restablecer contraseñas")
+        }
+
+        val usuario = findById(usuarioId)
+        val cargo = cargoService.getCargoDeUsuarioParaAdmin(adminUsername, usuarioId)
+            ?: throw NotFoundException("El usuario no tiene una empresa activa")
+        val temporaryPassword = CodeGeneratorUtil.generarCodigoBase26(8)
+
+        usuario.password = requireNotNull(passwordEncoder) { "PasswordEncoder no configurado" }
+            .encode(temporaryPassword)
+        usuario.debeCambiarPassword = true
+        usuario.fechaCambioPassword = LocalDateTime.now()
+        save(usuario)
+        refreshTokenService?.revocarTodos(requireNotNull(usuario.username))
+        emailService?.enviarRestablecimientoPassword(usuario.email, temporaryPassword, cargo.empresa)
+    }
+
+    @Transactional
+    @CacheEvict(value = ["onboardingPendiente", "usuarioDtoByUsername", "usuarioPerfil"], allEntries = true)
+    fun cambiarPassword(username: String, password: String): Usuario {
+        val usuario = usuarioRepository.getByUsername(username)
+            ?: throw NotFoundException("Usuario no encontrado")
+        validarPassword(password)
+        usuario.password = requireNotNull(passwordEncoder) { "PasswordEncoder no configurado" }.encode(password)
+        usuario.debeCambiarPassword = false
+        usuario.fechaCambioPassword = LocalDateTime.now()
+        return save(usuario)
+    }
+
+    fun validarPassword(password: String) {
+        if (password.length < 8) throw BadRequestException("La contraseña debe tener al menos 8 caracteres")
+        if (!Regex("^(?=.*[A-Z])(?=.*\\d).+$").matches(password)) {
+            throw BadRequestException("La contraseña debe contener al menos una letra mayúscula y un número")
+        }
     }
 
     private fun actualizarCargo(

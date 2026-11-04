@@ -6,13 +6,13 @@ import java.util.UUID
 object CodeGeneratorUtil {
 
     /**
-     * Genera un código aleatorio de 4 letras mayúsculas (Base26).
+     * Genera un código aleatorio de letras mayúsculas (Base26).
      */
     fun generarCodigoBase26(cantidad : Int): String {
         val random = Random()
         val base26chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
         val sb = StringBuilder(cantidad)
-        for (i in 0..3) {
+        for (i in 0 until cantidad) {
             sb.append(base26chars[random.nextInt(base26chars.size)])
         }
         return sb.toString()

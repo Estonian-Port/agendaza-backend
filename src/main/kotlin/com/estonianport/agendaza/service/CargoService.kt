@@ -32,4 +32,13 @@ class CargoService(val cargoRepository: CargoRepository) : GenericServiceImpl<Ca
         cargo.fechaBaja = LocalDate.now()
         cargoRepository.save(cargo)
     }
+
+    fun esAdminDeUsuario(username: String, usuarioId: Long): Boolean =
+        cargoRepository.esAdminDeUsuarioEnEmpresa(username, usuarioId)
+
+    fun getPrimerCargoActivo(usuarioId: Long): Cargo? =
+        cargoRepository.findFirstByUsuario_IdAndFechaBajaIsNull(usuarioId)
+
+    fun getCargoDeUsuarioParaAdmin(username: String, usuarioId: Long): Cargo? =
+        cargoRepository.findCargoDeUsuarioParaAdmin(username, usuarioId)
 }

@@ -520,7 +520,7 @@ class EventoServiceTest {
 
     @Test
     fun `consultas por usuario delegan al repositorio`() {
-        val eventos = listOf(EventoConUsuarioDTO(1L, "boda", "ABCD", 4L, "Ana", "Perez", null))
+        val eventos = listOf(EventoConUsuarioDTO(1L, "boda", "ABCD", 4L, "Ana", "Perez", null, LocalDateTime.now()))
         whenever(eventoRepository.getEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(eventos)
         whenever(eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(1)
 

@@ -39,7 +39,10 @@ class UsuarioController(
         ResponseEntity.ok(
         CustomResponse(
             message = "Estado",
-            data = onboardingService.pendiente(principal.name)
+            data = EstadoAccesoDTO(
+                onboardingRequired = onboardingService.pendiente(principal.name),
+                passwordChangeRequired = usuarioService.debeCambiarPassword(principal.name)
+            )
             )
         )
 
@@ -288,10 +291,11 @@ class UsuarioController(
      */
     @PutMapping("/{usuarioId}/password")
     fun updatePassword(
+        principal: Principal,
         @PathVariable usuarioId: Long,
         @RequestBody dto: UsuarioEditPasswordDTO
     ): ResponseEntity<CustomResponse<String>> {
-        usuarioService.updatePassword(usuarioId, dto.password)
+        usuarioService.updatePassword(principal.name, usuarioId, dto.password)
 
         return ResponseEntity.ok(
             CustomResponse(
@@ -299,6 +303,26 @@ class UsuarioController(
                 data = "OK"
             )
         )
+    }
+
+    @PostMapping("/{usuarioId}/restablecer-password")
+    fun resetPassword(
+        principal: Principal,
+        @PathVariable usuarioId: Long
+    ): ResponseEntity<CustomResponse<String>> {
+        usuarioService.restablecerPassword(principal.name, usuarioId)
+        return ResponseEntity.ok(
+            CustomResponse("Contraseña temporal generada y enviada correctamente", "OK")
+        )
+    }
+
+    @PutMapping("/me/password")
+    fun changeMyPassword(
+        principal: Principal,
+        @RequestBody dto: CambiarPasswordDTO
+    ): ResponseEntity<CustomResponse<String>> {
+        usuarioService.cambiarPassword(principal.name, dto.password)
+        return ResponseEntity.ok(CustomResponse("Contraseña actualizada correctamente", "OK"))
     }
 
     // ==================== ELIMINAR ====================

@@ -64,7 +64,7 @@ class SecurityConfig(
             }
             .addFilter(jwtAuthenticationFilter)
             .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterAfter(OnboardingFilter(onboardingService), JWTAuthorizationFilter::class.java)
+            .addFilterAfter(OnboardingFilter(onboardingService, usuarioRepository), JWTAuthorizationFilter::class.java)
             .build()
     }
 

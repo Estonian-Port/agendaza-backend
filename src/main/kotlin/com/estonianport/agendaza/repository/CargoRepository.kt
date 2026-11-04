@@ -39,6 +39,32 @@ interface CargoRepository : CrudRepository<Cargo, Long>{
     """)
     fun comparteEmpresa(usuarioAId: Long, usuarioBId: Long): Boolean
 
+    @Query("""
+        SELECT CASE WHEN COUNT(c1) > 0 THEN true ELSE false END
+        FROM Cargo c1, Cargo c2
+        WHERE c1.usuario.username = :username
+          AND c1.tipoCargo = com.estonianport.agendaza.model.enums.TipoCargo.ADMIN
+          AND c1.empresa.id = c2.empresa.id
+          AND c2.usuario.id = :usuarioId
+          AND c1.fechaBaja IS NULL
+          AND c2.fechaBaja IS NULL
+    """)
+    fun esAdminDeUsuarioEnEmpresa(username: String, usuarioId: Long): Boolean
+
+    @Query("""
+        SELECT c2
+        FROM Cargo c1, Cargo c2
+        WHERE c1.usuario.username = :username
+          AND c1.tipoCargo = com.estonianport.agendaza.model.enums.TipoCargo.ADMIN
+          AND c1.empresa.id = c2.empresa.id
+          AND c2.usuario.id = :usuarioId
+          AND c1.fechaBaja IS NULL
+          AND c2.fechaBaja IS NULL
+    """)
+    fun findCargoDeUsuarioParaAdmin(username: String, usuarioId: Long): Cargo?
+
+    fun findFirstByUsuario_IdAndFechaBajaIsNull(usuarioId: Long): Cargo?
+
     @Query("SELECT COUNT(c) FROM Cargo c WHERE c.empresa.id = :id AND c.fechaBaja IS NULL")
     fun countActivosByEmpresaId(id: Long): Int
 }

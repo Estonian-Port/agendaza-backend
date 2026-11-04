@@ -411,6 +411,24 @@ class EmailService(
         )
     }
 
+    fun enviarRestablecimientoPassword(email: String, password: String, empresa: Empresa) {
+        val template = loadHtmlTemplate("restablecimiento_password.html")
+        val content = renderTemplate(
+            template, mapOf(
+                "password" to password,
+                "empresa_nombre" to empresa.nombre,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
+            )
+        )
+        sendEmail(Email(email = email, subject = "Restablecimiento de contraseña", content = content))
+    }
+
     fun enviarNotificacionNuevaAgenda(email: String, empresa: Empresa, cargo: TipoCargo) {
         val template = loadHtmlTemplate("nueva_agenda_usuario.html")
         val content = renderTemplate(

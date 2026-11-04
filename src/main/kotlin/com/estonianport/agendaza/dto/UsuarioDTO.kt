@@ -59,6 +59,15 @@ data class UsuarioEditPasswordDTO(
     var password: String
 ) : Serializable
 
+data class CambiarPasswordDTO(
+    val password: String
+) : Serializable
+
+data class EstadoAccesoDTO(
+    val onboardingRequired: Boolean,
+    val passwordChangeRequired: Boolean
+) : Serializable
+
 data class UsuarioAbmDTO(
     var id: Long,
     var nombre: String,
@@ -95,12 +104,12 @@ fun Usuario.toUsuarioAbmDto() = UsuarioAbmDTO(
 )
 
 fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: String): Usuario = usuario.apply {
-    nombre = this@updateUsuario.nombre
-    apellido = this@updateUsuario.apellido
+    nombre = this@updateUsuario.nombre.trim()
+    apellido = this@updateUsuario.apellido.trim()
     celular = this@updateUsuario.celular
     fechaNacimiento = this@updateUsuario.fechaNacimiento
     username = this@updateUsuario.username
-    email = this@updateUsuario.email
+    email = this@updateUsuario.email.trim()
     password = encodedPassword
     fechaCambioPassword = LocalDateTime.now()
 
