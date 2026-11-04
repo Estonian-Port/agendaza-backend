@@ -10,11 +10,14 @@ import org.springframework.security.authentication.LockedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class JWTAuthenticationFilter(
     private val loginAttemptService: LoginAttemptService,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val refreshTokenRepository: RefreshTokenRepository
 ) : UsernamePasswordAuthenticationFilter() {
 
     companion object {
@@ -56,9 +59,15 @@ class JWTAuthenticationFilter(
         userDetails.username?.let { usuarioRepository.actualizarUltimoLogin(it, LocalDateTime.now()) }
 
         val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
+        val refreshToken = RefreshToken(
+            username = requireNotNull(userDetails.username) { "El usuario autenticado no tiene username" },
+            expiryDate = Instant.now().plus(30, ChronoUnit.DAYS)
+        )
+        refreshTokenRepository.save(refreshToken)
 
         if (response != null) {
             response.addHeader("Authorization", "Bearer $token")
+            response.addHeader("X-Refresh-Token", refreshToken.token)
             response.writer.flush()
         }
 

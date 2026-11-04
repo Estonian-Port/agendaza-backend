@@ -14,6 +14,6 @@ class OnboardingService(
     @Cacheable(value = ["onboardingPendiente"], key = "#username")
     fun pendiente(username: String): Boolean {
         val u = usuarioRepository.getByUsername(username) ?: return false
-        return u.debeActualizarDatos || !terminosService.aceptoVigente(u.id)
+        return !terminosService.aceptoVigente(u.id)
     }
 }

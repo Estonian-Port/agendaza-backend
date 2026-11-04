@@ -26,7 +26,6 @@ class RefreshTokenController(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token expirado")
         }
 
-        // Generar un nuevo Access Token
         val newAccessToken = TokenUtils.createToken(storedToken.username, storedToken.username)
 
         return ResponseEntity.ok(mapOf("accessToken" to newAccessToken, "refreshToken" to storedToken.token))

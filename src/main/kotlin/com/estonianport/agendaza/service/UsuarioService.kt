@@ -9,6 +9,8 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.errors.BadRequestException
+import com.estonianport.agendaza.errors.ConflictException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -17,7 +19,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Service
 class UsuarioService (
@@ -133,7 +134,6 @@ class UsuarioService (
 
             usuario.username = dto.email
             usuario.password = passwordEncoder!!.encode(temporaryPassword)
-            usuario.debeActualizarDatos = true
             usuario = save(usuario)
         }
 
@@ -153,19 +153,40 @@ class UsuarioService (
         val usuario = usuarioRepository.getByUsername(username)
             ?: throw NotFoundException("Usuario no encontrado")
 
-        require(dto.aceptaTerminos && dto.versionTerminos == TerminosService.VERSION_VIGENTE) {
-            "Debés aceptar los términos y condiciones vigentes"
+        if (!dto.aceptoTerminos || dto.versionTerminos != TerminosService.VERSION_VIGENTE) {
+            throw BadRequestException("Debés aceptar los términos y condiciones vigentes")
         }
-        require(dto.nombre.isNotBlank() && dto.apellido.isNotBlank()) { "Nombre y apellido son obligatorios" }
-        require(dto.fechaNacimiento.isBefore(LocalDate.now().minusYears(18))) { "Fecha de nacimiento inválida" }
-        require(dto.password.length >= 8) { "La contraseña debe tener al menos 8 caracteres" }
-        require(!passwordEncoder!!.matches(dto.password, usuario.password)) {
-            "La nueva contraseña debe ser distinta de la temporal"
+        if (dto.nombre.isBlank() || dto.apellido.isBlank()) {
+            throw BadRequestException("Nombre y apellido son obligatorios")
         }
-        if (usuarioRepository.findAllByCelular(dto.celular).any { it.id != usuario.id })
-            throw IllegalArgumentException("Celular ya registrado")
-        usuarioRepository.getByUsername(dto.username)?.takeIf { it.id != usuario.id }
-            ?.let { throw IllegalArgumentException("Username no disponible") }
+        val emailRegex = Regex("^[A-Za-z0-9._%+-]{3,}@[A-Za-z0-9.-]+$")
+        if (!emailRegex.matches(dto.email)) {
+            throw BadRequestException("El email debe tener al menos 3 caracteres antes de @ y un dominio válido")
+        }
+        if (!dto.fechaNacimiento.isBefore(LocalDate.now().minusYears(18))) {
+            throw BadRequestException("Fecha de nacimiento inválida")
+        }
+        val passwordRegex = Regex("^(?=.*[A-Z])(?=.*\\d).+$")
+
+        if (dto.password.length < 8) {
+            throw BadRequestException("La contraseña debe tener al menos 8 caracteres")
+        }
+        if (!passwordRegex.matches(dto.password)) {
+            throw BadRequestException("La contraseña debe contener al menos una letra mayúscula y un número")
+        }
+        val esFormatoTemporal = Regex("^[A-Z]{8}$").matches(dto.password)
+        if (esFormatoTemporal && passwordEncoder!!.matches(dto.password, usuario.password)) {
+            throw BadRequestException("La nueva contraseña debe ser distinta de la temporal")
+        }
+        if (usuarioRepository.findAllByCelular(dto.celular).any { it.id != usuario.id }) {
+            throw ConflictException("El número de celular ya se encuentra registrado")
+        }
+        if (usuarioRepository.findAllByEmail(dto.email).any { it.id != usuario.id }) {
+            throw ConflictException("El email ya se encuentra registrado")
+        }
+        usuarioRepository.getByUsername(dto.username)?.takeIf { it.id != usuario.id }?.let {
+            throw ConflictException("El nombre de usuario no está disponible")
+        }
 
         val guardado = save(dto.updateUsuario(usuario, passwordEncoder!!.encode(dto.password)))
         terminosService?.registrarAceptacion(guardado.id, ip, userAgent)

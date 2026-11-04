@@ -26,12 +26,13 @@ class SecurityConfig(
     private val jwtAuthorizationFilter: JWTAuthorizationFilter,
     private val loginAttemptService: LoginAttemptService,
     private val usuarioRepository: UsuarioRepository,
+    private val refreshTokenRepository: RefreshTokenRepository,
     private val onboardingService: OnboardingService
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager): SecurityFilterChain {
-        val jwtAuthenticationFilter = JWTAuthenticationFilter(loginAttemptService, usuarioRepository)
+        val jwtAuthenticationFilter = JWTAuthenticationFilter(loginAttemptService, usuarioRepository, refreshTokenRepository)
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
         jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler(loginAttemptService))
@@ -43,11 +44,19 @@ class SecurityConfig(
                 authorize
                     .requestMatchers("/", "/index.html", "/styles.css", "/logo.png", "/favicon.ico").permitAll()
                     .requestMatchers("/version/latest").permitAll()
+                    .requestMatchers("/v1/auth/refresh").permitAll()
                     .requestMatchers("/actuator/prometheus").access(WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
                     .anyRequest().authenticated()
             }
             .exceptionHandling { ex ->
-                ex.authenticationEntryPoint { _, res, _ -> res.json(401, "UNAUTHENTICATED", "Sesión inválida o vencida") }
+                ex.authenticationEntryPoint { req, res, _ ->
+                    val tokenError = req.getAttribute(JWTAuthorizationFilter.ATTR_TOKEN_ERROR) as? String
+                    if (tokenError == JWTAuthorizationFilter.TOKEN_EXPIRED) {
+                        res.json(401, "TOKEN_EXPIRED", "El token de acceso venció")
+                    } else {
+                        res.json(401, "UNAUTHENTICATED", "Sesión inválida o vencida")
+                    }
+                }
                 ex.accessDeniedHandler { _, res, _ -> res.json(403, "FORBIDDEN", "No tenés permiso para realizar esta acción") }
             }
             .sessionManagement { session ->

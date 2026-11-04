@@ -18,7 +18,12 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-    @ExceptionHandler(value = [NotFoundException::class, BusinessException::class])
+    @ExceptionHandler(value = [
+        BadRequestException::class,
+        NotFoundException::class,
+        BusinessException::class,
+        ConflictException::class
+    ])
     fun handleCustomExceptions(exception: Exception, webRequest: WebRequest): ResponseEntity<Any>? {
 
         val status = resolveAnnotatedResponseStatus(exception)

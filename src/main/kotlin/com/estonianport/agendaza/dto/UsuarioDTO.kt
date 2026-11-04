@@ -25,7 +25,8 @@ data class CompletarDatosUsuarioDTO(
     val fechaNacimiento: LocalDate,
     val username: String,
     val password: String,
-    val aceptaTerminos: Boolean,
+    val email: String,
+    val aceptoTerminos: Boolean,
     val versionTerminos: String
 ) : Serializable
 
@@ -99,8 +100,8 @@ fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: St
     celular = this@updateUsuario.celular
     fechaNacimiento = this@updateUsuario.fechaNacimiento
     username = this@updateUsuario.username
+    email = this@updateUsuario.email
     password = encodedPassword
-    debeActualizarDatos = false
     fechaCambioPassword = LocalDateTime.now()
 
 }

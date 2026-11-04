@@ -10,7 +10,6 @@ import java.time.Instant
 import java.util.UUID
 
 @Entity
-@Table(name = "refresh_tokens")
 class RefreshToken(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

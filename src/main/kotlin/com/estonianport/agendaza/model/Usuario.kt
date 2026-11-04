@@ -64,9 +64,6 @@ class Usuario(
     @Column(nullable = true)
     var fechaCambioPassword: LocalDateTime? = null
 
-    @Column(nullable = false)
-    var debeActualizarDatos: Boolean = false
-
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()

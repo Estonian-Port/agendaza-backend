@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.common.security
 
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -42,6 +43,20 @@ class TokenUtils {
                 return UsernamePasswordAuthenticationToken(username, null, Collections.emptyList())
             } catch (e: JwtException) {
                 return null
+            }
+        }
+
+        fun isExpired(token: String): Boolean {
+            return try {
+                Jwts.parserBuilder()
+                    .setSigningKey(ACCESS_TOKEN_SECRET.toByteArray())
+                    .build()
+                    .parseClaimsJws(token)
+                false
+            } catch (_: ExpiredJwtException) {
+                true
+            } catch (_: JwtException) {
+                false
             }
         }
     }
