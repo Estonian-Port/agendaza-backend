@@ -308,4 +308,8 @@ class UsuarioService (
     fun existsByCelular(celular: Long): Boolean {
         return usuarioRepository.existsByCelular(celular)
     }
+
+    fun getByUsername(username: String) : Usuario ?{
+        return usuarioRepository.getByUsername(username)
+    }
 }

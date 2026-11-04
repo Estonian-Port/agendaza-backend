@@ -26,13 +26,13 @@ class SecurityConfig(
     private val jwtAuthorizationFilter: JWTAuthorizationFilter,
     private val loginAttemptService: LoginAttemptService,
     private val usuarioRepository: UsuarioRepository,
-    private val refreshTokenRepository: RefreshTokenRepository,
+    private val refreshTokenService: RefreshTokenService,
     private val onboardingService: OnboardingService
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity, authenticationManager: AuthenticationManager): SecurityFilterChain {
-        val jwtAuthenticationFilter = JWTAuthenticationFilter(loginAttemptService, usuarioRepository, refreshTokenRepository)
+        val jwtAuthenticationFilter = JWTAuthenticationFilter(loginAttemptService, usuarioRepository, refreshTokenService)
         jwtAuthenticationFilter.setAuthenticationManager(authenticationManager)
         jwtAuthenticationFilter.setFilterProcessesUrl("/login")
         jwtAuthenticationFilter.setAuthenticationFailureHandler(CustomAuthenticationFailureHandler(loginAttemptService))

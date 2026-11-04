@@ -1,5 +1,7 @@
 package com.estonianport.agendaza.common.security
 
+import com.estonianport.agendaza.dto.response.CustomResponse
+import com.estonianport.agendaza.service.UsuarioService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -7,27 +9,48 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 @RequestMapping("/v1/auth")
 @CrossOrigin("*")
 class RefreshTokenController(
-    private val refreshTokenRepository: RefreshTokenRepository,
-    ){
+    private val refreshTokenService: RefreshTokenService,
+    private val usuarioService: UsuarioService
+) {
 
     @PostMapping("/refresh")
-    fun refreshToken(@RequestBody request: RefreshDTO): ResponseEntity<Any> {
-        val storedToken = refreshTokenRepository.findByToken(request.refreshToken)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token inválido")
+    fun refresh(@RequestBody request: RefreshDTO): ResponseEntity<CustomResponse<Any>> {
+        val nuevo = refreshTokenService.rotar(request.refreshToken)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    CustomResponse(
+                        message = "Refresh Token inválido o expirado",
+                        data = request.refreshToken
+                    )
+                )
 
-        if (storedToken.expiryDate.isBefore(Instant.now())) {
-            refreshTokenRepository.delete(storedToken)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token expirado")
+        val usuario = usuarioService.getByUsername(nuevo.username)
+        if (usuario == null) {
+            refreshTokenService.revocar(nuevo.token)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            CustomResponse(
+                        message = "Usuario inactivo",
+                        data = nuevo.username
+                    )
+                )
         }
 
-        val newAccessToken = TokenUtils.createToken(storedToken.username, storedToken.username)
+        val accessToken = TokenUtils.createToken(usuario.nombre, usuario.username)
+        return ResponseEntity.ok(
+            CustomResponse<Any>(
+                message = "Token renovado correctamente",
+                data = mapOf("accessToken" to accessToken, "refreshToken" to nuevo.token)
+            )
+        )
+    }
 
-        return ResponseEntity.ok(mapOf("accessToken" to newAccessToken, "refreshToken" to storedToken.token))
+    @PostMapping("/logout")
+    fun logout(@RequestBody request: RefreshDTO): ResponseEntity<Void> {
+        refreshTokenService.revocar(request.refreshToken)
+        return ResponseEntity.noContent().build()
     }
 }

@@ -17,7 +17,7 @@ import java.time.temporal.ChronoUnit
 class JWTAuthenticationFilter(
     private val loginAttemptService: LoginAttemptService,
     private val usuarioRepository: UsuarioRepository,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenService: RefreshTokenService
 ) : UsernamePasswordAuthenticationFilter() {
 
     companion object {
@@ -59,11 +59,8 @@ class JWTAuthenticationFilter(
         userDetails.username?.let { usuarioRepository.actualizarUltimoLogin(it, LocalDateTime.now()) }
 
         val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
-        val refreshToken = RefreshToken(
-            username = requireNotNull(userDetails.username) { "El usuario autenticado no tiene username" },
-            expiryDate = Instant.now().plus(30, ChronoUnit.DAYS)
-        )
-        refreshTokenRepository.save(refreshToken)
+
+        val refreshToken = refreshTokenService.crear(requireNotNull(userDetails.username))
 
         if (response != null) {
             response.addHeader("Authorization", "Bearer $token")
