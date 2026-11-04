@@ -20,7 +20,7 @@ class RefreshTokenService(
         get() = refreshTokenRepository
 
     companion object {
-        const val MAX_SESIONES = 5
+        const val MAX_SESIONES = 4
         val DURACION: Duration = Duration.ofDays(30)
     }
 
