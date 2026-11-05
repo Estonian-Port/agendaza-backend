@@ -51,92 +51,20 @@ class ExtraService (
             )
         }
 
-    fun fromListaExtraToListaExtraDto(
-        empresa: Empresa,
-        listaExtra: List<Extra>,
-        fechaEvento: LocalDateTime
-    ): List<ExtraDTO> = listaExtra.map { extra ->
-        extra.toExtraPrecioDTO(empresa, fechaEvento).also { dto ->
-            empresa.listaPrecioConFechaExtra.firstOrNull { it.extra.id == extra.id && it.fechaBaja == null &&
-                (it.desde == fechaEvento || (it.desde.isBefore(fechaEvento) && it.hasta.isAfter(fechaEvento)))
-            }?.let { vigente -> dto.precio = vigente.precio }
-        }
-    }
-
-    fun fromListaExtraToListaExtraDtoByFilter(
-        empresa: Empresa,
-        listaExtra: MutableSet<Extra>,
-        fechaEvento: LocalDateTime,
-        tipoExtra: TipoExtra
-    ): List<ExtraDTO> = fromListaExtraToListaExtraDto(
-        empresa,
-        listaExtra.filter { it.tipoExtra == tipoExtra },
-        fechaEvento
-    )
 
     fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
         listaExtra.filter { it.extra.tipoExtra in tipoExtras }
             .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
 
-    // ==================== EVENTO - PAGINADO ====================
+    // ====================  PAGINADO ====================
 
-    @Transactional(readOnly = true)
-    fun countEvento(empresaId: Long): Int =
-        extraRepository.countEvento(empresaId)
+    fun getPage(empresaId: Long, tiposExtra: List<TipoExtra>, page: Int, buscar: String?): List<ExtraDTO> {
+        return extraRepository.getPage(empresaId, tiposExtra, buscar, PageRequest.of(page, 10))
+    }
 
-    @Transactional(readOnly = true)
-    fun countEventoByNombre(empresaId: Long, buscar: String): Int =
-        extraRepository.countEventoByNombre(empresaId, buscar)
-
-    @Transactional(readOnly = true)
-    fun getPageEvento(empresaId: Long, pageNumber: Int): List<ExtraDTO> =
-        extraRepository.findAllEvento(empresaId, PageRequest.of(pageNumber, 10))
-            .content.map { it.toDTO() }
-
-    @Transactional(readOnly = true)
-    fun getPageEventoByNombre(empresaId: Long, pageNumber: Int, buscar: String): List<ExtraDTO> =
-        extraRepository.findAllEventoByNombre(empresaId, buscar, PageRequest.of(pageNumber, 10))
-            .content.map { it.toDTO() }
-
-    // ==================== CATERING - PAGINADO ====================
-
-    @Transactional(readOnly = true)
-    fun countCatering(empresaId: Long): Int =
-        extraRepository.countCatering(empresaId)
-
-    @Transactional(readOnly = true)
-    fun countCateringByNombre(empresaId: Long, buscar: String): Int =
-        extraRepository.countCateringByNombre(empresaId, buscar)
-
-    @Transactional(readOnly = true)
-    fun getPageCatering(empresaId: Long, pageNumber: Int): List<ExtraDTO> =
-        extraRepository.findAllCatering(empresaId, PageRequest.of(pageNumber, 10))
-            .content.map { it.toDTO() }
-
-    @Transactional(readOnly = true)
-    fun getPageCateringByNombre(empresaId: Long, pageNumber: Int, buscar: String): List<ExtraDTO> =
-        extraRepository.findAllCateringByNombre(empresaId, buscar, PageRequest.of(pageNumber, 10))
-            .content.map { it.toDTO() }
-
-    // ==================== LISTAS GLOBALES (cacheables) ====================
-
-    @Cacheable("extras-evento")
-    @Transactional(readOnly = true)
-    fun getAllEvento(): List<ExtraDTO> =
-        extraRepository.getAllEvento()
-
-    @Cacheable("extras-catering")
-    @Transactional(readOnly = true)
-    fun getAllCatering(): List<ExtraDTO> =
-        extraRepository.getAllCatering()
-
-    @Transactional(readOnly = true)
-    fun getAllExtraEventoAgregar(empresaId: Long): List<ExtraDTO> =
-        extraRepository.getAllExtraEventoAgregar(empresaId)
-
-    @Transactional(readOnly = true)
-    fun getAllExtraCateringAgregar(empresaId: Long): List<ExtraDTO> =
-        extraRepository.getAllExtraCateringAgregar(empresaId)
+    fun count(empresaId: Long, tiposExtra: List<TipoExtra>, buscar: String?): Int {
+        return extraRepository.count(empresaId, tiposExtra, buscar)
+    }
 
     // ==================== PRECIO ====================
 
@@ -154,27 +82,32 @@ class ExtraService (
     @Transactional
     @CacheEvict(value = ["extras-evento", "extras-catering"], allEntries = true)
     fun saveExtra(extraDTO: ExtraDTO, tipoEventoService: TipoEventoService): ExtraDTO {
+        val empresa = empresaService.get(extraDTO.empresaId)!!
+
         val extra = if (extraDTO.id != 0L) {
-            get(extraDTO.id)!!.apply {
-                nombre = extraDTO.nombre
-                tipoExtra = extraDTO.tipoExtra
+            get(extraDTO.id)!!.also {
+                if (extraRepository.countOtrasEmpresas(it.id, empresa.id) == 0) {
+                    it.nombre = extraDTO.nombre
+                    it.tipoExtra = extraDTO.tipoExtra
+                }
             }
         } else {
             Extra(0, extraDTO.nombre, extraDTO.tipoExtra)
         }
 
-        extra.listaTipoEvento = extraDTO.listaTipoEventoId
-            .map { tipoEventoService.get(it)!! }
-            .toMutableSet()
+        val nuevos = if (extraDTO.listaTipoEventoId.isEmpty()) emptyList()
+        else tipoEventoService.getAllByIdsAndEmpresa(extraDTO.listaTipoEventoId, empresa.id)
+
+        extra.listaTipoEvento.removeIf { it.empresa.id == empresa.id }
+        extra.listaTipoEvento.addAll(nuevos)
 
         val saved = save(extra)
 
-        val empresa = empresaService.get(extraDTO.empresaId)!!
-        empresa.listaExtra.add(saved)
-        empresaService.save(empresa)
+        if (empresa.listaExtra.add(saved)) empresaService.save(empresa)
 
         return saved.toDTO()
     }
+
 
     @Transactional
     @CacheEvict(value = ["extras-evento", "extras-catering"], allEntries = true)
@@ -234,4 +167,6 @@ class ExtraService (
             )
         }
     }
+
+
 }

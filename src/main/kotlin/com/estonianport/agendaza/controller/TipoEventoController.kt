@@ -9,6 +9,7 @@ import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.enums.Duracion
 import com.estonianport.agendaza.model.enums.TipoExtra
+import com.estonianport.agendaza.service.ExtraService
 import com.estonianport.agendaza.service.TipoEventoService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -28,7 +29,8 @@ import java.time.LocalTime
 @RequestMapping("/v1/tipos-evento")
 @CrossOrigin("*")
 class TipoEventoController(
-    private val tipoEventoService: TipoEventoService
+    private val tipoEventoService: TipoEventoService,
+    private val extraService: ExtraService
 ) {
 
     // ==================== METADATA / ENUMS ====================
@@ -359,7 +361,7 @@ class TipoEventoController(
         @PathVariable tipoEventoId: Long,
         @RequestBody fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> {
-        val extras = tipoEventoService.getExtrasConPrecio(empresaId, tipoEventoId, fechaEvento, TipoExtra.EVENTO)
+        val extras = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.EVENTO)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Extras de evento obtenidos correctamente",
@@ -369,6 +371,11 @@ class TipoEventoController(
     }
 
     /**
+     * TODO simplificar a 1 endpoint
+     * TODO getAllExtraEventoVariable
+     * TODO getAllTipoCatering
+     * TODO getAllCateringExtra
+     * TODO getAllExtraEventoConPrecio
      * Obtiene los extras de tipo VARIABLE_EVENTO con precio para un tipo de evento y fecha
      * @param empresaId ID de la empresa
      * @param tipoEventoId ID del tipo de evento
@@ -380,7 +387,7 @@ class TipoEventoController(
         @PathVariable tipoEventoId: Long,
         @RequestBody fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> {
-        val extras = tipoEventoService.getExtrasConPrecio(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_EVENTO)
+        val extras = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_EVENTO)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Extras variables de evento obtenidos correctamente",
@@ -401,7 +408,7 @@ class TipoEventoController(
         @PathVariable tipoEventoId: Long,
         @RequestBody fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> {
-        val extras = tipoEventoService.getExtrasConPrecio(empresaId, tipoEventoId, fechaEvento, TipoExtra.TIPO_CATERING)
+        val extras = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.TIPO_CATERING)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Tipos de catering obtenidos correctamente",
@@ -422,7 +429,7 @@ class TipoEventoController(
         @PathVariable tipoEventoId: Long,
         @RequestBody fechaEvento: LocalDateTime
     ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> {
-        val extras = tipoEventoService.getExtrasConPrecio(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_CATERING)
+        val extras = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, TipoExtra.VARIABLE_CATERING)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Extras variables de catering obtenidos correctamente",
