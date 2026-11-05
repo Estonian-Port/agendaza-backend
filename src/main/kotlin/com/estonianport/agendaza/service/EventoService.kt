@@ -258,6 +258,7 @@ class EventoService(
         val fechaFin = LocalDateTime.of(localDate.year, localDate.month, localDate.dayOfMonth, 23, 59, 59)
 
         return eventoRepository.getAllEventosForAgendaByFecha(fechaInicio, fechaFin, empresaId)
+            .ifEmpty { throw NotFoundException("No se encontraron eventos para esa fecha") }
     }
 
     /**
