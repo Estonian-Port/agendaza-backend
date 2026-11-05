@@ -125,12 +125,12 @@ class ExtraController(
         @PathVariable empresaId: Long,
         @PathVariable tipoEventoId: Long,
         @RequestParam fechaEvento: LocalDateTime,
-        @RequestParam tipoExtra: TipoExtra
+        @RequestParam tiposExtra: List<TipoExtra>,
     ): ResponseEntity<CustomResponse<List<ExtraPrecioDTO>>> =
         ResponseEntity.ok(
             CustomResponse(
                 message = "Extras con precio obtenidos correctamente",
-                data = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tipoExtra)
+                data = extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tiposExtra)
             )
         )
 

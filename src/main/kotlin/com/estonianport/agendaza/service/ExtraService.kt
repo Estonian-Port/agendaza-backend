@@ -74,9 +74,9 @@ class ExtraService (
         empresaId: Long,
         tipoEventoId: Long,
         fechaEvento: LocalDateTime,
-        tipoExtra: TipoExtra
+        tiposExtras: List<TipoExtra>
     ): List<ExtraPrecioDTO> =
-        extraRepository.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tipoExtra)
+        extraRepository.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tiposExtras)
 
     // ==================== ABM ====================
 

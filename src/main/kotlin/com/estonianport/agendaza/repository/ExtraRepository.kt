@@ -81,7 +81,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
            AND p.hasta >= :fechaEvento
         WHERE te.id = :tipoEventoId
           AND empresa.id = :empresaId
-          AND e.tipoExtra = :tipoExtra
+          AND e.tipoExtra IN :tiposExtra
           AND e.fechaBaja IS NULL
         ORDER BY e.nombre ASC
     """)
@@ -89,7 +89,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
         empresaId: Long,
         tipoEventoId: Long,
         fechaEvento: LocalDateTime,
-        tipoExtra: TipoExtra
+        tiposExtra: List<TipoExtra>
     ): List<ExtraPrecioDTO>
 
     @Query("""
