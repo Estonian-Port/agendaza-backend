@@ -5,15 +5,7 @@ import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.service.ServicioService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/v1/servicios")
@@ -25,12 +17,16 @@ class ServicioController(
     // ==================== OBTENER SERVICIOS ====================
 
     /**
-     * Obtiene un servicio por su ID, incluyendo los tipos de evento asociados
+     * Obtiene un servicio por su ID y empresa, incluyendo los tipos de evento asociados
      * @param id ID del servicio
+     * @param empresaId ID de la empresa
      */
-    @GetMapping("/{id}")
-    fun getServicio(@PathVariable id: Long): ResponseEntity<CustomResponse<ServicioDTO>> {
-        val servicioDTO = servicioService.getServicioConTiposEvento(id)
+    @GetMapping("/{id}/empresa/{empresaId}")
+    fun getServicio(
+        @PathVariable id: Long,
+        @PathVariable empresaId: Long
+    ): ResponseEntity<CustomResponse<ServicioDTO>> {
+        val servicioDTO = servicioService.getServicioConTiposEvento(id, empresaId)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Servicio obtenido correctamente",
@@ -40,16 +36,18 @@ class ServicioController(
     }
 
     /**
-     * Obtiene todos los servicios de una empresa con paginación
+     * Obtiene los servicios de una empresa con paginación y filtro opcional por nombre
      * @param empresaId ID de la empresa
      * @param page Número de página (default 0)
+     * @param buscar Texto opcional a buscar en el nombre
      */
     @GetMapping("/empresa/{empresaId}")
-    fun getAllServicioByEmpresa(
+    fun getPage(
         @PathVariable empresaId: Long,
-        @RequestParam(defaultValue = "0") page: Int
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(required = false) buscar: String?
     ): ResponseEntity<CustomResponse<List<ServicioDTO>>> {
-        val servicios = servicioService.getAllServicioByEmpresaId(empresaId, page)
+        val servicios = servicioService.getPage(empresaId, page, buscar)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Servicios obtenidos correctamente",
@@ -59,14 +57,16 @@ class ServicioController(
     }
 
     /**
-     * Obtiene la cantidad total de servicios activos de una empresa
+     * Obtiene la cantidad total de servicios activos de una empresa, opcionalmente filtrados por nombre
      * @param empresaId ID de la empresa
+     * @param buscar Texto opcional a buscar en el nombre
      */
-    @GetMapping("/empresa/{empresaId}/cantidad")
-    fun getCantidadServicio(
-        @PathVariable empresaId: Long
+    @GetMapping("/empresa/{empresaId}/count")
+    fun count(
+        @PathVariable empresaId: Long,
+        @RequestParam(required = false) buscar: String?
     ): ResponseEntity<CustomResponse<Int>> {
-        val cantidad = servicioService.getCantidadServicio(empresaId)
+        val cantidad = servicioService.count(empresaId, buscar)
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Cantidad de servicios obtenida correctamente",
@@ -76,57 +76,19 @@ class ServicioController(
     }
 
     /**
-     * Obtiene servicios de una empresa filtrados por nombre, con paginación
+     * Busca servicios disponibles para agregar a una empresa según un término de búsqueda
      * @param empresaId ID de la empresa
-     * @param buscar Texto a buscar en el nombre
-     * @param page Número de página (default 0)
+     * @param q Texto a buscar en el nombre
      */
-    @GetMapping("/empresa/{empresaId}/filtrar")
-    fun getAllServicioFiltrados(
+    @GetMapping("/empresa/{empresaId}/buscar")
+    fun buscar(
         @PathVariable empresaId: Long,
-        @RequestParam buscar: String,
-        @RequestParam(defaultValue = "0") page: Int
+        @RequestParam(defaultValue = "") q: String
     ): ResponseEntity<CustomResponse<List<ServicioDTO>>> {
-        val servicios = servicioService.getAllServicioFiltradosNombre(empresaId, buscar, page)
+        val servicios = servicioService.buscarParaAgregar(empresaId, q)
         return ResponseEntity.ok(
             CustomResponse(
-                message = "Servicios filtrados obtenidos correctamente",
-                data = servicios
-            )
-        )
-    }
-
-    /**
-     * Obtiene la cantidad de servicios filtrados por nombre de una empresa
-     * @param empresaId ID de la empresa
-     * @param buscar Texto a buscar en el nombre
-     */
-    @GetMapping("/empresa/{empresaId}/filtrar/cantidad")
-    fun getCantidadServicioFiltrados(
-        @PathVariable empresaId: Long,
-        @RequestParam buscar: String
-    ): ResponseEntity<CustomResponse<Int>> {
-        val cantidad = servicioService.getCantidadServicioFiltrados(empresaId, buscar)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Cantidad de servicios filtrados obtenida correctamente",
-                data = cantidad
-            )
-        )
-    }
-
-    /**
-     * Obtiene servicios disponibles para agregar a una empresa (los que aún no pertenecen a ella)
-     * @param empresaId ID de la empresa
-     */
-    @GetMapping("/empresa/{empresaId}/agregar")
-    fun getAllServicioAgregar(
-        @PathVariable empresaId: Long
-    ): ResponseEntity<CustomResponse<List<ServicioDTO>>> {
-        val servicios = servicioService.getAllServicioAgregar(empresaId)
-        return ResponseEntity.ok(
-            CustomResponse(
-                message = "Servicios disponibles para agregar obtenidos correctamente",
+                message = "Servicios encontrados",
                 data = servicios
             )
         )
@@ -137,7 +99,7 @@ class ServicioController(
      * @param tipoEventoId ID del tipo de evento
      */
     @GetMapping("/tipo-evento/{tipoEventoId}")
-    fun getAllServicioByTipoEventoId(
+    fun getAllByTipoEvento(
         @PathVariable tipoEventoId: Long
     ): ResponseEntity<CustomResponse<List<ServicioDTO>>> {
         val servicios = servicioService.getAllServicioByTipoEventoId(tipoEventoId)
@@ -156,7 +118,7 @@ class ServicioController(
      * @param dto Datos del servicio a guardar
      */
     @PostMapping
-    fun saveServicio(
+    fun save(
         @RequestBody dto: GenericItemDTO
     ): ResponseEntity<CustomResponse<ServicioDTO>> {
         val servicio = servicioService.saveServicio(dto)
@@ -176,7 +138,7 @@ class ServicioController(
      * @param empresaId ID de la empresa
      */
     @DeleteMapping("/{servicioId}/empresa/{empresaId}")
-    fun deleteServicio(
+    fun delete(
         @PathVariable servicioId: Long,
         @PathVariable empresaId: Long
     ): ResponseEntity<CustomResponse<String>> {

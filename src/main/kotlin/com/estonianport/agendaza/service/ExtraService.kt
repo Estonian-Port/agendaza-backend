@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
+import com.estonianport.agendaza.common.limpiarNombre
 import com.estonianport.agendaza.common.toEndOfMonth
 import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
@@ -84,15 +85,18 @@ class ExtraService (
     fun saveExtra(extraDTO: ExtraDTO, tipoEventoService: TipoEventoService): ExtraDTO {
         val empresa = empresaService.get(extraDTO.empresaId)!!
 
+        val nombre = extraDTO.nombre.limpiarNombre()
+
         val extra = if (extraDTO.id != 0L) {
             get(extraDTO.id)!!.also {
                 if (extraRepository.countOtrasEmpresas(it.id, empresa.id) == 0) {
-                    it.nombre = extraDTO.nombre
+                    it.nombre = nombre
                     it.tipoExtra = extraDTO.tipoExtra
                 }
             }
         } else {
-            Extra(0, extraDTO.nombre, extraDTO.tipoExtra)
+            extraRepository.findFirstByTipoExtraAndNombreIgnoreCaseOrderByIdAsc(extraDTO.tipoExtra, nombre)
+                ?: Extra(0, nombre, extraDTO.tipoExtra)
         }
 
         val nuevos = if (extraDTO.listaTipoEventoId.isEmpty()) emptyList()
@@ -168,5 +172,7 @@ class ExtraService (
         }
     }
 
+    fun buscarParaAgregar(empresaId: Long, q: String, tipos: List<TipoExtra>) =
+        extraRepository.buscarParaAgregar(empresaId, tipos, q.limpiarNombre(), PageRequest.of(0, 10))
 
 }

@@ -100,7 +100,6 @@ class ExtraController(
             )
         )
 
-
     // ==================== PRECIO ====================
 
     /**
@@ -136,6 +135,15 @@ class ExtraController(
         )
 
     // ==================== ABM ====================
+
+    @GetMapping("/empresa/{empresaId}/buscar")
+    fun buscar(
+        @PathVariable empresaId: Long,
+        @RequestParam(defaultValue = "") q: String,
+        @RequestParam tipos: List<TipoExtra>
+    ): ResponseEntity<CustomResponse<List<ExtraDTO>>> = ResponseEntity.ok(
+        CustomResponse("Extras encontrados", extraService.buscarParaAgregar(empresaId, q, tipos))
+    )
 
     /**
      * Crea o actualiza un extra y lo asocia a la empresa

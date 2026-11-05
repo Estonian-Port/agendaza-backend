@@ -5,6 +5,7 @@ import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.enums.Duracion
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.*
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -73,13 +74,13 @@ class EmpresaService (
         val cargos = cargoRepository.countActivosByEmpresaId(id)
         val tiposEvento = tipoEventoRepository.countActivosByEmpresaId(id)
 
-        val extrasEvento = extraRepository.countEvento(id)
-        val extrasCatering = extraRepository.countCatering(id)
+        val extrasEvento = extraRepository.count(id, listOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO))
+        val extrasCatering = extraRepository.count(id, listOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING))
 
         val pagos = pagoRepository.countActivosByEmpresaId(id) + gastoRepository.countActivosByEmpresaId(id)
         val eventos = eventoRepository.countActivosByEmpresaId(id)
         val clientes = eventoRepository.countClientesByEmpresaId(id)
-        val servicios = servicioRepository.countActivosByEmpresaId(id)
+        val servicios = servicioRepository.count(id)
         val clausulas = clausulaRepository.countByEmpresaId(id)
 
         return CantidadesPanelAdminDTO(

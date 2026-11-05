@@ -12,26 +12,6 @@ import java.time.LocalDateTime
 
 interface ExtraRepository : CrudRepository<Extra, Long> {
 
-    // ==================== COUNT PANEL ====================
-
-    @Query("""
-        SELECT COUNT(e) FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    """)
-    fun countEvento(empresaId: Long): Int
-
-    @Query("""
-        SELECT COUNT(e) FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun countCatering(empresaId: Long): Int
-
     // ====================  PAGINADO ====================
 
     @Query("""
@@ -41,8 +21,9 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
         WHERE ee.id = :empresaId
           AND e.fechaBaja IS NULL
           AND e.tipoExtra IN :tiposExtra
-          AND (:buscar IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :buscar, '%')))
-    """)
+          AND (CAST(:buscar AS string) IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%')))
+        ORDER BY e.nombre ASC
+""")
     fun getPage(
         empresaId: Long,
         tiposExtra: List<TipoExtra>,
@@ -56,13 +37,34 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
         WHERE ee.id = :empresaId
           AND e.fechaBaja IS NULL
           AND e.tipoExtra IN :tiposExtra
-          AND (:buscar IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :buscar, '%')))
+          AND (CAST(:buscar AS string) IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%')))
     """)
     fun count(
         empresaId: Long,
         tiposExtra: List<TipoExtra>,
-        buscar: String?
+        buscar: String? = null
     ): Int
+
+    // ==================== BUSQUEDA ====================
+
+    @Query("""
+    SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
+    FROM Extra e
+    WHERE e.fechaBaja IS NULL
+      AND e.tipoExtra IN :tipos
+      AND e.nombre ILIKE %:q%
+      AND e.id NOT IN (
+          SELECT e2.id FROM Extra e2
+          JOIN e2.listaEmpresa emp
+          WHERE emp.id = :empresaId
+      )
+    ORDER BY SIZE(e.listaEmpresa) DESC, e.nombre
+""")
+    fun buscarParaAgregar(
+        empresaId: Long, tipos: Collection<TipoExtra>, q: String, pageable: Pageable
+    ): List<ExtraDTO>
+
+    fun findFirstByTipoExtraAndNombreIgnoreCaseOrderByIdAsc(tipoExtra: TipoExtra, nombre: String): Extra?
 
     // ==================== PRECIO ====================
 
@@ -81,7 +83,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
           AND empresa.id = :empresaId
           AND e.tipoExtra = :tipoExtra
           AND e.fechaBaja IS NULL
-        ORDER BY e.nombre
+        ORDER BY e.nombre ASC
     """)
     fun getAllExtraConPrecioByTipoEventoAndFecha(
         empresaId: Long,
