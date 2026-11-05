@@ -191,7 +191,8 @@ interface EventoRepository : CrudRepository<Evento, Long> {
         """
         SELECT new com.estonianport.agendaza.dto.EventoConUsuarioDTO(
             e.id, e.nombre, e.codigo,
-            e.cliente.id, e.cliente.nombre, e.cliente.apellido, e.cliente.username
+            e.cliente.id, e.cliente.nombre, e.cliente.apellido, e.cliente.username,
+            e.inicio
         )
         FROM Evento e
         WHERE e.cliente.id = :usuarioId

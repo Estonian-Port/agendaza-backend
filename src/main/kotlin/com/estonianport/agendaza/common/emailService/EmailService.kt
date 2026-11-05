@@ -8,6 +8,7 @@ import com.estonianport.agendaza.model.Extra
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.model.Servicio
 import com.estonianport.agendaza.model.enums.TipoExtra
+import com.estonianport.agendaza.model.enums.TipoCargo
 import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -372,6 +373,82 @@ class EmailService(
             Email(
                 email = evento.cliente.email,
                 subject = "Tu estado de cuenta del evento  " + evento.nombre + ", codigo: " + evento.codigo,
+                content = content
+            )
+        )
+    }
+
+    fun enviarInvitacion(
+        email: String,
+        username: String,
+        password: String,
+        empresa: Empresa,
+        cargo: TipoCargo
+    ) {
+        val template = loadHtmlTemplate("invitacion_usuario.html")
+        val content = renderTemplate(
+            template, mapOf(
+                "username" to username,
+                "password" to password,
+                "empresa_nombre" to empresa.nombre,
+                "cargo" to cargo.name,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
+            )
+        )
+
+        sendEmail(
+            Email(
+                email = email,
+                subject = "Invitación a Agendaza",
+                content = content
+            )
+        )
+    }
+
+    fun enviarRestablecimientoPassword(email: String, password: String, empresa: Empresa) {
+        val template = loadHtmlTemplate("restablecimiento_password.html")
+        val content = renderTemplate(
+            template, mapOf(
+                "password" to password,
+                "empresa_nombre" to empresa.nombre,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
+            )
+        )
+        sendEmail(Email(email = email, subject = "Restablecimiento de contraseña", content = content))
+    }
+
+    fun enviarNotificacionNuevaAgenda(email: String, empresa: Empresa, cargo: TipoCargo) {
+        val template = loadHtmlTemplate("nueva_agenda_usuario.html")
+        val content = renderTemplate(
+            template, mapOf(
+                "empresa_nombre" to empresa.nombre,
+                "cargo" to cargo.name,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
+            )
+        )
+
+        sendEmail(
+            Email(
+                email = email,
+                subject = "Nueva agenda asignada en Agendaza",
                 content = content
             )
         )

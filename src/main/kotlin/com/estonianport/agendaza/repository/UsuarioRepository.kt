@@ -16,8 +16,10 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     // ==================== BÚSQUEDAS BÁSICAS ====================
 
-    @Query("SELECT u FROM Usuario u WHERE u.username = :username")
+    @Query("SELECT u FROM Usuario u WHERE u.username = :username AND u.fechaBaja IS NULL")
     fun getByUsername(username: String): Usuario?
+
+    fun existsByUsername(username: String): Boolean
 
     @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByEmail(email: String): List<Usuario>
@@ -29,7 +31,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.email = :email
@@ -38,7 +40,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.celular = :celular
@@ -47,7 +49,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioResponseDto(
-            u.id, u.nombre, u.apellido, u.username, u.email, u.celular
+            u.id, u.nombre, u.apellido, u.username, u.email, u.celular, u.fechaNacimiento
         ) 
         FROM Usuario u 
         WHERE u.username = :username

@@ -12,131 +12,59 @@ import java.time.LocalDateTime
 
 interface ExtraRepository : CrudRepository<Extra, Long> {
 
-    // ==================== EVENTO ====================
+    // ====================  PAGINADO ====================
+
+    @Query("""
+        SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
+        FROM Extra e        
+        JOIN e.listaEmpresa ee
+        WHERE ee.id = :empresaId
+          AND e.fechaBaja IS NULL
+          AND e.tipoExtra IN :tiposExtra
+          AND (CAST(:buscar AS string) IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%')))
+        ORDER BY e.nombre ASC
+""")
+    fun getPage(
+        empresaId: Long,
+        tiposExtra: List<TipoExtra>,
+        buscar: String?,
+        pageable: Pageable
+    ): List<ExtraDTO>
 
     @Query("""
         SELECT COUNT(e) FROM Extra e
         JOIN e.listaEmpresa ee
         WHERE ee.id = :empresaId
           AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
+          AND e.tipoExtra IN :tiposExtra
+          AND (CAST(:buscar AS string) IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', CAST(:buscar AS string), '%')))
     """)
-    fun countEvento(empresaId: Long): Int
+    fun count(
+        empresaId: Long,
+        tiposExtra: List<TipoExtra>,
+        buscar: String? = null
+    ): Int
+
+    // ==================== BUSQUEDA ====================
 
     @Query("""
-        SELECT COUNT(e) FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.nombre ILIKE %:buscar%
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    """)
-    fun countEventoByNombre(empresaId: Long, buscar: String): Int
+    SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
+    FROM Extra e
+    WHERE e.fechaBaja IS NULL
+      AND e.tipoExtra IN :tipos
+      AND e.nombre ILIKE %:q%
+      AND e.id NOT IN (
+          SELECT e2.id FROM Extra e2
+          JOIN e2.listaEmpresa emp
+          WHERE emp.id = :empresaId
+      )
+    ORDER BY SIZE(e.listaEmpresa) DESC, e.nombre
+""")
+    fun buscarParaAgregar(
+        empresaId: Long, tipos: Collection<TipoExtra>, q: String, pageable: Pageable
+    ): List<ExtraDTO>
 
-    @Query("""
-        SELECT e FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    """)
-    fun findAllEvento(empresaId: Long, pageable: Pageable): Page<Extra>
-
-    @Query("""
-        SELECT e FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.nombre ILIKE %:buscar%
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    """)
-    fun findAllEventoByNombre(empresaId: Long, buscar: String, pageable: Pageable): Page<Extra>
-
-    @Query("""
-        SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
-        FROM Extra e
-        WHERE e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-    """)
-    fun getAllEvento(): List<ExtraDTO>
-
-    @Query("""
-        SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
-        FROM Extra e
-        WHERE e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO)
-          AND e.id NOT IN (
-              SELECT e2.id FROM Extra e2
-              JOIN e2.listaEmpresa emp
-              WHERE emp.id = :empresaId
-          )
-        ORDER BY e.id DESC
-        LIMIT 10
-    """)
-    fun getAllExtraEventoAgregar(empresaId: Long): List<ExtraDTO>
-
-    // ==================== CATERING ====================
-
-    @Query("""
-        SELECT COUNT(e) FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun countCatering(empresaId: Long): Int
-
-    @Query("""
-        SELECT COUNT(e) FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.nombre ILIKE %:buscar%
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun countCateringByNombre(empresaId: Long, buscar: String): Int
-
-    @Query("""
-        SELECT e FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun findAllCatering(empresaId: Long, pageable: Pageable): Page<Extra>
-
-    @Query("""
-        SELECT e FROM Extra e
-        JOIN e.listaEmpresa ee
-        WHERE ee.id = :empresaId
-          AND e.fechaBaja IS NULL
-          AND e.nombre ILIKE %:buscar%
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun findAllCateringByNombre(empresaId: Long, buscar: String, pageable: Pageable): Page<Extra>
-
-    @Query("""
-        SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
-        FROM Extra e
-        WHERE e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-    """)
-    fun getAllCatering(): List<ExtraDTO>
-
-    @Query("""
-        SELECT new com.estonianport.agendaza.dto.ExtraDTO(e.id, e.nombre, e.tipoExtra)
-        FROM Extra e
-        WHERE e.fechaBaja IS NULL
-          AND e.tipoExtra IN (TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING)
-          AND e.id NOT IN (
-              SELECT e2.id FROM Extra e2
-              JOIN e2.listaEmpresa emp
-              WHERE emp.id = :empresaId
-          )
-        ORDER BY e.id DESC
-        LIMIT 10
-    """)
-    fun getAllExtraCateringAgregar(empresaId: Long): List<ExtraDTO>
+    fun findFirstByTipoExtraAndNombreIgnoreCaseOrderByIdAsc(tipoExtra: TipoExtra, nombre: String): Extra?
 
     // ==================== PRECIO ====================
 
@@ -144,6 +72,7 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
         SELECT new com.estonianport.agendaza.dto.ExtraPrecioDTO(e.id, e.nombre, e.tipoExtra, COALESCE(p.precio, 0))
         FROM TipoEvento te
         JOIN te.listaExtra e
+        JOIN e.listaEmpresa empresa
         LEFT JOIN precio_con_fecha_extra p
             ON p.extra.id = e.id
            AND p.empresa.id = :empresaId
@@ -151,14 +80,23 @@ interface ExtraRepository : CrudRepository<Extra, Long> {
            AND p.desde <= :fechaEvento
            AND p.hasta >= :fechaEvento
         WHERE te.id = :tipoEventoId
-          AND e.tipoExtra = :tipoExtra
+          AND empresa.id = :empresaId
+          AND e.tipoExtra IN :tiposExtra
           AND e.fechaBaja IS NULL
-        ORDER BY e.nombre
+        ORDER BY e.nombre ASC
     """)
     fun getAllExtraConPrecioByTipoEventoAndFecha(
         empresaId: Long,
         tipoEventoId: Long,
         fechaEvento: LocalDateTime,
-        tipoExtra: TipoExtra
+        tiposExtra: List<TipoExtra>
     ): List<ExtraPrecioDTO>
+
+    @Query("""
+    SELECT COUNT(emp) FROM Extra e
+    JOIN e.listaEmpresa emp
+    WHERE e.id = :extraId
+      AND emp.id <> :empresaId
+""")
+    fun countOtrasEmpresas(extraId: Long, empresaId: Long): Int
 }

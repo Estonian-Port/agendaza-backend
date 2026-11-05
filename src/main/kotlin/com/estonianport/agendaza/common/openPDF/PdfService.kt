@@ -278,8 +278,6 @@ class PdfService {
 
         // Setea titulo Informacion sobre evento
         recuadro(document, "INFORMACION SOBRE EL EVENTO", fontTitulo, true)
-        //document.add(Paragraph("INFORMACION SOBRE EL EVENTO", fontTitulo))
-        //lineaHorizontal(document)
 
         val listaExtra = evento.listaEventoExtra
             .filter { it.extra.tipoExtra == TipoExtra.EVENTO }

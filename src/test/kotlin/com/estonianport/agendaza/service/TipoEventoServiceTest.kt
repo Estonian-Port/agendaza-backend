@@ -181,17 +181,4 @@ class TipoEventoServiceTest {
         assertEquals(450.0, service.getPrecio(empresa.id, tipoEvento.id, fecha))
     }
 
-    @Test
-    fun `getExtrasConPrecio delega el filtro al servicio de extras`() {
-        val fecha = LocalDateTime.of(2026, 9, 25, 12, 0)
-        val esperado = listOf(ExtraPrecioDTO(2L, "Mozo", TipoExtra.VARIABLE_EVENTO, 100.0))
-        whenever(extraService.getAllExtraConPrecioByTipoEventoAndFecha(
-            empresa.id, tipoEvento.id, fecha, TipoExtra.VARIABLE_EVENTO
-        )).thenReturn(esperado)
-
-        assertEquals(esperado, service.getExtrasConPrecio(empresa.id, tipoEvento.id, fecha, TipoExtra.VARIABLE_EVENTO))
-        verify(extraService).getAllExtraConPrecioByTipoEventoAndFecha(
-            empresa.id, tipoEvento.id, fecha, TipoExtra.VARIABLE_EVENTO
-        )
-    }
 }

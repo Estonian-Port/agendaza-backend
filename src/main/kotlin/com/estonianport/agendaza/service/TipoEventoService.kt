@@ -152,15 +152,9 @@ class TipoEventoService(
         return empresaService.getAllPrecioConFechaByTipoEvento(empresaId, tipoEventoId)
     }
 
-    @Transactional(readOnly = true)
-    fun getExtrasConPrecio(
-        empresaId: Long,
-        tipoEventoId: Long,
-        fechaEvento: LocalDateTime,
-        tipoExtra: TipoExtra
-    ): List<ExtraPrecioDTO> {
-        return extraService.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tipoExtra)
-    }
+    fun getAllByIdsAndEmpresa(ids: Collection<Long>, empresaId: Long): List<TipoEvento> =
+        if (ids.isEmpty()) emptyList()
+        else tipoEventoRepository.getAllByIdsAndEmpresa(ids, empresaId)
 
     // ==================== MUTATIONS ====================
 
@@ -233,5 +227,9 @@ class TipoEventoService(
                 )
             )
         }
+    }
+
+    fun getIdsByExtraAndEmpresa(id: Long, empresaId: Long): List<Long> {
+        return tipoEventoRepository.getIdsByExtraAndEmpresa(id, empresaId)
     }
 }

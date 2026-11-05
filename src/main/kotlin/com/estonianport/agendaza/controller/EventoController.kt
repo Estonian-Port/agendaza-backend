@@ -442,7 +442,7 @@ class EventoController(
     @PatchMapping("/{eventoId}/anotaciones")
     fun editEventoAnotaciones(
         @PathVariable eventoId: Long,
-        @RequestBody anotacion: String
+        @RequestBody(required = false) anotacion: String = ""
     ): ResponseEntity<CustomResponse<String>> {
         val anotacionActualizada = eventoService.editEventoAnotaciones(anotacion, eventoId)
 

@@ -128,7 +128,7 @@ class UsuarioServiceTest {
 
     @Test
     fun `getUsuarioDtoByEmail devuelve el DTO del repositorio`() {
-        val esperado = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L)
+        val esperado = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L, LocalDate.now())
         whenever(usuarioRepository.getUsuarioDtoByEmail("test@test.com")).thenReturn(esperado)
 
         assertEquals(esperado, service.getUsuarioDtoByEmail("test@test.com"))
@@ -145,8 +145,8 @@ class UsuarioServiceTest {
 
     @Test
     fun `getUsuarioDtoByCelular y por username devuelven los DTOs del repositorio`() {
-        val porCelular = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L)
-        val porUsername = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L)
+        val porCelular = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L, LocalDate.now())
+        val porUsername = UsuarioResponseDto(1L, "Juan", "Pérez", "juan", "test@test.com", 1234567890L, LocalDate.now())
         whenever(usuarioRepository.getUsuarioDtoByCelular(1234567890L)).thenReturn(porCelular)
         whenever(usuarioRepository.getUsuarioDtoByUsername("juan")).thenReturn(porUsername)
 

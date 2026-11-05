@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.common.GenericServiceImpl
+import com.estonianport.agendaza.common.limpiarNombre
 import com.estonianport.agendaza.dto.GenericItemDTO
 import com.estonianport.agendaza.dto.ServicioDTO
 import com.estonianport.agendaza.dto.toDTO
@@ -27,89 +28,68 @@ class ServicioService(
     // ==================== QUERIES ====================
 
     @Transactional(readOnly = true)
-    fun getServicioConTiposEvento(id: Long): ServicioDTO {
+    fun getServicioConTiposEvento(id: Long, empresaId: Long): ServicioDTO {
         val servicio = servicioRepository.findById(id)
             .orElseThrow { NotFoundException("Servicio no encontrado con id: $id") }
-        return servicio.toDTO().also { dto ->
-            dto.listaTipoEventoId = tipoEventoService.getAllByServicio(dto.id).map { it.id }
+        return servicio.toDTO().also {
+            it.listaTipoEventoId = servicioRepository.getTipoEventoIdsByServicioAndEmpresa(id, empresaId)
         }
     }
 
-    @Transactional(readOnly = true)
-    @Cacheable(value = ["servicios"], key = "#empresaId + '-' + #pageNumber")
-    fun getAllServicioByEmpresaId(empresaId: Long, pageNumber: Int): List<ServicioDTO> {
-        return servicioRepository
-            .getAllServicioByEmpresaId(empresaId, PageRequest.of(pageNumber, 10))
-            .content
-    }
+    fun getPage(empresaId: Long, page: Int, buscar: String?): List<ServicioDTO> =
+        servicioRepository.getPage(empresaId, buscar?.limpiarNombre()?.ifBlank { null }, PageRequest.of(page, 10))
 
-    @Transactional(readOnly = true)
-    @Cacheable(value = ["servicios-count"], key = "#empresaId")
-    fun getCantidadServicio(empresaId: Long): Int {
-        return servicioRepository.getCantidadServicio(empresaId)
-    }
+    fun count(empresaId: Long, buscar: String?): Int =
+        servicioRepository.count(empresaId, buscar?.limpiarNombre()?.ifBlank { null })
 
-    @Transactional(readOnly = true)
-    fun getAllServicioFiltradosNombre(empresaId: Long, buscar: String, pageNumber: Int): List<ServicioDTO> {
-        return servicioRepository
-            .getAllServicioFilterNombre(empresaId, buscar, PageRequest.of(pageNumber, 10))
-            .content
-    }
+    fun buscarParaAgregar(empresaId: Long, q: String): List<ServicioDTO> =
+        servicioRepository.buscarParaAgregar(empresaId, q.limpiarNombre(), PageRequest.of(0, 10))
 
-    @Transactional(readOnly = true)
-    fun getCantidadServicioFiltrados(empresaId: Long, buscar: String): Int {
-        return servicioRepository.getCantidadServicioFiltrados(empresaId, buscar)
-    }
-
-    @Transactional(readOnly = true)
-    fun getAllServicioAgregar(empresaId: Long): List<ServicioDTO> {
-        return servicioRepository.getAllServicioAgregar(empresaId)
-    }
-
-    @Transactional(readOnly = true)
-    fun getAllServicioByTipoEventoId(tipoEventoId: Long): List<ServicioDTO> {
-        return servicioRepository.getAllServicioByTipoEventoId(tipoEventoId)
-    }
+    fun getAllServicioByTipoEventoId(tipoEventoId: Long): List<ServicioDTO> =
+        servicioRepository.getAllServicioByTipoEventoId(tipoEventoId)
 
     // ==================== MUTATIONS ====================
 
     @Transactional
-    @CacheEvict(value = ["servicios", "servicios-count"], allEntries = true)
     fun saveServicio(dto: GenericItemDTO): ServicioDTO {
+        val empresa = empresaService.findById(dto.empresaId)
+        val nombre = dto.nombre.limpiarNombre()
+
         val servicio = if (dto.id != 0L) {
             servicioRepository.findById(dto.id)
                 .orElseThrow { NotFoundException("Servicio no encontrado con id: ${dto.id}") }
-                .apply { nombre = dto.nombre }
+                .also {
+                    // Si lo comparten otras empresas no se renombra
+                    if (servicioRepository.countOtrasEmpresas(it.id, empresa.id) == 0) it.nombre = nombre
+                }
         } else {
-            Servicio(0, dto.nombre)
+            servicioRepository.findFirstByNombreIgnoreCaseOrderByIdAsc(nombre) ?: Servicio(0, nombre)
         }
 
-        servicio.listaTipoEvento = dto.listaTipoEventoId
-            .map { tipoEventoService.get(it)
-                ?: throw NotFoundException("TipoEvento no encontrado con id: $it") }
-            .toMutableSet()
+        val nuevos = if (dto.listaTipoEventoId.isEmpty()) emptyList()
+        else tipoEventoService.getAllByIdsAndEmpresa(dto.listaTipoEventoId, empresa.id)
 
-        val savedServicio = servicioRepository.save(servicio)
+        // Solo toca los tipos de evento de esta empresa
+        servicio.listaTipoEvento.removeIf { it.empresa.id == empresa.id }
+        servicio.listaTipoEvento.addAll(nuevos)
 
-        val empresa = empresaService.findById(dto.empresaId)
-        if (!empresa.listaServicio.any { it.id == savedServicio.id }) {
-            empresa.listaServicio.add(savedServicio)
-            empresaService.save(empresa)
-        }
+        val saved = servicioRepository.save(servicio)
+        if (empresa.listaServicio.add(saved)) empresaService.save(empresa)
 
-        return savedServicio.toDTO()
+        return saved.toDTO()
     }
 
     @Transactional
-    @CacheEvict(value = ["servicios", "servicios-count"], allEntries = true)
     fun deleteService(servicioId: Long, empresaId: Long) {
         val empresa = empresaService.get(empresaId)
             ?: throw NotFoundException("Empresa no encontrada con id: $empresaId")
 
-        empresa.listaServicio = empresa.listaServicio
-            .filter { it.id != servicioId }
-            .toMutableSet()
-
+        empresa.listaServicio.removeIf { it.id == servicioId }
         empresaService.save(empresa)
+
+        // Limpia los vínculos con los tipos de evento de esta empresa
+        servicioRepository.findById(servicioId).ifPresent { s ->
+            s.listaTipoEvento.removeIf { it.empresa.id == empresaId }
+        }
     }
 }
