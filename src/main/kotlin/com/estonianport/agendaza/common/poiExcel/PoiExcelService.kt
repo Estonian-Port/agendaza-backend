@@ -45,7 +45,8 @@ class PoiExcelService(
     )
 
     private val tiposReinversion = setOf(
-        TipoGasto.MANTENIMIENTO, TipoGasto.DECORACION, TipoGasto.EQUIPAMIENTO
+        TipoGasto.REINVERSION
+        //TipoGasto.MANTENIMIENTO, TipoGasto.DECORACION, TipoGasto.EQUIPAMIENTO
     )
 
     private data class Col(val nombre: String, val ancho: Int)
@@ -93,17 +94,15 @@ class PoiExcelService(
 
         val tEventos = Tabla(
             "EVENTOS",
-            listOf(Col("Fecha", 12), Col("Evento", 30), Col("Tipo", 16), Col("Detalle", 32), Col("Importe", 15)),
-            gastosEvento
-                .sortedWith(compareBy({ it.evento?.nombre.orEmpty() }, { it.fecha }))
-                .map { listOf(it.fecha, it.evento?.nombre.orEmpty(), formatEnum(it.tipoGasto), it.descripcion, it.monto) }
+            listOf(Col("Fecha", 18), Col("Evento", 34), Col("Importe", 18)),
+            emptyList()
         )
 
         val tPagos = Tabla(
             "PAGOS",
             listOf(
                 Col("Fecha evento", 13), Col("Importe", 15), Col("Fecha cobro", 13), Col("Forma de pago", 18),
-                Col("Factura", 9), Col("Concepto", 24), Col("Cliente", 28)
+                Col("Factura", 9), Col("Cliente", 24)
             ),
             pagos.sortedBy { it.fecha }.map { p ->
                 listOf(
@@ -116,8 +115,8 @@ class PoiExcelService(
 
         val tReinversion = Tabla(
             "REINVERSIÓN",
-            listOf(Col("Fecha", 12), Col("Tipo", 16), Col("Descripción", 32), Col("Importe", 15)),
-            reinversion.sortedBy { it.fecha }.map { listOf(it.fecha, formatEnum(it.tipoGasto), it.descripcion, it.monto) }
+            listOf(Col("Fecha", 12), Col("Descripción", 32), Col("Importe", 15)),
+            reinversion.sortedBy { it.fecha }.map { listOf(it.fecha, it.descripcion, it.monto) }
         )
 
         val tFijos = Tabla(
@@ -129,16 +128,104 @@ class PoiExcelService(
         // Las tablas van una al lado de otra con una columna vacía de separación
         var col = 0
         val refs = mutableListOf<String>()
-        for (t in listOf(tEventos, tPagos, tReinversion, tFijos)) {
+        refs += escribirTablaEventos(sheet, e, col, gastosEvento, pagos, mes)
+        col += tEventos.columnas.size + 1
+        for (t in listOf(tPagos, tReinversion, tFijos)) {
             refs += escribirTabla(sheet, e, col, t)
             col += t.columnas.size + 1
         }
         val (refEventos, refPagos, refReinversion, refFijos) = refs
 
-        val maxFilas = listOf(tEventos, tPagos, tReinversion, tFijos).maxOf { it.filas.size }
+        val filasEventos = cantidadFilasEventos(gastosEvento, pagos, mes)
+        val maxFilas = maxOf(filasEventos, tPagos.filas.size, tReinversion.filas.size, tFijos.filas.size)
         escribirResumen(sheet, e, 2 + maxFilas + 3, refEventos, refPagos, refReinversion, refFijos)
 
         sheet.createFreezePane(0, 2)
+    }
+
+    /**
+     * Escribe un bloque independiente por evento. Cada bloque termina con su total
+     * de gastos y deja una fila libre antes del siguiente evento.
+     */
+    private fun escribirTablaEventos(
+        sheet: Sheet, e: Estilos, col0: Int, gastos: List<Gasto>, pagos: List<Pago>, mes: YearMonth
+    ): String {
+        val n = 3
+        sheet.addMergedRegion(CellRangeAddress(0, 0, col0, col0 + n - 1))
+        for (i in 0 until n) celda(sheet, 0, col0 + i).cellStyle = e.titulo
+        celda(sheet, 0, col0).setCellValue("EVENTOS")
+
+        listOf(18, 34, 18).forEachIndexed { i, ancho -> sheet.setColumnWidth(col0 + i, ancho * 256) }
+
+        val eventos = (gastos.mapNotNull { it.evento } + pagos.map { it.evento })
+            .distinctBy { it.id }
+            .filter { YearMonth.from(it.inicio) == mes }
+            .sortedBy { it.inicio }
+        val gastosPorEvento = gastos.groupBy { it.evento?.id }
+        val referenciasTotales = mutableListOf<String>()
+        var fila = 1
+
+        eventos.forEach { evento ->
+            // La fila naranja identifica visualmente el comienzo de cada evento.
+            for (i in 0 until n) celda(sheet, fila, col0 + i).cellStyle = e.evento
+            celda(sheet, fila, col0).apply { setCellValue(evento.inicio); cellStyle = e.eventoFecha }
+            celda(sheet, fila, col0 + 1).apply { setCellValue(evento.nombre); cellStyle = e.evento }
+            fila++
+
+            sheet.addMergedRegion(CellRangeAddress(fila, fila, col0, col0 + 1))
+            celda(sheet, fila, col0).apply { setCellValue("Cantidad de invitados"); cellStyle = e.totalEtiqueta }
+            celda(sheet, fila, col0 + 2).apply {
+                setCellValue("${evento.capacidadAdultos} adultos + ${evento.capacidadNinos} menores")
+                cellStyle = e.texto
+            }
+            fila++
+
+            sheet.addMergedRegion(CellRangeAddress(fila, fila, col0, col0 + 1))
+            celda(sheet, fila, col0).apply { setCellValue("Total de ingresos"); cellStyle = e.ingresoEtiqueta }
+            celda(sheet, fila, col0 + 2).apply { setCellValue(evento.getPresupuestoTotal()); cellStyle = e.ingreso }
+            fila++
+
+            listOf("Tipo", "Descripción", "Cantidad").forEachIndexed { i, nombre ->
+                celda(sheet, fila, col0 + i).apply { setCellValue(nombre); cellStyle = e.encabezado }
+            }
+            fila++
+
+            val gastosEvento = gastosPorEvento[evento.id].orEmpty().sortedBy { it.fecha }
+            gastosEvento.forEach { gasto ->
+                celda(sheet, fila, col0).apply { setCellValue(formatEnum(gasto.tipoGasto)); cellStyle = e.texto }
+                celda(sheet, fila, col0 + 1).apply { setCellValue(gasto.descripcion); cellStyle = e.texto }
+                celda(sheet, fila, col0 + 2).apply { setCellValue(gasto.monto); cellStyle = e.moneda }
+                fila++
+            }
+
+            val totalGasto = gastosEvento.sumOf { it.monto }
+            sheet.addMergedRegion(CellRangeAddress(fila, fila, col0, col0 + 1))
+            celda(sheet, fila, col0).apply { setCellValue("TOTAL GASTO"); cellStyle = e.gastoEtiqueta }
+            celda(sheet, fila, col0 + 2).apply { setCellValue(totalGasto); cellStyle = e.gasto }
+            referenciasTotales += CellReference(fila, col0 + 2).formatAsString()
+            fila += 2
+        }
+
+        val filaTotal = if (eventos.isEmpty()) 1 else fila - 1
+        val celdaTotal = celda(sheet, filaTotal, col0 + 2)
+        if (eventos.isEmpty()) {
+            sheet.addMergedRegion(CellRangeAddress(filaTotal, filaTotal, col0, col0 + 1))
+            celda(sheet, filaTotal, col0).apply { setCellValue("TOTAL GASTO"); cellStyle = e.gastoEtiqueta }
+            celdaTotal.setCellValue(0.0)
+            celdaTotal.cellStyle = e.gasto
+        }
+        return if (referenciasTotales.isEmpty()) {
+            CellReference(filaTotal, col0 + 2).formatAsString()
+        } else {
+            "SUM(${referenciasTotales.joinToString(",")})"
+        }
+    }
+
+    private fun cantidadFilasEventos(gastos: List<Gasto>, pagos: List<Pago>, mes: YearMonth): Int {
+        val eventos = (gastos.mapNotNull { it.evento } + pagos.map { it.evento })
+            .distinctBy { it.id }
+            .filter { YearMonth.from(it.inicio) == mes }
+        return eventos.sumOf { evento -> 6 + gastos.count { it.evento?.id == evento.id } }
     }
 
     /** Devuelve la referencia (ej. "E10") de la celda con el total de importes. */
@@ -222,7 +309,7 @@ class PoiExcelService(
         }
 
         val titulo: CellStyle = wb.createCellStyle().apply {
-            gris(this, IndexedColors.GREY_80_PERCENT)
+            gris(this, IndexedColors.ROYAL_BLUE)
             alignment = HorizontalAlignment.CENTER
             setFont(wb.createFont().apply { bold = true; color = IndexedColors.WHITE.index })
         }
@@ -245,6 +332,37 @@ class PoiExcelService(
         }
         val total: CellStyle = wb.createCellStyle().apply {
             gris(this, IndexedColors.GREY_25_PERCENT)
+            borderTop = BorderStyle.THIN
+            dataFormat = formato.getFormat("#,##0")
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val evento: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.ORANGE)
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val eventoFecha: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.ORANGE)
+            dataFormat = formato.getFormat("dd/mm/yyyy")
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val ingresoEtiqueta: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.LIGHT_GREEN)
+            borderTop = BorderStyle.THIN
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val ingreso: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.LIGHT_GREEN)
+            borderTop = BorderStyle.THIN
+            dataFormat = formato.getFormat("#,##0")
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val gastoEtiqueta: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.ROSE)
+            borderTop = BorderStyle.THIN
+            setFont(wb.createFont().apply { bold = true })
+        }
+        val gasto: CellStyle = wb.createCellStyle().apply {
+            gris(this, IndexedColors.ROSE)
             borderTop = BorderStyle.THIN
             dataFormat = formato.getFormat("#,##0")
             setFont(wb.createFont().apply { bold = true })

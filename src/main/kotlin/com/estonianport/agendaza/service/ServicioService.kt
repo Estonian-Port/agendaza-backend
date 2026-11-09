@@ -28,6 +28,7 @@ class ServicioService(
     // ==================== QUERIES ====================
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["servicios-detalle"], key = "#id + '-' + #empresaId")
     fun getServicioConTiposEvento(id: Long, empresaId: Long): ServicioDTO {
         val servicio = servicioRepository.findById(id)
             .orElseThrow { NotFoundException("Servicio no encontrado con id: $id") }
@@ -36,21 +37,29 @@ class ServicioService(
         }
     }
 
+    @Cacheable(value = ["servicios-page"], key = "#empresaId + '-' + #page + '-' + #buscar")
     fun getPage(empresaId: Long, page: Int, buscar: String?): List<ServicioDTO> =
         servicioRepository.getPage(empresaId, buscar?.limpiarNombre()?.ifBlank { null }, PageRequest.of(page, 10))
 
+    @Cacheable(value = ["servicios-count"], key = "#empresaId + '-' + #buscar")
     fun count(empresaId: Long, buscar: String?): Int =
         servicioRepository.count(empresaId, buscar?.limpiarNombre()?.ifBlank { null })
 
+    @Cacheable(value = ["servicios-buscar"], key = "#empresaId + '-' + #q")
     fun buscarParaAgregar(empresaId: Long, q: String): List<ServicioDTO> =
         servicioRepository.buscarParaAgregar(empresaId, q.limpiarNombre(), PageRequest.of(0, 10))
 
+    @Cacheable(value = ["servicios-tipo-evento"], key = "#tipoEventoId")
     fun getAllServicioByTipoEventoId(tipoEventoId: Long): List<ServicioDTO> =
         servicioRepository.getAllServicioByTipoEventoId(tipoEventoId)
 
     // ==================== MUTATIONS ====================
 
     @Transactional
+    @CacheEvict(
+        value = ["servicios-detalle", "servicios-page", "servicios-count", "servicios-buscar", "servicios-tipo-evento", "panelAdminCantidades"],
+        allEntries = true
+    )
     fun saveServicio(dto: GenericItemDTO): ServicioDTO {
         val empresa = empresaService.findById(dto.empresaId)
         val nombre = dto.nombre.limpiarNombre()
@@ -80,6 +89,10 @@ class ServicioService(
     }
 
     @Transactional
+    @CacheEvict(
+        value = ["servicios-detalle", "servicios-page", "servicios-count", "servicios-buscar", "servicios-tipo-evento", "panelAdminCantidades"],
+        allEntries = true
+    )
     fun deleteService(servicioId: Long, empresaId: Long) {
         val empresa = empresaService.get(empresaId)
             ?: throw NotFoundException("Empresa no encontrada con id: $empresaId")

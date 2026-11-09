@@ -553,17 +553,18 @@ class PdfBalanceService {
 
     private fun nombreTipo(t: TipoGasto): String = when (t) {
         TipoGasto.EVENTO -> "Eventos"
-        TipoGasto.MANTENIMIENTO -> "Mantenimiento"
-        TipoGasto.MERCADERIA -> "Mercadería"
+        //TipoGasto.MANTENIMIENTO -> "Mantenimiento"
+        //TipoGasto.MERCADERIA -> "Mercadería"
         TipoGasto.SUELDOS -> "Sueldos"
         TipoGasto.IMPUESTOS -> "Impuestos"
         TipoGasto.SERVICIOS -> "Servicios"
         TipoGasto.OTROS -> "Otros"
         TipoGasto.TARJETA_CREDITO -> "Tarjeta de crédito"
         TipoGasto.EMPLEADOS -> "Empleados"
-        TipoGasto.LIBRERIA -> "Librería"
-        TipoGasto.DECORACION -> "Decoración"
-        TipoGasto.EQUIPAMIENTO -> "Equipamiento"
+        //TipoGasto.LIBRERIA -> "Librería"
+        //TipoGasto.DECORACION -> "Decoración"
+        //TipoGasto.EQUIPAMIENTO -> "Equipamiento"
+        TipoGasto.REINVERSION -> "Reinversión"
     }
 
     private fun txtMultilinea(
