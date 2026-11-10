@@ -52,7 +52,7 @@ class GastoServiceTest {
     ) = Gasto(
         id = id,
         monto = 125.50,
-        tipoGasto = TipoGasto.MANTENIMIENTO,
+        tipoGasto = TipoGasto.REINVERSION,
         descripcion = "Reparación",
         fecha = fecha,
         evento = evento,
@@ -64,7 +64,7 @@ class GastoServiceTest {
         id: Long = 0L,
         eventoId: Long? = null,
         fecha: LocalDateTime = LocalDateTime.of(2025, 4, 10, 12, 0)
-    ) = GastoDTO(id, 125.50, TipoGasto.MANTENIMIENTO, "Reparación", fecha, eventoId, 1L, 2L)
+    ) = GastoDTO(id, 125.50, TipoGasto.REINVERSION, "Reparación", fecha, eventoId, 1L, 2L)
 
     private fun buildEvento(): Evento {
         val tipoEvento = TipoEvento(3L, "Fiesta", Duracion.MEDIO, 50, 10, LocalTime.of(4, 0), empresa)
@@ -98,7 +98,7 @@ class GastoServiceTest {
 
         assertEquals(5L, dto.id)
         assertEquals(125.50, dto.monto)
-        assertEquals(TipoGasto.MANTENIMIENTO, dto.tipoGasto)
+        assertEquals(TipoGasto.REINVERSION, dto.tipoGasto)
         assertEquals("Reparación", dto.descripcion)
         assertNull(dto.eventoId)
         assertEquals(1L, dto.empresaId)

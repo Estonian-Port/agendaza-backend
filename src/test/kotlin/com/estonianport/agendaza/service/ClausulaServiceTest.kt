@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.data.domain.PageImpl
+import org.mockito.kotlin.anyOrNull
 import org.springframework.data.domain.PageRequest
 
 class ClausulaServiceTest {
@@ -20,52 +18,71 @@ class ClausulaServiceTest {
     private val repository = mock<ClausulaRepository>()
     private val empresaService = mock<EmpresaService>()
     private lateinit var service: ClausulaService
+    private val clausulasGuardadas = mutableListOf<Clausula>()
 
     private val empresa = Salon(1L, "Salon", 123L, "salon@test.com", "Calle", 1, "Ciudad")
 
     @BeforeEach
     fun setUp() {
+        empresa.listaClausula.clear()
+        clausulasGuardadas.clear()
         service = ClausulaService(empresaService, repository)
+
+        whenever(empresaService.findById(empresa.id)).thenReturn(empresa)
+        whenever(repository.save(any<Clausula>())).thenAnswer { invocation ->
+            val clausula = invocation.getArgument<Clausula>(0)
+            if (clausula.id == 0L) clausula.id = (clausulasGuardadas.size + 1).toLong()
+            clausulasGuardadas.add(clausula)
+            clausula
+        }
+        whenever(repository.getPage(any(), anyOrNull(), any())).thenAnswer { invocation ->
+            val buscar = invocation.getArgument<String?>(1)
+            val pageable = invocation.getArgument<PageRequest>(2)
+            clausulasGuardadas
+                .filter { it in empresa.listaClausula }
+                .filter { buscar == null || it.nombre.contains(buscar, ignoreCase = true) }
+                .sortedByDescending { it.id }
+                .drop(pageable.offset.toInt())
+                .take(pageable.pageSize)
+                .map { GenericItemDTO(it.id, it.nombre) }
+        }
     }
 
     @Test
-    fun `getAll devuelve el contenido de la pagina solicitada`() {
-        val esperado = listOf(GenericItemDTO(2L, "Cancelación"))
-        whenever(repository.getAll(eq(1L), any())).thenReturn(PageImpl(esperado))
+    fun `crea clausulas y la segunda pagina devuelve la que falta`() {
+        val creadas = (1..11).map { numero ->
+            service.saveClausula(
+                GenericItemDTO(0L, "Cláusula $numero").apply { empresaId = empresa.id }
+            )
+        }
 
-        assertEquals(esperado, service.getAll(1L, 3))
-        verify(repository).getAll(1L, PageRequest.of(3, 10))
+        val primeraPagina = service.getPage(empresa.id, 0, null)
+        val segundaPagina = service.getPage(empresa.id, 1, null)
+
+        assertEquals(11, creadas.size)
+        assertEquals(10, primeraPagina.size)
+        assertEquals(listOf(creadas.last().id), primeraPagina.map { it.id }.take(1))
+        assertEquals(listOf(creadas.first().id), segundaPagina.map { it.id })
     }
 
     @Test
-    fun `getAllFiltro pasa el texto y la pagina al repositorio`() {
-        val esperado = listOf(GenericItemDTO(4L, "Seña"))
-        whenever(repository.getAllFiltro(eq(1L), eq("seña"), any())).thenReturn(PageImpl(esperado))
+    fun `getPage aplica el texto de busqueda`() {
+        service.saveClausula(GenericItemDTO(0L, "Cancelación").apply { empresaId = empresa.id })
+        service.saveClausula(GenericItemDTO(0L, "Seña").apply { empresaId = empresa.id })
 
-        assertEquals(esperado, service.getAllFiltro(1L, "seña", 0))
-        verify(repository).getAllFiltro(1L, "seña", PageRequest.of(0, 10))
+        assertEquals(
+            listOf("Cancelación"),
+            service.getPage(empresa.id, 0, "cancel").map { it.nombre }
+        )
     }
 
     @Test
-    fun `getAllCantidad delega el conteo al repositorio`() {
-        whenever(repository.getAllCantidad(1L)).thenReturn(6)
+    fun `count devuelve la cantidad de clausulas segun la busqueda`() {
+        whenever(repository.count(empresa.id, null)).thenReturn(11)
+        whenever(repository.count(empresa.id, "reserva")).thenReturn(2)
 
-        assertEquals(6, service.getAllCantidad(1L))
-    }
-
-    @Test
-    fun `getAllCantidadFiltro delega el texto de busqueda`() {
-        whenever(repository.getAllCantidadFiltro(1L, "reserva")).thenReturn(2)
-
-        assertEquals(2, service.getAllCantidadFiltro(1L, "reserva"))
-    }
-
-    @Test
-    fun `getAllAgregar devuelve las clausulas disponibles`() {
-        val disponibles = listOf(GenericItemDTO(8L, "Uso del salón"))
-        whenever(repository.getAllAgregar(1L)).thenReturn(disponibles)
-
-        assertEquals(disponibles, service.getAllAgregar(1L))
+        assertEquals(11, service.count(empresa.id, null))
+        assertEquals(2, service.count(empresa.id, "reserva"))
     }
 
     @Test
@@ -77,6 +94,5 @@ class ClausulaServiceTest {
         service.delete(10L, 1L)
 
         assertEquals(listOf(11L), empresa.listaClausula.map { it.id })
-        verify(empresaService).save(empresa)
     }
 }

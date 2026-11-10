@@ -18,6 +18,7 @@ import com.estonianport.agendaza.repository.PagoRepository
 import com.estonianport.agendaza.repository.ServicioRepository
 import com.estonianport.agendaza.repository.ClausulaRepository
 import com.estonianport.agendaza.model.enums.Duracion
+import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EmpresaRepository
 import com.estonianport.agendaza.repository.GastoRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -154,12 +155,12 @@ class EmpresaServiceTest {
     fun `getAllCantidadesForPanelAdmin combina los contadores de los repositorios`() {
         whenever(cargoRepository.countActivosByEmpresaId(1L)).thenReturn(1)
         whenever(tipoEventoRepository.countActivosByEmpresaId(1L)).thenReturn(2)
-        whenever(extraRepository.countEvento(1L)).thenReturn(3)
-        whenever(extraRepository.countCatering(1L)).thenReturn(4)
+        whenever(extraRepository.count(1L, listOf(TipoExtra.EVENTO, TipoExtra.VARIABLE_EVENTO))).thenReturn(3)
+        whenever(extraRepository.count(1L, listOf(TipoExtra.TIPO_CATERING, TipoExtra.VARIABLE_CATERING))).thenReturn(4)
         whenever(pagoRepository.countActivosByEmpresaId(1L)).thenReturn(5)
         whenever(eventoRepository.countActivosByEmpresaId(1L)).thenReturn(6)
         whenever(eventoRepository.countClientesByEmpresaId(1L)).thenReturn(7)
-        whenever(servicioRepository.countActivosByEmpresaId(1L)).thenReturn(8)
+        whenever(servicioRepository.count(1L)).thenReturn(8)
         whenever(clausulaRepository.countByEmpresaId(1L)).thenReturn(9)
 
         assertEquals(CantidadesPanelAdminDTO(1, 2, 3, 5, 6, 7, 4, 8, 9), service.getAllCantidadesForPanelAdminByEmpresaId(1L))

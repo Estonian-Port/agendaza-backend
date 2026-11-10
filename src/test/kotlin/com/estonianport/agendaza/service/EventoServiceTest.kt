@@ -505,7 +505,7 @@ class EventoServiceTest {
             3L
         )).thenReturn(emptyList())
 
-        val exception = assertThrows<NotFoundException> {
+        val exception = assertThrows(NotFoundException::class.java) {
             service.getAllEventosByFecha("2026-09-25", 3L)
         }
 
