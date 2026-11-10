@@ -27,6 +27,4 @@ class Servicio(
     )
     var listaTipoEvento: MutableSet<TipoEvento> = mutableSetOf()
 
-    @Column
-    var fechaBaja : LocalDate? = null
 }

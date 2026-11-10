@@ -126,7 +126,8 @@ data class EventoConUsuarioDTO(
     val usuarioId: Long,
     val usuarioNombre: String,
     val usuarioApellido: String,
-    val usuarioUsername: String?
+    val usuarioUsername: String?,
+    val fechaEvento: LocalDateTime
 ) : Serializable
 
 // ==================== DTOs para Ediciones Parciales (PATCH) ====================

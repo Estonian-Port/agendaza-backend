@@ -498,6 +498,21 @@ class EventoServiceTest {
     }
 
     @Test
+    fun `getAllEventosByFecha lanza NotFoundException si no hay eventos`() {
+        whenever(eventoRepository.getAllEventosForAgendaByFecha(
+            LocalDateTime.of(2026, 9, 25, 0, 0),
+            LocalDateTime.of(2026, 9, 25, 23, 59, 59),
+            3L
+        )).thenReturn(emptyList())
+
+        val exception = assertThrows(NotFoundException::class.java) {
+            service.getAllEventosByFecha("2026-09-25", 3L)
+        }
+
+        assertEquals("No se encontraron eventos para esa fecha", exception.message)
+    }
+
+    @Test
     fun `getAllEventosByFecha rechaza una fecha con formato invalido`() {
         assertThrows(DateTimeParseException::class.java) { service.getAllEventosByFecha("25-09-2026", 3L) }
         verifyNoInteractions(eventoRepository)
@@ -520,7 +535,7 @@ class EventoServiceTest {
 
     @Test
     fun `consultas por usuario delegan al repositorio`() {
-        val eventos = listOf(EventoConUsuarioDTO(1L, "boda", "ABCD", 4L, "Ana", "Perez", null))
+        val eventos = listOf(EventoConUsuarioDTO(1L, "boda", "ABCD", 4L, "Ana", "Perez", null, LocalDateTime.now()))
         whenever(eventoRepository.getEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(eventos)
         whenever(eventoRepository.getCantEventosByUsuarioIdAndEmpresaId(4L, 3L)).thenReturn(1)
 

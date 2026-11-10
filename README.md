@@ -2,7 +2,7 @@
 
 Agendaza es un sistema integral para la gestión de eventos en salones. Facilita la administración de reservas, clientes, catering, servicios adicionales y mucho más.
 
-[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://github.com/Estonian-Port/agendaza-backend/tags)
+[![Version](https://img.shields.io/badge/version-1.2.2-blue.svg)](https://github.com/Estonian-Port/agendaza-backend/tags)
 [![Build Status](https://github.com/Estonian-Port/agendaza-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/Estonian-Port/agendaza-backend/actions)
 [![codecov](https://codecov.io/gh/Estonian-Port/agendaza-backend/branch/main/graph/badge.svg)](https://codecov.io/gh/Estonian-Port/agendaza-backend)
 

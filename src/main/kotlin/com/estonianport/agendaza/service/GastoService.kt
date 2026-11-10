@@ -9,6 +9,8 @@ import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Gasto
 import com.estonianport.agendaza.model.enums.TipoGasto
 import com.estonianport.agendaza.repository.GastoRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +31,7 @@ class GastoService(
     // ==================== QUERIES ====================
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["gastos-id"], key = "#id")
     fun getGastoDTO(id: Long): GastoDTO {
         return gastoRepository.findById(id)
             .orElseThrow { NotFoundException("Gasto no encontrado con id: $id") }
@@ -36,16 +39,19 @@ class GastoService(
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["gastos-evento"], key = "#eventoId")
     fun getAllGastoByEvento(eventoId: Long): List<GastoDTO> =
         gastoRepository.getAllGastoByEvento(eventoId)
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["gastos-mes"], key = "#empresaId + '-' + #mes + '-' + #anio")
     fun getAllGastoByMes(empresaId: Long, mes: Int, anio: Int): List<GastoDTO> {
         val (desde, hasta) = rangoDelMes(mes, anio)
         return gastoRepository.getAllGastoByRango(empresaId, desde, hasta)
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["gastos-totales"], key = "#empresaId + '-' + #mes + '-' + #anio")
     fun totalesByRango(empresaId: Long, mes: Int, anio: Int): TotalesPagosMes {
         val (desde, hasta) = rangoDelMes(mes, anio)
         return gastoRepository.totalesByRango(empresaId, desde, hasta)
@@ -54,6 +60,10 @@ class GastoService(
     // ==================== MUTATIONS ====================
 
     @Transactional
+    @CacheEvict(
+        value = ["gastos-id", "gastos-evento", "gastos-mes", "gastos-totales", "pagos-resumen", "panelAdminCantidades"],
+        allEntries = true
+    )
     fun saveGasto(gastoDTO: GastoDTO): GastoDTO {
         if (gastoDTO.monto <= 0) throw BusinessException("El monto debe ser mayor a 0")
         if (gastoDTO.descripcion.isBlank()) throw BusinessException("La descripción no puede estar vacía")
@@ -94,6 +104,10 @@ class GastoService(
     }
 
     @Transactional
+    @CacheEvict(
+        value = ["gastos-id", "gastos-evento", "gastos-mes", "gastos-totales", "pagos-resumen", "panelAdminCantidades"],
+        allEntries = true
+    )
     override fun delete(id: Long) {
         val gasto = gastoRepository.findById(id)
             .orElseThrow { NotFoundException("Gasto no encontrado con id: $id") }

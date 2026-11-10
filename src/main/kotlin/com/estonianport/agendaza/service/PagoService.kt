@@ -11,6 +11,8 @@ import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Pago
 import com.estonianport.agendaza.repository.PagoRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -35,6 +37,7 @@ class PagoService(
     // ==================== QUERIES ====================
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["pagos-id"], key = "#id")
     fun getPagoDTO(id: Long): PagoDTO {
         return pagoRepository.findById(id)
             .orElseThrow { NotFoundException("Pago no encontrado con id: $id") }
@@ -58,6 +61,7 @@ class PagoService(
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["pagos-evento"], key = "#eventoId")
     fun getAllPagoFromEvento(eventoId: Long): List<PagoDTO> {
         return pagoRepository.getAllPagoFromEvento(eventoId)
             ?: throw NotFoundException("No hay pagos registrados para el evento con id: $eventoId")
@@ -66,6 +70,10 @@ class PagoService(
     // ==================== MUTATIONS ====================
 
     @Transactional
+    @CacheEvict(
+        value = ["pagos-id", "pagos-evento", "pagos-mes", "pagos-resumen", "panelAdminCantidades"],
+        allEntries = true
+    )
     fun savePago(pagoDTO: PagoDTO): PagoDTO {
         val evento = eventoService.getByCodigoAndEmpresaId(pagoDTO.codigo, pagoDTO.empresaId)
         val encargado = usuarioService.get(pagoDTO.usuarioId)
@@ -88,6 +96,10 @@ class PagoService(
     }
 
     @Transactional
+    @CacheEvict(
+        value = ["pagos-id", "pagos-evento", "pagos-mes", "pagos-resumen", "panelAdminCantidades"],
+        allEntries = true
+    )
     override fun delete(id: Long) {
         val pago = pagoRepository.findById(id)
             .orElseThrow { NotFoundException("Pago no encontrado con id: $id") }
@@ -134,12 +146,14 @@ class PagoService(
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["pagos-mes"], key = "#empresaId + '-' + #mes + '-' + #anio")
     fun getAllPagoByMes(empresaId: Long, mes: Int, anio: Int): List<PagoDTO> {
         val (desde, hasta) = rangoDelMes(mes, anio)
         return pagoRepository.getAllPagoByRango(empresaId, desde, hasta)
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = ["pagos-resumen"], key = "#empresaId + '-' + #mes + '-' + #anio")
     fun getResumenPagosMes(empresaId: Long, mes: Int, anio: Int): ResumenPagosMesDTO {
         val (desde, hasta) = rangoDelMes(mes, anio)
         val ingresos = pagoRepository.totalesByRango(empresaId, desde, hasta)

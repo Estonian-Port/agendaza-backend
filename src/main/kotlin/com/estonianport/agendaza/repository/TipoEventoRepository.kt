@@ -22,6 +22,13 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
             "where s.id = :servicioId")
     fun getAllByServicio(servicioId: Long): MutableList<TipoEventoDTO>
 
+    @Query("""
+    SELECT t FROM TipoEvento t
+    WHERE t.id IN :ids
+      AND t.empresa.id = :empresaId
+      AND t.fechaBaja IS NULL
+""")
+    fun getAllByIdsAndEmpresa(ids: Collection<Long>, empresaId: Long): List<TipoEvento>
 
     @Query("SELECT new com.estonianport.agendaza.dto.TipoEventoDTO(t.id, t.nombre, t.cantidadDuracion, " +
             "t.duracion, t.capacidadAdultos, t.capacidadNinos, t.empresa.id) FROM TipoEvento t INNER JOIN t.empresa ee WHERE ee.id = :empresaId " +
@@ -58,4 +65,13 @@ interface TipoEventoRepository : CrudRepository<TipoEvento, Long> {
 
     @Query("SELECT COUNT(te) FROM TipoEvento te WHERE te.empresa.id = :id AND te.fechaBaja IS NULL")
     fun countActivosByEmpresaId(id: Long): Int
+
+    @Query("""
+    SELECT t.id FROM TipoEvento t
+    JOIN t.listaExtra e
+    WHERE e.id = :extraId
+      AND t.empresa.id = :empresaId
+      AND t.fechaBaja IS NULL
+""")
+    fun getIdsByExtraAndEmpresa(extraId: Long, empresaId: Long): List<Long>
 }

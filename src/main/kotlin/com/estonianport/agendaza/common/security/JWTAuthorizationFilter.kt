@@ -11,6 +11,12 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JWTAuthorizationFilter : OncePerRequestFilter() {
 
+    companion object {
+        const val ATTR_TOKEN_ERROR = "jwt.token.error"
+        const val TOKEN_EXPIRED = "EXPIRED"
+        const val TOKEN_INVALID = "INVALID"
+    }
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -21,7 +27,14 @@ class JWTAuthorizationFilter : OncePerRequestFilter() {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             val token : String = bearerToken.replace("Bearer ", "")
             val usernamePAT : UsernamePasswordAuthenticationToken? = TokenUtils.getAuthentication(token)
-            SecurityContextHolder.getContext().authentication = usernamePAT
+            if (usernamePAT != null) {
+                SecurityContextHolder.getContext().authentication = usernamePAT
+            } else {
+                request.setAttribute(
+                    ATTR_TOKEN_ERROR,
+                    if (TokenUtils.isExpired(token)) TOKEN_EXPIRED else TOKEN_INVALID
+                )
+            }
         }
 
         filterChain.doFilter(request, response)

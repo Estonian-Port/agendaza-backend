@@ -18,6 +18,7 @@ import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.repository.EventoRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
@@ -140,7 +141,7 @@ class EventoService(
         }
 
         val emailParaGuardar = emailLimpio.ifBlank {
-            "sin-email-${UUID.randomUUID()}@agendaza.com"
+            CodeGeneratorUtil.generarEmailUnico()
         }
 
         val celularParaGuardar = if (celularInput > 0) {
@@ -177,7 +178,7 @@ class EventoService(
     private fun generarCelularFantasmaUnico(): Long {
         var candidato: Long
         do {
-            candidato = "999${System.currentTimeMillis().toString().takeLast(7)}".toLong()
+            candidato = CodeGeneratorUtil.generarCelularUnico()
         } while (usuarioService.getByCelular(candidato) != null)
 
         return candidato
@@ -187,10 +188,10 @@ class EventoService(
      * Genera un código único para un evento en una empresa
      */
     private fun generateCodigoForEventoOfEmpresa(empresa: Empresa): String {
-        var codigo: String = CodeGeneratorUtil.base26Only4Letters
+        var codigo: String = CodeGeneratorUtil.generarCodigoBase26(4)
 
         while (eventoRepository.existCodigoInEmpresa(codigo, empresa)) {
-            codigo = CodeGeneratorUtil.base26Only4Letters
+            codigo = CodeGeneratorUtil.generarCodigoBase26(4)
         }
 
         return codigo
@@ -257,6 +258,7 @@ class EventoService(
         val fechaFin = LocalDateTime.of(localDate.year, localDate.month, localDate.dayOfMonth, 23, 59, 59)
 
         return eventoRepository.getAllEventosForAgendaByFecha(fechaInicio, fechaFin, empresaId)
+            .ifEmpty { throw NotFoundException("No se encontraron eventos para esa fecha") }
     }
 
     /**
@@ -313,7 +315,10 @@ class EventoService(
     // ==================== EDICIONES PARCIALES ====================
 
     @Transactional
-    @CacheEvict(value = ["eventoHora", "eventoVer", "eventoAgenda"], key = "#evento.id")
+    @Caching(evict = [
+        CacheEvict(value = ["eventoHora", "eventoVer"], key = "#evento.id"),
+        CacheEvict(value = ["agendaEventos"], allEntries = true)
+    ])
     fun editEventoHora(evento: EventoHoraDTO): EventoHoraDTO {
         val eventoExistente = findById(evento.id)
         eventoExistente.inicio = evento.inicio

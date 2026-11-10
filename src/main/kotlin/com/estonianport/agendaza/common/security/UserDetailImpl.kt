@@ -8,7 +8,7 @@ import java.util.*
 class UserDetailImpl(var usuario : Usuario) : UserDetails{
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return Collections.emptyList()
+        return mutableListOf()
     }
 
     override fun getPassword(): String? {

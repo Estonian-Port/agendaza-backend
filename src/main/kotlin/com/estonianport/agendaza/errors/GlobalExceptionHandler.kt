@@ -18,7 +18,12 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-    @ExceptionHandler(value = [NotFoundException::class, BusinessException::class])
+    @ExceptionHandler(value = [
+        BadRequestException::class,
+        NotFoundException::class,
+        BusinessException::class,
+        ConflictException::class
+    ])
     fun handleCustomExceptions(exception: Exception, webRequest: WebRequest): ResponseEntity<Any>? {
 
         val status = resolveAnnotatedResponseStatus(exception)
@@ -56,6 +61,13 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
             status,
             webRequest
         )
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleForbidden(exception: Exception, webRequest: WebRequest): ResponseEntity<Any>? {
+        val status = HttpStatus.FORBIDDEN
+        val body = mapOf("code" to "FORBIDDEN", "message" to "No tenés permiso para realizar esta acción", "status" to status.value())
+        return handleExceptionInternal(exception, body, HttpHeaders(), status, webRequest)
     }
 
     private fun resolveAnnotatedResponseStatus(exception: Exception): HttpStatus {
