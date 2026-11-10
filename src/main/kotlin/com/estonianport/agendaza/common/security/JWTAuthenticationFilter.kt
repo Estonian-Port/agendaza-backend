@@ -52,24 +52,32 @@ class JWTAuthenticationFilter(
         return authenticationManager.authenticate(usernamePAT)
     }
 
-    override fun successfulAuthentication(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?, authResult: Authentication?) {
-        val userDetails : UserDetailImpl = authResult?.principal as UserDetailImpl
+    override fun successfulAuthentication(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        chain: FilterChain?,
+        authResult: Authentication?
+    ) {
+        val userDetails = authResult?.principal as UserDetailImpl
 
         loginAttemptService.registrarExito(userDetails.username)
         userDetails.username?.let { usuarioRepository.actualizarUltimoLogin(it, LocalDateTime.now()) }
 
-        val token : String = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
-
+        val token = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
         val refreshToken = refreshTokenService.crear(requireNotNull(userDetails.username))
 
-        if (response != null) {
-            response.addHeader("Authorization", "Bearer $token")
-            response.addHeader("X-Refresh-Token", refreshToken.token)
-            response.contentType = "application/json;charset=UTF-8"
-            response.status = HttpServletResponse.SC_OK
-        }
+        response?.apply {
+            addHeader("Authorization", "Bearer $token")
+            addHeader("X-Refresh-Token", refreshToken.token)
+            contentType = "application/json;charset=UTF-8"
+            status = HttpServletResponse.SC_OK
+            writer.write("{}")/
+￼
+￼
+￼
 
-        super.successfulAuthentication(request, response, chain, authResult)
+            writer.flush()
+        }
     }
 
 }
