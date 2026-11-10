@@ -71,11 +71,7 @@ class JWTAuthenticationFilter(
             addHeader("X-Refresh-Token", refreshToken.token)
             contentType = "application/json;charset=UTF-8"
             status = HttpServletResponse.SC_OK
-            writer.write("{}")/
-￼
-￼
-￼
-
+            writer.write("{}")
             writer.flush()
         }
     }
