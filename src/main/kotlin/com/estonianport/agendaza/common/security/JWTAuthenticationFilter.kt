@@ -65,7 +65,8 @@ class JWTAuthenticationFilter(
         if (response != null) {
             response.addHeader("Authorization", "Bearer $token")
             response.addHeader("X-Refresh-Token", refreshToken.token)
-            response.writer.flush()
+            response.contentType = "application/json;charset=UTF-8"
+            response.status = HttpServletResponse.SC_OK
         }
 
         super.successfulAuthentication(request, response, chain, authResult)
