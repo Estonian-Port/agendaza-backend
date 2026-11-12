@@ -8,6 +8,7 @@ import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.toDTO
 import com.estonianport.agendaza.dto.toExtraPrecioDTO
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Empresa
 import com.estonianport.agendaza.model.EventoExtra
 import com.estonianport.agendaza.model.Extra
@@ -28,7 +29,8 @@ import java.time.LocalDateTime
 class ExtraService (
     val empresaService: EmpresaService,
     val extraRepository: ExtraRepository,
-    val precioConFechaExtraService: PrecioConFechaExtraService
+    val precioConFechaExtraService: PrecioConFechaExtraService,
+    val tipoEventoService: TipoEventoService
 ): GenericServiceImpl<Extra, Long>() {
 
     override val dao: CrudRepository<Extra, Long>
@@ -52,10 +54,17 @@ class ExtraService (
             )
         }
 
+    // ==================== GET ====================
 
-    fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
-        listaExtra.filter { it.extra.tipoExtra in tipoExtras }
-            .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
+    @Transactional(readOnly = true)
+    fun getExtraConTiposEvento(id: Long, empresaId: Long): ExtraDTO {
+        val extra = get(id)
+            ?: throw NotFoundException("Extra no encontrado con id: $id")
+
+        return extra.toDTO().also {
+            it.listaTipoEventoId = tipoEventoService.getIdsByExtraAndEmpresa(id, empresaId).toMutableSet()
+        }
+    }
 
     // ====================  PAGINADO ====================
 
@@ -78,22 +87,27 @@ class ExtraService (
     ): List<ExtraPrecioDTO> =
         extraRepository.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tiposExtras)
 
+    fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
+        listaExtra.filter { it.extra.tipoExtra in tipoExtras }
+            .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
+
     // ==================== ABM ====================
 
     @Transactional
     @CacheEvict(value = ["extras-evento", "extras-catering"], allEntries = true)
-    fun saveExtra(extraDTO: ExtraDTO, tipoEventoService: TipoEventoService): ExtraDTO {
-        val empresa = empresaService.get(extraDTO.empresaId)!!
+    fun saveExtra(extraDTO: ExtraDTO): ExtraDTO {
+        val empresa = empresaService.get(extraDTO.empresaId)
+            ?: throw NotFoundException("Empresa no encontrada con id: ${extraDTO.empresaId}")
 
         val nombre = extraDTO.nombre.limpiarNombre()
 
         val extra = if (extraDTO.id != 0L) {
-            get(extraDTO.id)!!.also {
+            get(extraDTO.id)?.also {
                 if (extraRepository.countOtrasEmpresas(it.id, empresa.id) == 0) {
                     it.nombre = nombre
                     it.tipoExtra = extraDTO.tipoExtra
                 }
-            }
+            } ?: throw NotFoundException("Extra no encontrado con id: ${extraDTO.id}")
         } else {
             extraRepository.findFirstByTipoExtraAndNombreIgnoreCaseOrderByIdAsc(extraDTO.tipoExtra, nombre)
                 ?: Extra(0, nombre, extraDTO.tipoExtra)
@@ -116,7 +130,8 @@ class ExtraService (
     @Transactional
     @CacheEvict(value = ["extras-evento", "extras-catering"], allEntries = true)
     fun deleteExtra(extraId: Long, empresaId: Long) {
-        val empresa = empresaService.get(empresaId)!!
+        val empresa = empresaService.get(empresaId)
+            ?: throw NotFoundException("Empresa no encontrada con id: $empresaId")
         empresa.listaExtra = empresa.listaExtra
             .filter { it.id != extraId }
             .toMutableSet()
@@ -140,9 +155,9 @@ class ExtraService (
         listaPrecioConFechaDTO: MutableSet<PrecioConFechaDTO>
     ) {
         val extra = get(extraId)
-            ?: throw RuntimeException("Extra no encontrado con id: $extraId")
+            ?: throw NotFoundException("Extra no encontrado con id: $extraId")
         val empresa = empresaService.get(empresaId)
-            ?: throw RuntimeException("Empresa no encontrada con id: $empresaId")
+            ?: throw NotFoundException("Empresa no encontrada con id: $empresaId")
 
         // Soft-delete de los precios que ya no están en la lista nueva
         empresa.listaPrecioConFechaExtra

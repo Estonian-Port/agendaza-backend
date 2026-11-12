@@ -19,7 +19,10 @@ class UserDetailServiceImpl : UserDetailsService {
         val usuario : Usuario = usuarioRepository.getByUsername(username)
             ?: throw UsernameNotFoundException("No se encontró el usuario")
 
-        return UserDetailImpl(usuario)
+        val usernamePersistido = usuario.username
+            ?: throw UsernameNotFoundException("El usuario no tiene username configurado")
+
+        return UserDetailImpl(usuario, usernamePersistido)
     }
 
 }

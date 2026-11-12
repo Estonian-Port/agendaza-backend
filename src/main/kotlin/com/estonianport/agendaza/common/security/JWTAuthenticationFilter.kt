@@ -59,12 +59,13 @@ class JWTAuthenticationFilter(
         authResult: Authentication?
     ) {
         val userDetails = authResult?.principal as UserDetailImpl
+        val username = userDetails.username
 
-        loginAttemptService.registrarExito(userDetails.username)
-        userDetails.username?.let { usuarioRepository.actualizarUltimoLogin(it, LocalDateTime.now()) }
+        loginAttemptService.registrarExito(username)
+        usuarioRepository.actualizarUltimoLogin(username, LocalDateTime.now())
 
-        val token = TokenUtils.createToken(userDetails.getNombre(), userDetails.username)
-        val refreshToken = refreshTokenService.crear(requireNotNull(userDetails.username))
+        val token = TokenUtils.createToken(userDetails.getNombre(), username)
+        val refreshToken = refreshTokenService.crear(username)
 
         response?.apply {
             addHeader("Authorization", "Bearer $token")

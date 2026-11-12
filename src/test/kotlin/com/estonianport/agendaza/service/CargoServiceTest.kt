@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.dto.AgendaDTO
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.model.Salon
 import com.estonianport.agendaza.model.Usuario
@@ -43,7 +44,7 @@ class CargoServiceTest {
     fun `findById falla si no existe el cargo`() {
         whenever(repository.findById(99L)).thenReturn(Optional.empty())
 
-        assertThrows(NoSuchElementException::class.java) { service.findById(99L) }
+        assertThrows(NotFoundException::class.java) { service.findById(99L) }
     }
 
     @Test

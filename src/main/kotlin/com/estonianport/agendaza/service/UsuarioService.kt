@@ -9,8 +9,10 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.common.security.RefreshTokenService
 import com.estonianport.agendaza.errors.BadRequestException
 import com.estonianport.agendaza.errors.ConflictException
+import com.estonianport.agendaza.model.enums.TipoCargo
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
@@ -25,12 +27,12 @@ import java.time.LocalDateTime
 @Service
 class UsuarioService (
     val usuarioRepository: UsuarioRepository,
-    val empresaService: EmpresaService? = null,
-    val cargoService: CargoService? = null,
-    val emailService: EmailService? = null,
-    val passwordEncoder: PasswordEncoder? = null,
-    val terminosService: TerminosService? = null,
-    val refreshTokenService: com.estonianport.agendaza.common.security.RefreshTokenService? = null
+    val empresaService: EmpresaService,
+    val cargoService: CargoService,
+    val emailService: EmailService,
+    val passwordEncoder: PasswordEncoder,
+    val terminosService: TerminosService,
+    val refreshTokenService: RefreshTokenService
 ): GenericServiceImpl<Usuario, Long>() {
 
     override val dao: CrudRepository<Usuario, Long>
@@ -124,7 +126,7 @@ class UsuarioService (
 
     @Transactional
     fun alta(dto: AltaUsuarioDTO): Usuario {
-        val empresa = empresaService!!.findById(dto.empresaId)
+        val empresa = empresaService.findById(dto.empresaId)
         var usuario = getByEmail(dto.email)
         var temporaryPassword: String? = null
 
@@ -140,18 +142,16 @@ class UsuarioService (
                 dto.email)
 
             usuario.username = dto.email
-            usuario.password = passwordEncoder!!.encode(temporaryPassword)
+            usuario.password = passwordEncoder.encode(temporaryPassword)
             usuario.debeCambiarPassword = true
             usuario = save(usuario)
         }
 
-        cargoService!!.save(Cargo(0, usuario, empresa, dto.rol))
+        cargoService.save(Cargo(0, usuario, empresa, dto.rol))
 
-        if (temporaryPassword != null) {
-            emailService!!.enviarInvitacion(dto.email, dto.email, temporaryPassword!!, empresa, dto.rol)
-        } else {
-            emailService!!.enviarNotificacionNuevaAgenda(dto.email, empresa, dto.rol)
-        }
+        temporaryPassword?.let { password ->
+            emailService.enviarInvitacion(dto.email, dto.email, password, empresa, dto.rol)
+        } ?: emailService.enviarNotificacionNuevaAgenda(dto.email, empresa, dto.rol)
         return usuario
     }
 
@@ -183,7 +183,7 @@ class UsuarioService (
             throw BadRequestException("La contraseña debe contener al menos una letra mayúscula y un número")
         }
         val esFormatoTemporal = Regex("^[A-Z]{8}$").matches(dto.password)
-        if (esFormatoTemporal && passwordEncoder!!.matches(dto.password, usuario.password)) {
+        if (esFormatoTemporal && passwordEncoder.matches(dto.password, usuario.password)) {
             throw BadRequestException("La nueva contraseña debe ser distinta de la temporal")
         }
         if (usuarioRepository.findAllByCelular(dto.celular).any { it.id != usuario.id }) {
@@ -196,10 +196,10 @@ class UsuarioService (
             throw ConflictException("El nombre de usuario no está disponible")
         }
 
-        val guardado = save(dto.updateUsuario(usuario, passwordEncoder!!.encode(dto.password)))
+        val guardado = save(dto.updateUsuario(usuario, passwordEncoder.encode(dto.password)))
         guardado.debeCambiarPassword = false
         save(guardado)
-        terminosService?.registrarAceptacion(guardado.id, ip, userAgent)
+        terminosService.registrarAceptacion(guardado.id, ip, userAgent)
         return guardado
     }
 
@@ -240,9 +240,7 @@ class UsuarioService (
         val usuario = dto.usuario
 
         if (usuario.id == 0L) {
-            usuario.password = requireNotNull(passwordEncoder) {
-                "PasswordEncoder no configurado"
-            }.encode(usuario.password)
+            usuario.password = passwordEncoder.encode(usuario.password)
         } else {
             usuario.password = findById(usuario.id).password.orEmpty()
         }
@@ -254,24 +252,23 @@ class UsuarioService (
 
     @Transactional
     fun updatePassword(adminUsername: String, usuarioId: Long, password: String) {
-        val cargoService = cargoService ?: throw AccessDeniedException("Servicio de cargos no configurado")
         if (!cargoService.esAdminDeUsuario(adminUsername, usuarioId)) {
             throw AccessDeniedException("Solo un administrador de la empresa puede actualizar contraseñas")
         }
         val usuario = findById(usuarioId)
         validarPassword(password)
-        usuario.password = requireNotNull(passwordEncoder) {
-            "PasswordEncoder no configurado"
-        }.encode(password)
+        usuario.password = passwordEncoder.encode(password)
         usuario.debeCambiarPassword = false
         usuario.fechaCambioPassword = LocalDateTime.now()
         save(usuario)
-        refreshTokenService?.revocarTodos(requireNotNull(usuario.username))
+
+        usuario.username?.let { username ->
+            refreshTokenService.revocarTodos(username)
+        }
     }
 
     @Transactional
     fun restablecerPassword(adminUsername: String, usuarioId: Long) {
-        val cargoService = cargoService ?: throw AccessDeniedException("Servicio de cargos no configurado")
         if (!cargoService.esAdminDeUsuario(adminUsername, usuarioId)) {
             throw AccessDeniedException("Solo un administrador de la empresa puede restablecer contraseñas")
         }
@@ -281,13 +278,16 @@ class UsuarioService (
             ?: throw NotFoundException("El usuario no tiene una empresa activa")
         val temporaryPassword = CodeGeneratorUtil.generarCodigoBase26(8)
 
-        usuario.password = requireNotNull(passwordEncoder) { "PasswordEncoder no configurado" }
-            .encode(temporaryPassword)
+        usuario.password = passwordEncoder.encode(temporaryPassword)
         usuario.debeCambiarPassword = true
         usuario.fechaCambioPassword = LocalDateTime.now()
         save(usuario)
-        refreshTokenService?.revocarTodos(requireNotNull(usuario.username))
-        emailService?.enviarRestablecimientoPassword(usuario.email, temporaryPassword, cargo.empresa)
+
+        usuario.username?.let { username ->
+            refreshTokenService.revocarTodos(username)
+        }
+
+        emailService.enviarRestablecimientoPassword(usuario.email, temporaryPassword, cargo.empresa)
     }
 
     @Transactional
@@ -296,7 +296,7 @@ class UsuarioService (
         val usuario = usuarioRepository.getByUsername(username)
             ?: throw NotFoundException("Usuario no encontrado")
         validarPassword(password)
-        usuario.password = requireNotNull(passwordEncoder) { "PasswordEncoder no configurado" }.encode(password)
+        usuario.password = passwordEncoder.encode(password)
         usuario.debeCambiarPassword = false
         usuario.fechaCambioPassword = LocalDateTime.now()
         return save(usuario)
@@ -312,14 +312,18 @@ class UsuarioService (
     private fun actualizarCargo(
         usuario: Usuario,
         empresaId: Long,
-        tipoCargo: com.estonianport.agendaza.model.enums.TipoCargo?
+        tipoCargo: TipoCargo?
     ) {
-        if (empresaId == 0L || tipoCargo == null) return
-
-        val empresa = empresaService?.get(empresaId) ?: return
-        val cargoService = requireNotNull(cargoService) {
-            "CargoService no configurado"
+        if (empresaId == 0L) {
+            throw BadRequestException("La empresa es obligatoria para asignar un cargo")
         }
+        if (tipoCargo == null) {
+            throw BadRequestException("El cargo es obligatorio")
+        }
+
+        val empresa = empresaService.get(empresaId)
+            ?: throw NotFoundException("Empresa no encontrada con id: $empresaId")
+
         val cargoExistente = empresa.listaEmpleados.find { it.usuario.id == usuario.id }
 
         if (cargoExistente != null) {
