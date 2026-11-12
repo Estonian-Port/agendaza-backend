@@ -5,6 +5,7 @@ import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.dto.toDTO
+import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -58,7 +59,8 @@ class ExtraController(
         @PathVariable empresaId: Long,
         @PathVariable id: Long
     ): ResponseEntity<CustomResponse<ExtraDTO>> {
-        val extra = extraService.get(id)!!
+        val extra = extraService.get(id)
+            ?: throw NotFoundException("Extra no encontrado con id: $id")
         val extraDTO = extra.toDTO().apply {
             listaTipoEventoId = tipoEventoService.getIdsByExtraAndEmpresa(id, empresaId).toMutableSet()
         }

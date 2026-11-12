@@ -31,7 +31,6 @@ import java.time.LocalTime
 class TipoEventoService(
     private val tipoEventoRepository: TipoEventoRepository,
     private val empresaService: EmpresaService,
-    private val extraService: ExtraService,
     private val precioConFechaTipoEventoService: PrecioConFechaTipoEventoService
 ) : GenericServiceImpl<TipoEvento, Long>() {
 

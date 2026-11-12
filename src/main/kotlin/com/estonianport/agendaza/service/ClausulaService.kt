@@ -23,7 +23,8 @@ class ClausulaService(
 
     @Transactional
     fun delete(clausulaId : Long, empresaId: Long){
-        val empresa: Empresa = empresaService.get(empresaId)!!
+        val empresa: Empresa = empresaService.get(empresaId)
+            ?: throw NotFoundException("Empresa no encontrada con el ID: $empresaId")
 
         empresa.listaClausula = empresa.listaClausula.filter { clausula -> clausula.id != clausulaId }.toMutableSet()
         empresaService.save(empresa)

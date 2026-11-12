@@ -35,7 +35,6 @@ class TipoEventoServiceTest {
 
     private val repository = mock<TipoEventoRepository>()
     private val empresaService = mock<EmpresaService>()
-    private val extraService = mock<ExtraService>()
     private val precioService = mock<PrecioConFechaTipoEventoService>()
     private lateinit var service: TipoEventoService
 
@@ -46,7 +45,7 @@ class TipoEventoServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = TipoEventoService(repository, empresaService, extraService, precioService)
+        service = TipoEventoService(repository, empresaService, precioService)
     }
 
     @Test

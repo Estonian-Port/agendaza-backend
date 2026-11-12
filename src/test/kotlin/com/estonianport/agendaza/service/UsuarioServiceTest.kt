@@ -5,6 +5,9 @@ import com.estonianport.agendaza.dto.UsuarioPerfilDTO
 import com.estonianport.agendaza.dto.UsuarioResponseDto
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.repository.UsuarioRepository
+import com.estonianport.agendaza.common.security.RefreshTokenService
+import com.estonianport.agendaza.common.aceptacionTerminos.TerminosService
+import com.estonianport.agendaza.common.emailService.EmailService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -14,6 +17,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.LocalDate
 import java.util.Optional
+import org.springframework.security.crypto.password.PasswordEncoder
 
 class UsuarioServiceTest {
 
@@ -22,7 +26,15 @@ class UsuarioServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = UsuarioService(usuarioRepository)
+        service = UsuarioService(
+            usuarioRepository = usuarioRepository,
+            empresaService = mock(),
+            cargoService = mock(),
+            emailService = mock(),
+            passwordEncoder = mock(),
+            terminosService = mock(),
+            refreshTokenService = mock()
+        )
     }
 
     private fun buildUsuario(id: Long = 1L, email: String = "test@test.com") =
