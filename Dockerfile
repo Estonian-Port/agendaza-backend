@@ -18,8 +18,12 @@ RUN gradle bootJar -x test --no-daemon
 # Etapa 2: Imagen liviana de ejecución
 FROM eclipse-temurin:17-jre-alpine
 
+# Configuración de zona horaria
+RUN apk add --no-cache tzdata
+
 ENV APP_HOME=/app \
-    SPRING_PROFILES_ACTIVE=prod
+    SPRING_PROFILES_ACTIVE=prod \
+    TZ=America/Argentina/Buenos_Aires
 
 WORKDIR $APP_HOME
 
