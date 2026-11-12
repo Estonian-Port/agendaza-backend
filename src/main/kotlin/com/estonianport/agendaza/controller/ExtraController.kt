@@ -4,8 +4,6 @@ import com.estonianport.agendaza.dto.ExtraDTO
 import com.estonianport.agendaza.dto.ExtraPrecioDTO
 import com.estonianport.agendaza.dto.PrecioConFechaDTO
 import com.estonianport.agendaza.dto.response.CustomResponse
-import com.estonianport.agendaza.dto.toDTO
-import com.estonianport.agendaza.errors.NotFoundException
 import com.estonianport.agendaza.model.enums.TipoExtra
 import com.estonianport.agendaza.service.EmpresaService
 import com.estonianport.agendaza.service.ExtraService
@@ -19,7 +17,6 @@ import java.time.LocalDateTime
 @CrossOrigin("*")
 class ExtraController(
     private val extraService: ExtraService,
-    private val tipoEventoService: TipoEventoService,
     private val empresaService: EmpresaService,
 ) {
 
@@ -59,13 +56,11 @@ class ExtraController(
         @PathVariable empresaId: Long,
         @PathVariable id: Long
     ): ResponseEntity<CustomResponse<ExtraDTO>> {
-        val extra = extraService.get(id)
-            ?: throw NotFoundException("Extra no encontrado con id: $id")
-        val extraDTO = extra.toDTO().apply {
-            listaTipoEventoId = tipoEventoService.getIdsByExtraAndEmpresa(id, empresaId).toMutableSet()
-        }
         return ResponseEntity.ok(
-            CustomResponse(message = "Extra obtenido correctamente", data = extraDTO)
+            CustomResponse(
+                message = "Extra obtenido correctamente",
+                data = extraService.getExtraConTiposEvento(id, empresaId)
+            )
         )
     }
 
@@ -155,7 +150,7 @@ class ExtraController(
         ResponseEntity.ok(
             CustomResponse(
                 message = "Extra guardado correctamente",
-                data = extraService.saveExtra(extraDTO, tipoEventoService)
+                data = extraService.saveExtra(extraDTO)
             )
         )
 

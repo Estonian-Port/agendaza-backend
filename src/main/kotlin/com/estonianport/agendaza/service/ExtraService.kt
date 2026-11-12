@@ -29,7 +29,8 @@ import java.time.LocalDateTime
 class ExtraService (
     val empresaService: EmpresaService,
     val extraRepository: ExtraRepository,
-    val precioConFechaExtraService: PrecioConFechaExtraService
+    val precioConFechaExtraService: PrecioConFechaExtraService,
+    val tipoEventoService: TipoEventoService
 ): GenericServiceImpl<Extra, Long>() {
 
     override val dao: CrudRepository<Extra, Long>
@@ -53,10 +54,17 @@ class ExtraService (
             )
         }
 
+    // ==================== GET ====================
 
-    fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
-        listaExtra.filter { it.extra.tipoExtra in tipoExtras }
-            .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
+    @Transactional(readOnly = true)
+    fun getExtraConTiposEvento(id: Long, empresaId: Long): ExtraDTO {
+        val extra = get(id)
+            ?: throw NotFoundException("Extra no encontrado con id: $id")
+
+        return extra.toDTO().also {
+            it.listaTipoEventoId = tipoEventoService.getIdsByExtraAndEmpresa(id, empresaId).toMutableSet()
+        }
+    }
 
     // ====================  PAGINADO ====================
 
@@ -79,11 +87,15 @@ class ExtraService (
     ): List<ExtraPrecioDTO> =
         extraRepository.getAllExtraConPrecioByTipoEventoAndFecha(empresaId, tipoEventoId, fechaEvento, tiposExtras)
 
+    fun aplicarPreciosFoto(listaExtra: Collection<EventoExtra>, tipoExtras: Set<TipoExtra>): List<ExtraDTO> =
+        listaExtra.filter { it.extra.tipoExtra in tipoExtras }
+            .map { item -> item.extra.toDTO().also { dto -> dto.precio = item.precio; dto.cantidad = item.cantidad } }
+
     // ==================== ABM ====================
 
     @Transactional
     @CacheEvict(value = ["extras-evento", "extras-catering"], allEntries = true)
-    fun saveExtra(extraDTO: ExtraDTO, tipoEventoService: TipoEventoService): ExtraDTO {
+    fun saveExtra(extraDTO: ExtraDTO): ExtraDTO {
         val empresa = empresaService.get(extraDTO.empresaId)
             ?: throw NotFoundException("Empresa no encontrada con id: ${extraDTO.empresaId}")
 
