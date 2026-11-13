@@ -15,7 +15,7 @@ class OnboardingFilter(
 ) : OncePerRequestFilter() {
 
     private val permitidosOnboarding = Regex("^/(v1|api)/(usuarios/(me(/.*)?|check-username)|terminos/vigente)$")
-    private val permitidosPassword = Regex("^/(v1|api)/usuarios/(me|me/estado|me/password)$")
+    private val permitidosPassword = Regex("^/(v1|api)/usuarios/(me|me/estado|me/password|me/completar-datos)$")
     private val permitidosLogout = Regex("^/(v1|api)/auth/logout$")
 
     override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {

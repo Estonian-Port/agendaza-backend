@@ -26,12 +26,13 @@ class UsuarioServiceTest {
 
     @BeforeEach
     fun setUp() {
+        passwordEncoder = mock()
         service = UsuarioService(
             usuarioRepository = usuarioRepository,
             empresaService = mock(),
             cargoService = mock(),
             emailService = mock(),
-            passwordEncoder = mock(),
+            passwordEncoder = passwordEncoder,
             terminosService = mock(),
             refreshTokenService = mock()
         )
@@ -292,7 +293,7 @@ class UsuarioServiceTest {
         whenever(usuarioRepository.findAllByEmail(dto.email)).thenReturn(emptyList())
         whenever(usuarioRepository.getByUsername("juan")).thenReturn(null)
         whenever(passwordEncoder.encode(dto.password)).thenReturn("encoded-new")
-        whenever(usuarioRepository.save(any())).thenAnswer { it.arguments[0] as Usuario }
+        whenever(usuarioRepository.save(any<Usuario>())).thenAnswer { it.arguments[0] as Usuario }
 
         val resultado = service.completarDatos("temporal", dto, null, null)
 
