@@ -9,6 +9,7 @@ import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
+import com.estonianport.agendaza.common.emailVerification.EmailVerificationTokenService
 import com.estonianport.agendaza.common.security.RefreshTokenService
 import com.estonianport.agendaza.common.security.UsernameNormalizer
 import com.estonianport.agendaza.errors.BadRequestException
@@ -31,6 +32,7 @@ class UsuarioService (
     val empresaService: EmpresaService,
     val cargoService: CargoService,
     val emailService: EmailService,
+    val emailVerificationTokenService: EmailVerificationTokenService,
     val passwordEncoder: PasswordEncoder,
     val terminosService: TerminosService,
     val refreshTokenService: RefreshTokenService
@@ -148,6 +150,7 @@ class UsuarioService (
             usuario.username = dto.email
             usuario.password = passwordEncoder.encode(temporaryPassword)
             usuario.debeCambiarPassword = true
+            usuario.emailVerificado = true
             usuario = save(usuario)
         }
 
@@ -201,10 +204,37 @@ class UsuarioService (
             throw ConflictException("El nombre de usuario no está disponible")
         }
 
+        val emailCambio = !usuario.email.equals(dto.email.trim(), ignoreCase = true)
         usuario.debeCambiarPassword = false
+        if (emailCambio) {
+            usuario.emailVerificado = false
+            emailVerificationTokenService.eliminar(usuario.id)
+        }
         val guardado = save(dto.updateUsuario(usuario, passwordEncoder.encode(dto.password)))
         terminosService.registrarAceptacion(guardado.id, ip, userAgent)
+
+        if (!guardado.emailVerificado) solicitarVerificacionEmail(guardado.username ?: username)
         return guardado
+    }
+
+    @Transactional
+    fun solicitarVerificacionEmail(username: String) {
+        val usuario = getByUsername(username)
+            ?: throw NotFoundException("No se encontró el usuario autenticado")
+
+        if (usuario.emailVerificado) return
+
+        val codigo = emailVerificationTokenService.crear(usuario.id, usuario.email)
+        emailService.enviarVerificacionEmail(usuario.email, codigo)
+    }
+
+    @Transactional
+    fun verificarEmail(username: String, codigo: String) {
+        val usuario = getByUsername(username)
+            ?: throw BadRequestException("El código de verificación es inválido")
+        emailVerificationTokenService.validarYConsumir(usuario.id, usuario.email, codigo)
+        usuario.emailVerificado = true
+        save(usuario)
     }
 
 

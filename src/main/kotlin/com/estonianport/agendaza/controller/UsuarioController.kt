@@ -42,10 +42,23 @@ class UsuarioController(
             message = "Estado",
             data = EstadoAccesoDTO(
                 onboardingRequired = onboardingService.pendiente(principal.name),
-                passwordChangeRequired = usuarioService.debeCambiarPassword(principal.name)
+                passwordChangeRequired = usuarioService.debeCambiarPassword(principal.name),
+                emailVerificationRequired = usuarioService.getByUsername(principal.name)?.emailVerificado != true
             )
             )
         )
+
+    @PostMapping("/verificacion-email")
+    fun solicitarVerificacionEmail(principal: Principal): ResponseEntity<CustomResponse<Nothing?>> {
+        usuarioService.solicitarVerificacionEmail(principal.name)
+        return ResponseEntity.ok(CustomResponse(message = "Revisá tu casilla de correo y spam", data = null))
+    }
+
+    @PostMapping("/verificacion-email/confirmar")
+    fun verificarEmail(principal: Principal, @RequestBody dto: VerificarEmailDTO): ResponseEntity<CustomResponse<Nothing?>> {
+        usuarioService.verificarEmail(principal.name, dto.codigo)
+        return ResponseEntity.ok(CustomResponse(message = "Email verificado correctamente", data = null))
+    }
 
     @PutMapping("/me/completar-datos")
     fun completarDatos(

@@ -411,6 +411,31 @@ class EmailService(
         )
     }
 
+    fun enviarVerificacionEmail(email: String, codigo: String) {
+        val template = loadHtmlTemplate("verificacion_email.html")
+
+        val content = renderTemplate(
+            template, mapOf(
+                "codigo" to codigo,
+                "agendaza_logo" to AGENDAZA_LOGO_URL,
+                "url_instagram" to URL_INSTAGRAM,
+                "url_web" to URL_WEB,
+                "url_linkedin" to URL_LINKEDIN,
+                "imagen_ig" to IMAGEN_IG_URL,
+                "imagen_web" to IMAGEN_WEB_URL,
+                "imagen_linkedin" to IMAGEN_LINKEDIN_URL
+            )
+        )
+
+        sendEmail(
+            Email(
+                email = email,
+                subject = "Código de verificación de email",
+                content = content
+            )
+        )
+    }
+
     fun enviarRestablecimientoPassword(email: String, password: String, empresa: Empresa) {
         val template = loadHtmlTemplate("restablecimiento_password.html")
         val content = renderTemplate(

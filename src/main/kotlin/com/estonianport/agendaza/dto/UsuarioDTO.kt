@@ -66,8 +66,11 @@ data class CambiarPasswordDTO(
 
 data class EstadoAccesoDTO(
     val onboardingRequired: Boolean,
-    val passwordChangeRequired: Boolean
+    val passwordChangeRequired: Boolean,
+    val emailVerificationRequired: Boolean = false
 ) : Serializable
+
+data class VerificarEmailDTO(val codigo: String) : Serializable
 
 data class UsuarioAbmDTO(
     var id: Long,
