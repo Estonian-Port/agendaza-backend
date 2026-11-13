@@ -4,6 +4,7 @@ import com.estonianport.agendaza.common.aceptacionTerminos.OnboardingService
 import com.estonianport.agendaza.dto.*
 import com.estonianport.agendaza.dto.response.CustomResponse
 import com.estonianport.agendaza.service.UsuarioService
+import com.estonianport.agendaza.common.security.UsernameNormalizer
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -254,7 +255,7 @@ class UsuarioController(
 
     @GetMapping("/check-username")
     fun checkUsername(@RequestParam username: String): ResponseEntity<CustomResponse<Boolean>> {
-        val isAvailable = !usuarioService.existsByUsername(username)
+        val isAvailable = !usuarioService.existsByUsername(UsernameNormalizer.normalize(username))
         return ResponseEntity.ok(
             CustomResponse(
                 message = "Disponibilidad de username verificada",

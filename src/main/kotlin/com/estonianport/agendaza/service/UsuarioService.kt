@@ -10,6 +10,7 @@ import com.estonianport.agendaza.model.Cargo
 import com.estonianport.agendaza.common.codeGeneratorUtil.CodeGeneratorUtil
 import com.estonianport.agendaza.common.emailService.EmailService
 import com.estonianport.agendaza.common.security.RefreshTokenService
+import com.estonianport.agendaza.common.security.UsernameNormalizer
 import com.estonianport.agendaza.errors.BadRequestException
 import com.estonianport.agendaza.errors.ConflictException
 import com.estonianport.agendaza.model.enums.TipoCargo
@@ -74,15 +75,18 @@ class UsuarioService (
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = ["usuarioDtoByUsername"], key = "#username")
+    @Cacheable(
+        value = ["usuarioDtoByUsername"],
+        key = "T(com.estonianport.agendaza.common.security.UsernameNormalizer).normalize(#username)"
+    )
     fun getUsuarioDtoByUsername(username: String): UsuarioResponseDto {
-        return usuarioRepository.getUsuarioDtoByUsername(username)
+        return usuarioRepository.getUsuarioDtoByUsername(UsernameNormalizer.normalize(username))
             ?: throw NotFoundException("No se encontró un usuario con el username proporcionado")
     }
 
     @Transactional(readOnly = true)
     fun debeCambiarPassword(username: String): Boolean =
-        usuarioRepository.getByUsername(username)?.debeCambiarPassword ?: false
+        usuarioRepository.getByUsername(UsernameNormalizer.normalize(username))?.debeCambiarPassword ?: false
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioPerfil"], key = "#usuarioId")
@@ -158,7 +162,7 @@ class UsuarioService (
     @Transactional
     @CacheEvict(value = ["onboardingPendiente", "usuarioDtoByUsername", "usuarioPerfil"], allEntries = true)
     fun completarDatos(username: String, dto: CompletarDatosUsuarioDTO, ip: String?, userAgent: String?): Usuario {
-        val usuario = usuarioRepository.getByUsername(username)
+        val usuario = getByUsername(username)
             ?: throw NotFoundException("Usuario no encontrado")
 
         if (!dto.aceptoTerminos || dto.versionTerminos != TerminosService.VERSION_VIGENTE) {
@@ -192,7 +196,8 @@ class UsuarioService (
         if (usuarioRepository.findAllByEmail(dto.email).any { it.id != usuario.id }) {
             throw ConflictException("El email ya se encuentra registrado")
         }
-        usuarioRepository.getByUsername(dto.username)?.takeIf { it.id != usuario.id }?.let {
+        val normalizedUsername = UsernameNormalizer.normalize(dto.username)
+        usuarioRepository.getByUsername(normalizedUsername)?.takeIf { it.id != usuario.id }?.let {
             throw ConflictException("El nombre de usuario no está disponible")
         }
 
@@ -293,7 +298,7 @@ class UsuarioService (
     @Transactional
     @CacheEvict(value = ["onboardingPendiente", "usuarioDtoByUsername", "usuarioPerfil"], allEntries = true)
     fun cambiarPassword(username: String, password: String): Usuario {
-        val usuario = usuarioRepository.getByUsername(username)
+        val usuario = getByUsername(username)
             ?: throw NotFoundException("Usuario no encontrado")
         validarPassword(password)
         usuario.password = passwordEncoder.encode(password)
@@ -343,6 +348,7 @@ class UsuarioService (
         "eventoVer"
     ], key = "#entity.username", allEntries = true)
     override fun save(entity: Usuario): Usuario {
+        entity.username = entity.username?.let(UsernameNormalizer::normalize)
         return usuarioRepository.save(entity)
     }
 
@@ -363,7 +369,8 @@ class UsuarioService (
     }
 
     @Transactional(readOnly = true)
-    fun existsByUsername(username: String): Boolean = usuarioRepository.existsByUsername(username)
+    fun existsByUsername(username: String): Boolean =
+        usuarioRepository.existsByUsername(UsernameNormalizer.normalize(username))
 
 
     @Transactional(readOnly = true)
@@ -372,6 +379,6 @@ class UsuarioService (
     }
 
     fun getByUsername(username: String) : Usuario ?{
-        return usuarioRepository.getByUsername(username)
+        return usuarioRepository.getByUsername(UsernameNormalizer.normalize(username))
     }
 }

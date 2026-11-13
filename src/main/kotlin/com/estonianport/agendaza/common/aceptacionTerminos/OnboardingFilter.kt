@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 import com.estonianport.agendaza.repository.UsuarioRepository
+import com.estonianport.agendaza.common.security.UsernameNormalizer
 
 class OnboardingFilter(
     private val onboardingService: OnboardingService,
@@ -33,7 +34,7 @@ class OnboardingFilter(
 
         if (auth != null && auth.isAuthenticated && auth !is AnonymousAuthenticationToken
             && req.method != "OPTIONS"
-            && usuarioRepository.getByUsername(auth.name)?.debeCambiarPassword == true
+            && usuarioRepository.getByUsername(UsernameNormalizer.normalize(auth.name))?.debeCambiarPassword == true
             && !permitidosPassword.matches(req.requestURI)
             && !permitidosLogout.matches(req.requestURI)
         ) {

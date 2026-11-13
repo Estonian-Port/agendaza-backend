@@ -2,6 +2,7 @@ package com.estonianport.agendaza.dto
 
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.model.enums.TipoCargo
+import com.estonianport.agendaza.common.security.UsernameNormalizer
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -108,7 +109,7 @@ fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: St
     apellido = this@updateUsuario.apellido.trim()
     celular = this@updateUsuario.celular
     fechaNacimiento = this@updateUsuario.fechaNacimiento
-    username = this@updateUsuario.username
+    username = UsernameNormalizer.normalize(this@updateUsuario.username)
     email = this@updateUsuario.email.trim()
     password = encodedPassword
     fechaCambioPassword = LocalDateTime.now()
