@@ -201,9 +201,8 @@ class UsuarioService (
             throw ConflictException("El nombre de usuario no está disponible")
         }
 
+        usuario.debeCambiarPassword = false
         val guardado = save(dto.updateUsuario(usuario, passwordEncoder.encode(dto.password)))
-        guardado.debeCambiarPassword = false
-        save(guardado)
         terminosService.registrarAceptacion(guardado.id, ip, userAgent)
         return guardado
     }

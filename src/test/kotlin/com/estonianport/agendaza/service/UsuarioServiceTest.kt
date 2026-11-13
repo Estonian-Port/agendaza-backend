@@ -1,13 +1,12 @@
 package com.estonianport.agendaza.service
 
 import com.estonianport.agendaza.dto.UsuarioAbmDTO
+import com.estonianport.agendaza.dto.CompletarDatosUsuarioDTO
 import com.estonianport.agendaza.dto.UsuarioPerfilDTO
 import com.estonianport.agendaza.dto.UsuarioResponseDto
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.repository.UsuarioRepository
-import com.estonianport.agendaza.common.security.RefreshTokenService
 import com.estonianport.agendaza.common.aceptacionTerminos.TerminosService
-import com.estonianport.agendaza.common.emailService.EmailService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,14 +14,15 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDate
 import java.util.Optional
-import org.springframework.security.crypto.password.PasswordEncoder
 
 class UsuarioServiceTest {
 
     private val usuarioRepository = mock<UsuarioRepository>()
     private lateinit var service: UsuarioService
+    private lateinit var passwordEncoder: PasswordEncoder
 
     @BeforeEach
     fun setUp() {
@@ -267,5 +267,36 @@ class UsuarioServiceTest {
         assertEquals(listOf(empresa), service.getAllEmpresaByUsuarioId(1L))
         assertSame(usuario, service.save(usuario))
         verify(usuarioRepository).save(usuario)
+    }
+
+    @Test
+    fun `completarDatos desactiva el cambio obligatorio de password`() {
+        val usuario = buildUsuario().apply {
+            username = "temporal"
+            password = "encoded-temporal"
+            debeCambiarPassword = true
+        }
+        val dto = CompletarDatosUsuarioDTO(
+            nombre = "Juan",
+            apellido = "Pérez",
+            celular = 1234567890L,
+            fechaNacimiento = LocalDate.of(1990, 1, 1),
+            username = "juan",
+            password = "NuevaClave1",
+            email = "test@test.com",
+            aceptoTerminos = true,
+            versionTerminos = TerminosService.VERSION_VIGENTE
+        )
+        whenever(usuarioRepository.getByUsername("temporal")).thenReturn(usuario)
+        whenever(usuarioRepository.findAllByCelular(dto.celular)).thenReturn(emptyList())
+        whenever(usuarioRepository.findAllByEmail(dto.email)).thenReturn(emptyList())
+        whenever(usuarioRepository.getByUsername("juan")).thenReturn(null)
+        whenever(passwordEncoder.encode(dto.password)).thenReturn("encoded-new")
+        whenever(usuarioRepository.save(any())).thenAnswer { it.arguments[0] as Usuario }
+
+        val resultado = service.completarDatos("temporal", dto, null, null)
+
+        assertFalse(resultado.debeCambiarPassword)
+        verify(usuarioRepository).save(argThat { !debeCambiarPassword })
     }
 }
