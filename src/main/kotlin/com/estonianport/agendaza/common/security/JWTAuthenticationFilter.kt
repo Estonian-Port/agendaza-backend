@@ -35,16 +35,20 @@ class JWTAuthenticationFilter(
             throw AuthenticationServiceException("Username o password no provistos")
         }
 
+        val rawUsername = authCredentials.username
+            ?: throw AuthenticationServiceException("Username o password no provistos")
+        val username = UsernameNormalizer.normalize(rawUsername)
+
         // Control de fuerza bruta: se corta antes de tocar la base o BCrypt
-        if (loginAttemptService.estaBloqueado(request.remoteAddr, authCredentials.username)) {
+        if (loginAttemptService.estaBloqueado(request.remoteAddr, username)) {
             throw LockedException("Demasiados intentos de login")
         }
 
         // Lo usa el failure handler para contar el fallo contra este usuario
-        request.setAttribute(ATTR_USERNAME, authCredentials.username)
+        request.setAttribute(ATTR_USERNAME, username)
 
         val usernamePAT = UsernamePasswordAuthenticationToken(
-            authCredentials.username,
+            username,
             authCredentials.password,
             emptyList()
         )

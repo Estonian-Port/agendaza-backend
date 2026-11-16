@@ -1,6 +1,7 @@
 package com.estonianport.agendaza.common.aceptacionTerminos
 
 import com.estonianport.agendaza.repository.UsuarioRepository
+import com.estonianport.agendaza.common.security.UsernameNormalizer
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,7 +14,7 @@ class OnboardingService(
     @Transactional(readOnly = true)
     @Cacheable(value = ["onboardingPendiente"], key = "#username")
     fun pendiente(username: String): Boolean {
-        val u = usuarioRepository.getByUsername(username) ?: return false
+        val u = usuarioRepository.getByUsername(UsernameNormalizer.normalize(username)) ?: return false
         return !terminosService.aceptoVigente(u.id)
     }
 }

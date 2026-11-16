@@ -13,7 +13,9 @@ class TokenUtils {
 
     companion object {
 
-        private val ACCESS_TOKEN_SECRET: String = System.getenv("JWT_SECRET")
+        private val ACCESS_TOKEN_SECRET: String = requireNotNull(System.getenv("JWT_SECRET")) {
+            "La variable de entorno JWT_SECRET no está configurada"
+        }
 
         private const val ACCESS_TOKEN_VALIDITY_MS: Long = 15 * 60 * 1000L
 
@@ -21,7 +23,7 @@ class TokenUtils {
             val expirationDate = Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_MS)
 
             val extra: MutableMap<String, Any> = HashMap()
-            extra["nombre"] = nombre ?: ""
+            extra["nombre"] = nombre
 
             return Jwts.builder()
                 .setSubject(username)

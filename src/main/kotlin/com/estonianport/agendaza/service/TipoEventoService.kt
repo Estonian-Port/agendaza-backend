@@ -78,6 +78,7 @@ class TipoEventoService(
         return tipoEventoRepository
             .getAllTipoEventoByEmpresaId(empresaId, PageRequest.of(pageNumber, 10))
             .content
+            .ifEmpty { throw NotFoundException("No se encontraron tipos de evento") }
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +92,7 @@ class TipoEventoService(
         return tipoEventoRepository
             .getAllTipoEventoFilterNombre(empresaId, buscar, PageRequest.of(pageNumber, 10))
             .content
+            .ifEmpty { throw NotFoundException("No se encontraron tipos de evento") }
     }
 
     @Transactional(readOnly = true)

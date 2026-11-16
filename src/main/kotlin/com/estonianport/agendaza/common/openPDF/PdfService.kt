@@ -13,18 +13,45 @@ import com.lowagie.text.pdf.draw.LineSeparator
 import org.springframework.stereotype.Service
 import java.awt.Color
 import java.io.ByteArrayOutputStream
-import java.net.URL
+import java.net.URI
 import java.time.LocalDate
 
 @Service
 class PdfService {
+
+    private data class PdfContext(
+        val document: Document,
+        val output: ByteArrayOutputStream,
+        val writer: PdfWriter,
+        val fontTitulo: Font,
+        val fontSubtitulo: Font,
+        val fontNormal: Font,
+        val fontClausula: Font
+    )
+
+    private fun crearContextoPdf(): PdfContext {
+        val document = Document()
+        val output = ByteArrayOutputStream()
+        val writer = PdfWriter.getInstance(document, output)
+        writer.pageEvent = MargenPageEvent()
+
+        return PdfContext(
+            document = document,
+            output = output,
+            writer = writer,
+            fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f),
+            fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f),
+            fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f),
+            fontClausula = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8f)
+        )
+    }
 
     private fun setPageSize(document: Document) {
         document.setPageSize(PageSize.A4)
     }
 
     private fun setLogo(document: Document, logoUrl: String) {
-        val logo = Image.getInstance(URL(logoUrl))
+        val logo = Image.getInstance(URI(logoUrl).toURL())
 
         logo.scaleToFit(100f, 100f) // Ajusta el tamaño del logo
         logo.alignment = Element.ALIGN_CENTER
@@ -79,8 +106,6 @@ class PdfService {
         lineaHorizontal(document)
 
         var cateringDescripcion : String
-
-        val fechaEvento: LocalDate = evento.inicio.toLocalDate()
 
         if (evento.cateringOtro != 0.0) {
             cateringDescripcion = evento.cateringOtroDescripcion + ". Precio por plato: $" + evento.cateringOtro
@@ -157,38 +182,6 @@ class PdfService {
         cb.stroke()
     }
 
-    private fun setCuadroDescripcion(cb: PdfContentByte, cuadroGrande: Boolean) {
-
-        // Setea color y ancho del cuadro
-        cb.setColorStroke(Color.DARK_GRAY)
-        cb.setLineWidth(0.5f)
-
-        // Cambia la medida del cuadro de descripcion en base al tipo de comprobante
-        var cuadroAltura = -140f
-
-        if (cuadroGrande) {
-            cuadroAltura = -400f
-
-            // Coloca una linea divisoria correspondiente al cuadro grande
-            cb.moveTo(30f, 455f) // Mueve a la posición donde comienza la línea
-            cb.lineTo(560f, 455f) // Dibuja la línea hasta el otro lado
-
-            // Coloca una linea divisoria correspondiente al cuadro grande
-            cb.moveTo(30f, 415f) // Mueve a la posición donde comienza la línea
-            cb.lineTo(560f, 415f) // Dibuja la línea hasta el otro lado
-            cb.stroke()
-        }
-
-        // Dibuja el cuadro de descripcion
-        cb.rectangle(30f, 565f, 530f, cuadroAltura)
-        cb.stroke()
-
-        // Dibuja la línea divisioria de descripcion
-        cb.moveTo(30f, 525f) // Mueve a la posición donde comienza la línea
-        cb.lineTo(560f, 525f) // Dibuja la línea hasta el otro lado
-        cb.stroke()
-    }
-
     class MargenPageEvent : PdfPageEventHelper() {
         override fun onEndPage(writer: PdfWriter, document: Document) {
             val cb = writer.directContent
@@ -254,18 +247,7 @@ class PdfService {
 
     fun generarComprobanteEvento(evento : Evento): ByteArray {
 
-        val document = Document()
-        val baos = ByteArrayOutputStream()
-        val writer = PdfWriter.getInstance(document, baos)
-
-        // Dibuja los margenes en todas las hojas
-        writer.pageEvent = MargenPageEvent()
-
-        // Estilos de fuente
-        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
-        val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
-        val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
-        val fontClausula = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8f)
+        val (document, baos, writer, fontTitulo, fontSubtitulo, fontNormal, fontClausula) = crearContextoPdf()
 
         // Setea el pageSize, logo, header y datos del cliente
         setInicioDocumento(document, evento, fontNormal, fontSubtitulo)
@@ -366,17 +348,7 @@ class PdfService {
 
     fun generarComprobanteDePago(pago : Pago): ByteArray {
 
-        val document = Document()
-        val baos = ByteArrayOutputStream()
-        val writer = PdfWriter.getInstance(document, baos)
-
-        // Dibuja los margenes en todas las hojas
-        writer.pageEvent = MargenPageEvent()
-
-        // Estilos de fuente
-        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
-        val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
-        val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
+        val (document, baos, writer, fontTitulo, fontSubtitulo, fontNormal) = crearContextoPdf()
 
         // Setea el pageSize, logo, header y datos del cliente
         setInicioDocumento(document, pago.evento, fontNormal, fontSubtitulo)
@@ -410,17 +382,7 @@ class PdfService {
 
     fun generarEstadoDeCuenta(evento : Evento): ByteArray {
 
-        val document = Document()
-        val baos = ByteArrayOutputStream()
-        val writer = PdfWriter.getInstance(document, baos)
-
-        // Dibuja los margenes en todas las hojas
-        writer.pageEvent = MargenPageEvent()
-
-        // Estilos de fuente
-        val fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 15f)
-        val fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12f)
-        val fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12f)
+        val (document, baos, writer, fontTitulo, fontSubtitulo, fontNormal) = crearContextoPdf()
 
         // Setea el pageSize, logo, header y datos del cliente
         setInicioDocumento(document, evento, fontNormal, fontSubtitulo)

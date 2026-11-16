@@ -16,7 +16,7 @@ class UserDetailServiceImpl : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails{
 
-        val usuario : Usuario = usuarioRepository.getByUsername(username)
+        val usuario : Usuario = usuarioRepository.getByUsername(UsernameNormalizer.normalize(username))
             ?: throw UsernameNotFoundException("No se encontró el usuario")
 
         val usernamePersistido = usuario.username

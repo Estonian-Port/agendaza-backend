@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.estonianport.agendaza"
-version = "1.2.3"
+version = "1.2.4"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 jacoco {
@@ -20,6 +20,12 @@ jacoco {
 
 repositories {
     mavenCentral()
+}
+
+// Spring Boot reemplaza commons-logging mediante spring-jcl.
+// Evita empaquetar ambos bridges en la aplicación.
+configurations.configureEach {
+    exclude(group = "commons-logging", module = "commons-logging")
 }
 
 dependencies {
@@ -64,6 +70,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
     finalizedBy(tasks.jacocoTestReport)
 }
 

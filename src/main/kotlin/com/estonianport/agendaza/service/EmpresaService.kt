@@ -61,11 +61,13 @@ class EmpresaService (
     fun getAllEventoByEmpresaId(id: Long, pageNumber : Int): List<EventoDTO> {
         return eventoRepository.eventosByEmpresa(id, PageRequest.of(pageNumber,10))
             .content
+            .ifEmpty { throw NotFoundException("No se encontraron eventos") }
     }
 
     fun getAllEventoByFilterName(id : Long, pageNumber : Int, buscar: String): List<EventoDTO>{
         return eventoRepository.eventosByNombre(id, buscar, PageRequest.of(pageNumber,10))
             .content
+            .ifEmpty { throw NotFoundException("No se encontraron eventos") }
     }
 
     @Cacheable(value = ["panelAdminCantidades"], key = "#id")

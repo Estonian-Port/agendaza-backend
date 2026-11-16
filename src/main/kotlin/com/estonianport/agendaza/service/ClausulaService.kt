@@ -54,7 +54,7 @@ class ClausulaService(
             empresaId,
             buscar?.limpiarNombre()?.ifBlank { null },
             PageRequest.of(page, 10)
-        )
+        ).ifEmpty { throw NotFoundException("No se encontraron cláusulas") }
 
     fun count(empresaId: Long, buscar: String?): Int =
         clausulaRepository.count(empresaId, buscar?.limpiarNombre()?.ifBlank { null })

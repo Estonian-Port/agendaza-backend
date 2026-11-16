@@ -16,7 +16,7 @@ import java.sql.SQLException
 @ControllerAdvice
 class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
-    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+    private val appLogger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(value = [
         BadRequestException::class,
@@ -45,7 +45,7 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [DataAccessException::class, SQLException::class, Exception::class])
     fun handleDatabaseAndGenericExceptions(exception: Exception, webRequest: WebRequest): ResponseEntity<Any>? {
 
-        logger.error("Excepción interna capturada: ", exception)
+        appLogger.error("Excepción interna capturada: ", exception)
 
         val status = HttpStatus.INTERNAL_SERVER_ERROR
 

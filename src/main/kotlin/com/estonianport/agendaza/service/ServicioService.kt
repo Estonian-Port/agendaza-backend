@@ -40,6 +40,7 @@ class ServicioService(
     @Cacheable(value = ["servicios-page"], key = "#empresaId + '-' + #page + '-' + #buscar")
     fun getPage(empresaId: Long, page: Int, buscar: String?): List<ServicioDTO> =
         servicioRepository.getPage(empresaId, buscar?.limpiarNombre()?.ifBlank { null }, PageRequest.of(page, 10))
+            .ifEmpty { throw NotFoundException("No se encontraron servicios") }
 
     @Cacheable(value = ["servicios-count"], key = "#empresaId + '-' + #buscar")
     fun count(empresaId: Long, buscar: String?): Int =

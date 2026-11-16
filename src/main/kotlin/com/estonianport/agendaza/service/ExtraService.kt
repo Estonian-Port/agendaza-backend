@@ -70,6 +70,7 @@ class ExtraService (
 
     fun getPage(empresaId: Long, tiposExtra: List<TipoExtra>, page: Int, buscar: String?): List<ExtraDTO> {
         return extraRepository.getPage(empresaId, tiposExtra, buscar, PageRequest.of(page, 10))
+            .ifEmpty { throw NotFoundException("No se encontraron extras") }
     }
 
     fun count(empresaId: Long, tiposExtra: List<TipoExtra>, buscar: String?): Int {

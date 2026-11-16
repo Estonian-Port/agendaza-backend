@@ -67,6 +67,9 @@ class Usuario(
     @Column(nullable = false)
     var debeCambiarPassword: Boolean = false
 
+    @Column(nullable = false)
+    var emailVerificado: Boolean = false
+
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var listaCargo: MutableSet<Cargo> = mutableSetOf()
