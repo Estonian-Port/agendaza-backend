@@ -22,6 +22,12 @@ repositories {
     mavenCentral()
 }
 
+// Spring Boot reemplaza commons-logging mediante spring-jcl.
+// Evita empaquetar ambos bridges en la aplicación.
+configurations.configureEach {
+    exclude(group = "commons-logging", module = "commons-logging")
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-mail")
@@ -64,6 +70,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
     finalizedBy(tasks.jacocoTestReport)
 }
 
