@@ -7,6 +7,7 @@ import com.estonianport.agendaza.dto.UsuarioResponseDto
 import com.estonianport.agendaza.model.Usuario
 import com.estonianport.agendaza.repository.UsuarioRepository
 import com.estonianport.agendaza.common.aceptacionTerminos.TerminosService
+import com.estonianport.agendaza.common.emailVerification.EmailVerificationTokenService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -32,6 +33,7 @@ class UsuarioServiceTest {
             empresaService = mock(),
             cargoService = mock(),
             emailService = mock(),
+            emailVerificationTokenService = mock<EmailVerificationTokenService>(),
             passwordEncoder = passwordEncoder,
             terminosService = mock(),
             refreshTokenService = mock()
@@ -276,6 +278,7 @@ class UsuarioServiceTest {
             username = "temporal"
             password = "encoded-temporal"
             debeCambiarPassword = true
+            emailVerificado = true
         }
         val dto = CompletarDatosUsuarioDTO(
             nombre = "Juan",

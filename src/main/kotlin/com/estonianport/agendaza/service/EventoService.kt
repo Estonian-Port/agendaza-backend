@@ -214,7 +214,9 @@ class EventoService(
      */
     @Transactional(readOnly = true)
     fun getAllEventoByEmpresaId(empresaId: Long, pageable: Pageable): Page<EventoDTO> {
-        return eventoRepository.eventosByEmpresa(empresaId, pageable)
+        return eventoRepository.eventosByEmpresa(empresaId, pageable).also {
+            if (it.isEmpty) throw NotFoundException("No se encontraron eventos")
+        }
     }
 
     /**
@@ -225,7 +227,9 @@ class EventoService(
      */
     @Transactional(readOnly = true)
     fun getAllEventoByFilterName(empresaId: Long, buscar: String, pageable: Pageable): Page<EventoDTO> {
-        return eventoRepository.eventosByNombre(empresaId, buscar, pageable)
+        return eventoRepository.eventosByNombre(empresaId, buscar, pageable).also {
+            if (it.isEmpty) throw NotFoundException("No se encontraron eventos")
+        }
     }
 
     /**

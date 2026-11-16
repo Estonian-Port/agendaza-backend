@@ -113,11 +113,13 @@ class UsuarioService (
     @Transactional(readOnly = true)
     fun getAllUsuario(empresaId: Long, pageNumber: Int): List<UsuarioAbmDTO> {
         return usuarioRepository.getAllUsuario(empresaId, PageRequest.of(pageNumber, 10)).content
+            .ifEmpty { throw NotFoundException("No se encontraron usuarios") }
     }
 
     @Transactional(readOnly = true)
     fun getAllUsuarioFiltrados(empresaId: Long, pageNumber: Int, buscar: String): List<UsuarioAbmDTO> {
         return usuarioRepository.getAllUsuarioFiltrados(empresaId, buscar, PageRequest.of(pageNumber, 10)).content
+            .ifEmpty { throw NotFoundException("No se encontraron usuarios") }
     }
 
     @Transactional(readOnly = true)
@@ -243,11 +245,13 @@ class UsuarioService (
     @Transactional(readOnly = true)
     fun getAllCliente(empresaId: Long, pageNumber: Int): List<UsuarioAbmDTO> {
         return usuarioRepository.getAllCliente(empresaId, PageRequest.of(pageNumber, 10)).content
+            .ifEmpty { throw NotFoundException("No se encontraron clientes") }
     }
 
     @Transactional(readOnly = true)
     fun getAllClienteFiltrados(empresaId: Long, pageNumber: Int, buscar: String): List<UsuarioAbmDTO> {
         return usuarioRepository.getAllClienteFiltrados(empresaId, buscar, PageRequest.of(pageNumber, 10)).content
+            .ifEmpty { throw NotFoundException("No se encontraron clientes") }
     }
 
     @Transactional(readOnly = true)
