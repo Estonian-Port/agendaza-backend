@@ -231,6 +231,26 @@ class UsuarioService (
     }
 
     @Transactional
+    fun actualizarEmail(username: String, email: String): Usuario {
+        val usuario = getByUsername(username)
+            ?: throw NotFoundException("No se encontró el usuario autenticado")
+        val emailNormalizado = email.trim().lowercase()
+        val emailRegex = Regex("^[A-Za-z0-9._%+-]{3,}@[A-Za-z0-9.-]+$")
+
+        if (!emailRegex.matches(emailNormalizado)) {
+            throw BadRequestException("El email debe tener al menos 3 caracteres antes de @ y un dominio válido")
+        }
+        if (usuarioRepository.findAllByEmailIgnoreCase(emailNormalizado).any { it.id != usuario.id }) {
+            throw ConflictException("El email ya se encuentra registrado")
+        }
+
+        usuario.email = emailNormalizado
+        usuario.emailVerificado = false
+        emailVerificationTokenService.eliminar(usuario.id)
+        return save(usuario)
+    }
+
+    @Transactional
     fun verificarEmail(username: String, codigo: String) {
         val usuario = getByUsername(username)
             ?: throw BadRequestException("El código de verificación es inválido")

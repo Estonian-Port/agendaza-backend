@@ -54,6 +54,17 @@ class UsuarioController(
         return ResponseEntity.ok(CustomResponse(message = "Revisá tu casilla de correo y spam", data = null))
     }
 
+    @PutMapping("/me/email")
+    fun actualizarEmail(
+        principal: Principal,
+        @RequestBody dto: ActualizarEmailDTO
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuario = usuarioService.actualizarEmail(principal.name, dto.email)
+        return ResponseEntity.ok(
+            CustomResponse(message = "Email actualizado correctamente", data = usuario.toUsuarioResponseDto())
+        )
+    }
+
     @PostMapping("/verificacion-email/confirmar")
     fun verificarEmail(principal: Principal, @RequestBody dto: VerificarEmailDTO): ResponseEntity<CustomResponse<Nothing?>> {
         usuarioService.verificarEmail(principal.name, dto.codigo)

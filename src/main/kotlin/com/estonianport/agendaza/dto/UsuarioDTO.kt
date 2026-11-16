@@ -72,6 +72,8 @@ data class EstadoAccesoDTO(
 
 data class VerificarEmailDTO(val codigo: String) : Serializable
 
+data class ActualizarEmailDTO(val email: String) : Serializable
+
 data class UsuarioAbmDTO(
     var id: Long,
     var nombre: String,

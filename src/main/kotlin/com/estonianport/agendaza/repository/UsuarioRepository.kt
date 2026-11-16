@@ -24,6 +24,9 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.email = :email AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByEmail(email: String): List<Usuario>
 
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.email) = LOWER(:email) AND u.fechaBaja IS NULL ORDER BY u.id ASC")
+    fun findAllByEmailIgnoreCase(email: String): List<Usuario>
+
     @Query("SELECT u FROM Usuario u WHERE u.celular = :celular AND u.fechaBaja IS NULL ORDER BY u.id ASC")
     fun findAllByCelular(celular: Long): List<Usuario>
 

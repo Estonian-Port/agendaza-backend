@@ -303,4 +303,37 @@ class UsuarioServiceTest {
         assertFalse(resultado.debeCambiarPassword)
         verify(usuarioRepository).save(argThat { !debeCambiarPassword })
     }
+
+    @Test
+    fun `actualizarEmail valida, invalida la verificacion y conserva el username`() {
+        val usuario = buildUsuario(email = "viejo@test.com").apply {
+            id = 1L
+            username = "viejo@test.com"
+            emailVerificado = true
+        }
+        whenever(usuarioRepository.getByUsername("viejo@test.com")).thenReturn(usuario)
+        whenever(usuarioRepository.findAllByEmailIgnoreCase("nuevo@test.com")).thenReturn(emptyList())
+        whenever(usuarioRepository.save(any<Usuario>())).thenAnswer { it.arguments[0] as Usuario }
+
+        val resultado = service.actualizarEmail("viejo@test.com", " NUEVO@test.com ")
+
+        assertEquals("nuevo@test.com", resultado.email)
+        assertFalse(resultado.emailVerificado)
+        assertEquals("viejo@test.com", resultado.username)
+        verify(service.emailVerificationTokenService).eliminar(1L)
+        verify(usuarioRepository).save(usuario)
+    }
+
+    @Test
+    fun `actualizarEmail rechaza email duplicado`() {
+        val usuario = buildUsuario(email = "viejo@test.com").apply { username = "juan" }
+        val otro = buildUsuario(id = 2L, email = "nuevo@test.com")
+        whenever(usuarioRepository.getByUsername("juan")).thenReturn(usuario)
+        whenever(usuarioRepository.findAllByEmailIgnoreCase("nuevo@test.com")).thenReturn(listOf(otro))
+
+        assertThrows(com.estonianport.agendaza.errors.ConflictException::class.java) {
+            service.actualizarEmail("juan", "nuevo@test.com")
+        }
+        verify(usuarioRepository, never()).save(any<Usuario>())
+    }
 }
