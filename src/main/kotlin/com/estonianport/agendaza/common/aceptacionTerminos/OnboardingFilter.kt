@@ -21,6 +21,11 @@ class OnboardingFilter(
 
     override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
         val auth = SecurityContextHolder.getContext().authentication
+        val usuarioAutenticado = auth?.name?.let { username ->
+            val normalized = UsernameNormalizer.normalize(username)
+            usuarioRepository.getByUsername(normalized)
+                ?: usuarioRepository.findAllByEmailIgnoreCase(normalized).firstOrNull()
+        }
         if (auth != null && auth.isAuthenticated && auth !is AnonymousAuthenticationToken
             && req.method != "OPTIONS"
             && !permitidosOnboarding.matches(req.requestURI)
@@ -36,7 +41,7 @@ class OnboardingFilter(
 
         if (auth != null && auth.isAuthenticated && auth !is AnonymousAuthenticationToken
             && req.method != "OPTIONS"
-            && usuarioRepository.getByUsername(UsernameNormalizer.normalize(auth.name))?.emailVerificado != true
+            && usuarioAutenticado?.emailVerificado != true
             && !permitidosEmail.matches(req.requestURI)
             && !permitidosOnboarding.matches(req.requestURI)
             && !permitidosPassword.matches(req.requestURI)
@@ -50,9 +55,10 @@ class OnboardingFilter(
 
         if (auth != null && auth.isAuthenticated && auth !is AnonymousAuthenticationToken
             && req.method != "OPTIONS"
-            && usuarioRepository.getByUsername(UsernameNormalizer.normalize(auth.name))?.debeCambiarPassword == true
+            && usuarioAutenticado?.debeCambiarPassword == true
             && !permitidosPassword.matches(req.requestURI)
             && !permitidosEmail.matches(req.requestURI)
+            && !permitidosOnboarding.matches(req.requestURI)
             && !permitidosLogout.matches(req.requestURI)
         ) {
             res.status = 403

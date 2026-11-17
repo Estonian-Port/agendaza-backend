@@ -82,13 +82,15 @@ class UsuarioService (
         key = "T(com.estonianport.agendaza.common.security.UsernameNormalizer).normalize(#username)"
     )
     fun getUsuarioDtoByUsername(username: String): UsuarioResponseDto {
-        return usuarioRepository.getUsuarioDtoByUsername(UsernameNormalizer.normalize(username))
+        val normalized = UsernameNormalizer.normalize(username)
+        return (usuarioRepository.getUsuarioDtoByUsername(normalized)
+            ?: usuarioRepository.getUsuarioDtoByEmail(normalized))
             ?: throw NotFoundException("No se encontró un usuario con el username proporcionado")
     }
 
     @Transactional(readOnly = true)
     fun debeCambiarPassword(username: String): Boolean =
-        usuarioRepository.getByUsername(UsernameNormalizer.normalize(username))?.debeCambiarPassword ?: false
+        getByUsername(username)?.debeCambiarPassword ?: false
 
     @Transactional(readOnly = true)
     @Cacheable(value = ["usuarioPerfil"], key = "#usuarioId")
@@ -169,6 +171,7 @@ class UsuarioService (
     fun completarDatos(username: String, dto: CompletarDatosUsuarioDTO, ip: String?, userAgent: String?): Usuario {
         val usuario = getByUsername(username)
             ?: throw NotFoundException("Usuario no encontrado")
+        val usernameAnterior = usuario.username
 
         if (!dto.aceptoTerminos || dto.versionTerminos != TerminosService.VERSION_VIGENTE) {
             throw BadRequestException("Debés aceptar los términos y condiciones vigentes")
@@ -185,15 +188,13 @@ class UsuarioService (
         }
         val passwordRegex = Regex("^(?=.*[A-Z])(?=.*\\d).+$")
 
-        if (dto.password.length < 8) {
-            throw BadRequestException("La contraseña debe tener al menos 8 caracteres")
-        }
-        if (!passwordRegex.matches(dto.password)) {
-            throw BadRequestException("La contraseña debe contener al menos una letra mayúscula y un número")
-        }
-        val esFormatoTemporal = Regex("^[A-Z]{8}$").matches(dto.password)
-        if (esFormatoTemporal && passwordEncoder.matches(dto.password, usuario.password)) {
-            throw BadRequestException("La nueva contraseña debe ser distinta de la temporal")
+        dto.password?.let { password ->
+            if (password.length < 8) {
+                throw BadRequestException("La contraseña debe tener al menos 8 caracteres")
+            }
+            if (!passwordRegex.matches(password)) {
+                throw BadRequestException("La contraseña debe contener al menos una letra mayúscula y un número")
+            }
         }
         if (usuarioRepository.findAllByCelular(dto.celular).any { it.id != usuario.id }) {
             throw ConflictException("El número de celular ya se encuentra registrado")
@@ -206,13 +207,21 @@ class UsuarioService (
             throw ConflictException("El nombre de usuario no está disponible")
         }
 
-        val emailCambio = !usuario.email.equals(dto.email.trim(), ignoreCase = true)
+        val emailCambio = !usuario.email.trim().equals(dto.email.trim(), ignoreCase = true)
+        val invitacionConEmailSinCambios = usuario.debeCambiarPassword && !emailCambio
         usuario.debeCambiarPassword = false
         if (emailCambio) {
             usuario.emailVerificado = false
             emailVerificationTokenService.eliminar(usuario.id)
+        } else if (invitacionConEmailSinCambios) {
+            // Las credenciales fueron enviadas a este mismo email como parte de la invitación.
+            usuario.emailVerificado = true
         }
-        val guardado = save(dto.updateUsuario(usuario, passwordEncoder.encode(dto.password)))
+        val encodedPassword = dto.password?.let(passwordEncoder::encode)
+        val guardado = save(dto.updateUsuario(usuario, encodedPassword))
+        if (usernameAnterior != null && guardado.username != null) {
+            refreshTokenService.actualizarUsername(usernameAnterior, guardado.username!!)
+        }
         terminosService.registrarAceptacion(guardado.id, ip, userAgent)
 
         if (!guardado.emailVerificado) solicitarVerificacionEmail(guardado.username ?: username)
@@ -432,6 +441,8 @@ class UsuarioService (
     }
 
     fun getByUsername(username: String) : Usuario ?{
-        return usuarioRepository.getByUsername(UsernameNormalizer.normalize(username))
+        val normalized = UsernameNormalizer.normalize(username)
+        return usuarioRepository.getByUsername(normalized)
+            ?: usuarioRepository.findAllByEmailIgnoreCase(normalized).firstOrNull()
     }
 }

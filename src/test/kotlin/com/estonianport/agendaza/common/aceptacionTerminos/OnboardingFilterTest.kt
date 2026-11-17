@@ -44,4 +44,25 @@ class OnboardingFilterTest {
         assertTrue(chainReached)
         assertEquals(200, response.status)
     }
+
+    @Test
+    fun `permite verificar username mientras se requiere cambio de password`() {
+        val usuario = Usuario(1L, "Ana", "Perez", 123L, "ana@test.com").apply {
+            username = "ana"
+            debeCambiarPassword = true
+        }
+        whenever(usuarioRepository.getByUsername("ana")).thenReturn(usuario)
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken("ana", null, emptyList())
+
+        val request = MockHttpServletRequest("GET", "/v1/usuarios/check-username")
+        val response = MockHttpServletResponse()
+        var chainReached = false
+        val chain = FilterChain { _, _ -> chainReached = true }
+
+        filter.doFilter(request, response, chain)
+
+        assertTrue(chainReached)
+        assertEquals(200, response.status)
+    }
 }

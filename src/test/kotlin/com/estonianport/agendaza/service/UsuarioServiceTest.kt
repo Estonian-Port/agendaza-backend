@@ -305,6 +305,71 @@ class UsuarioServiceTest {
     }
 
     @Test
+    fun `completarDatos verifica el email de la invitacion si no fue cambiado`() {
+        val usuario = buildUsuario().apply {
+            username = "temporal"
+            password = "encoded-temporal"
+            debeCambiarPassword = true
+            emailVerificado = false
+        }
+        val dto = CompletarDatosUsuarioDTO(
+            nombre = "Juan",
+            apellido = "Pérez",
+            celular = 1234567890L,
+            fechaNacimiento = LocalDate.of(1990, 1, 1),
+            username = "juan",
+            password = "NuevaClave1",
+            email = " test@test.com ",
+            aceptoTerminos = true,
+            versionTerminos = TerminosService.VERSION_VIGENTE
+        )
+        whenever(usuarioRepository.getByUsername("temporal")).thenReturn(usuario)
+        whenever(usuarioRepository.findAllByCelular(dto.celular)).thenReturn(emptyList())
+        whenever(usuarioRepository.findAllByEmail(dto.email)).thenReturn(emptyList())
+        whenever(usuarioRepository.getByUsername("juan")).thenReturn(null)
+        whenever(passwordEncoder.encode(dto.password)).thenReturn("encoded-new")
+        whenever(usuarioRepository.save(any<Usuario>())).thenAnswer { it.arguments[0] as Usuario }
+
+        val resultado = service.completarDatos("temporal", dto, null, null)
+
+        assertTrue(resultado.emailVerificado)
+        assertFalse(resultado.debeCambiarPassword)
+        verify(service.emailVerificationTokenService, never()).eliminar(any())
+    }
+
+    @Test
+    fun `completarDatos conserva la password cuando no viene en el payload`() {
+        val usuario = buildUsuario().apply {
+            username = "srodriguez"
+            password = "encoded-actual"
+            fechaCambioPassword = java.time.LocalDateTime.of(2026, 1, 1, 12, 0)
+            emailVerificado = true
+        }
+        val fechaCambioPassword = usuario.fechaCambioPassword
+        val dto = CompletarDatosUsuarioDTO(
+            nombre = "Sebastian",
+            apellido = "Rodriguez",
+            celular = 1133814805L,
+            fechaNacimiento = LocalDate.of(1995, 11, 29),
+            username = "srodriguez",
+            email = "sebis_289@hotmail.com",
+            aceptoTerminos = true,
+            versionTerminos = TerminosService.VERSION_VIGENTE
+        )
+        whenever(usuarioRepository.getByUsername("srodriguez")).thenReturn(usuario)
+        whenever(usuarioRepository.findAllByCelular(dto.celular)).thenReturn(emptyList())
+        whenever(usuarioRepository.findAllByEmail(dto.email)).thenReturn(emptyList())
+        whenever(usuarioRepository.save(any<Usuario>())).thenAnswer { it.arguments[0] as Usuario }
+
+        val resultado = service.completarDatos("srodriguez", dto, null, null)
+
+        assertEquals("encoded-actual", resultado.password)
+        assertEquals(fechaCambioPassword, resultado.fechaCambioPassword)
+        verify(passwordEncoder, never()).encode(any())
+        verify(usuarioRepository).save(usuario)
+    }
+
+    @Test
     fun `actualizarEmail valida, invalida la verificacion y conserva el username`() {
         val usuario = buildUsuario(email = "viejo@test.com").apply {
             id = 1L

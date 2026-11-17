@@ -51,6 +51,13 @@ class RefreshTokenService(
         refreshTokenRepository.deleteByUsername(username)
     }
 
+    @Transactional
+    fun actualizarUsername(username: String, nuevoUsername: String) {
+        if (username != nuevoUsername) {
+            refreshTokenRepository.actualizarUsername(username, nuevoUsername)
+        }
+    }
+
     @Scheduled(cron = "0 0 3 * * *")
     fun limpiarVencidos() {
         refreshTokenRepository.deleteByExpiryDateBefore(Instant.now())

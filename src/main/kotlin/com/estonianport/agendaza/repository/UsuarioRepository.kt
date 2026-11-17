@@ -83,7 +83,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(
-            c.usuario.id, c.usuario.nombre, c.usuario.apellido, c.usuario.username
+            c.usuario.id, c.usuario.nombre, c.usuario.apellido, c.usuario.username, c.usuario.email
         ) 
         FROM Cargo c 
         WHERE c.empresa.id = :empresaId 
@@ -94,7 +94,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT new com.estonianport.agendaza.dto.UsuarioAbmDTO(
-            c.usuario.id, c.usuario.nombre, c.usuario.apellido, c.usuario.username
+            c.usuario.id, c.usuario.nombre, c.usuario.apellido, c.usuario.username, c.usuario.email
         ) 
         FROM Cargo c 
         WHERE c.empresa.id = :empresaId 
@@ -129,7 +129,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
 
     @Query("""
         SELECT DISTINCT new com.estonianport.agendaza.dto.UsuarioAbmDTO(
-            c.id, c.nombre, c.apellido, c.username
+            c.id, c.nombre, c.apellido, c.username, c.email
         ) 
         FROM Evento ev 
         INNER JOIN ev.cliente c 
@@ -140,7 +140,7 @@ interface UsuarioRepository : CrudRepository<Usuario, Long> {
     fun getAllCliente(empresaId: Long, pageable: Pageable): Page<UsuarioAbmDTO>
     @Query("""
         SELECT DISTINCT new com.estonianport.agendaza.dto.UsuarioAbmDTO(
-            c.id, c.nombre, c.apellido, c.username
+            c.id, c.nombre, c.apellido, c.username, c.email
         ) 
         FROM Evento ev 
         INNER JOIN ev.cliente c 

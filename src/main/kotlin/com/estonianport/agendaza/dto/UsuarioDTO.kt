@@ -25,7 +25,7 @@ data class CompletarDatosUsuarioDTO(
     val celular: Long,
     val fechaNacimiento: LocalDate,
     val username: String,
-    val password: String,
+    val password: String? = null,
     val email: String,
     val aceptoTerminos: Boolean,
     val versionTerminos: String
@@ -78,7 +78,8 @@ data class UsuarioAbmDTO(
     var id: Long,
     var nombre: String,
     var apellido: String,
-    var username: String?
+    var username: String?,
+    var email: String? = null
 ) : Serializable
 
 data class UsuarioResponseDto(
@@ -109,14 +110,16 @@ fun Usuario.toUsuarioAbmDto() = UsuarioAbmDTO(
     username = this.username
 )
 
-fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: String): Usuario = usuario.apply {
+fun CompletarDatosUsuarioDTO.updateUsuario(usuario: Usuario, encodedPassword: String?): Usuario = usuario.apply {
     nombre = this@updateUsuario.nombre.trim()
     apellido = this@updateUsuario.apellido.trim()
     celular = this@updateUsuario.celular
     fechaNacimiento = this@updateUsuario.fechaNacimiento
     username = UsernameNormalizer.normalize(this@updateUsuario.username)
     email = this@updateUsuario.email.trim()
-    password = encodedPassword
-    fechaCambioPassword = LocalDateTime.now()
+    encodedPassword?.let {
+        password = it
+        fechaCambioPassword = LocalDateTime.now()
+    }
 
 }

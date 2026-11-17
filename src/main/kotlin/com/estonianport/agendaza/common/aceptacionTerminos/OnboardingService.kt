@@ -14,7 +14,10 @@ class OnboardingService(
     @Transactional(readOnly = true)
     @Cacheable(value = ["onboardingPendiente"], key = "#username")
     fun pendiente(username: String): Boolean {
-        val u = usuarioRepository.getByUsername(UsernameNormalizer.normalize(username)) ?: return false
+        val normalized = UsernameNormalizer.normalize(username)
+        val u = usuarioRepository.getByUsername(normalized)
+            ?: usuarioRepository.findAllByEmailIgnoreCase(normalized).firstOrNull()
+            ?: return false
         return !terminosService.aceptoVigente(u.id)
     }
 }
