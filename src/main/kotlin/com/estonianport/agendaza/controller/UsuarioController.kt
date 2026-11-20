@@ -309,6 +309,23 @@ class UsuarioController(
         )
     }
 
+    /**
+     * Actualiza los datos de un cliente que no tiene una cuenta de usuario.
+     */
+    @PostMapping("/clientes")
+    fun actualizarCliente(
+        @RequestBody clienteDto: ClienteDTO
+    ): ResponseEntity<CustomResponse<UsuarioResponseDto>> {
+        val usuario = usuarioService.actualizarCliente(clienteDto)
+
+        return ResponseEntity.ok(
+            CustomResponse(
+                message = "Cliente actualizado correctamente",
+                data = usuario.toUsuarioResponseDto()
+            )
+        )
+    }
+
     // ==================== ACTUALIZAR ====================
 
     /**

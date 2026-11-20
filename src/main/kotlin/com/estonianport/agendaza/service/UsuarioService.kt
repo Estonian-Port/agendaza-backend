@@ -13,6 +13,7 @@ import com.estonianport.agendaza.common.emailVerification.EmailVerificationToken
 import com.estonianport.agendaza.common.security.RefreshTokenService
 import com.estonianport.agendaza.common.security.UsernameNormalizer
 import com.estonianport.agendaza.errors.BadRequestException
+import com.estonianport.agendaza.errors.BusinessException
 import com.estonianport.agendaza.errors.ConflictException
 import com.estonianport.agendaza.model.enums.TipoCargo
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -291,6 +292,30 @@ class UsuarioService (
     @Transactional(readOnly = true)
     fun getCantidadClienteFiltrados(empresaId: Long, buscar: String): Int {
         return usuarioRepository.getCantidadClienteFiltrados(empresaId, buscar)
+    }
+
+    @Transactional
+    fun actualizarCliente(clienteDto: ClienteDTO): Usuario {
+        val usuario = findById(clienteDto.id)
+
+        if (!usuario.username.isNullOrBlank()) {
+            throw BusinessException("No se puede editar un cliente que tiene una cuenta de usuario")
+        }
+
+        if (usuarioRepository.findAllByCelular(clienteDto.celular).any { it.id != usuario.id }) {
+            throw ConflictException("El número de celular ya se encuentra registrado")
+        }
+
+        if (usuarioRepository.findAllByEmailIgnoreCase(clienteDto.email).any { it.id != usuario.id }) {
+            throw ConflictException("El email ya se encuentra registrado")
+        }
+
+        usuario.nombre = clienteDto.nombre.trim()
+        usuario.apellido = clienteDto.apellido.trim()
+        usuario.email = clienteDto.email.trim().lowercase()
+        usuario.celular = clienteDto.celular
+
+        return save(usuario)
     }
 
     // ==================== EMPRESAS ====================

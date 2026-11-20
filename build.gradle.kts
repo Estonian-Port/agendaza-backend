@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.estonianport.agendaza"
-version = "1.2.5"
+version = "1.2.6"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 jacoco {
